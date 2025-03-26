@@ -14,7 +14,7 @@ unit = v.attrib["units"]
 close(ds)
 ```
 
-More information is available at https://github.com/Alexander-Barth/NCDatasets.jl .
+More information is available at https://github.com/JuliaGeo/NCDatasets.jl .
 """
 module NCDatasets
 

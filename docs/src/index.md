@@ -1,6 +1,6 @@
 # NCDatasets.jl
 
-Documentation for [NCDatasets.jl](https://github.com/Alexander-Barth/NCDatasets.jl), a Julia package for loading and writing NetCDF ([Network Common Data Form](https://www.unidata.ucar.edu/software/netcdf/)) files.
+Documentation for [NCDatasets.jl](https://github.com/JuliaGeo/NCDatasets.jl), a Julia package for loading and writing NetCDF ([Network Common Data Form](https://www.unidata.ucar.edu/software/netcdf/)) files.
 NCDatasets.jl implements the for the NetCDF format the interface defined
 in [CommonDataModel.jl](https://github.com/JuliaGeo/CommonDataModel.jl).
 All functions defined by CommonDataModel.jl are also available for NetCDF data, including:
@@ -215,7 +215,7 @@ close(ds);
 
 ### Create a netCDF file using the metadata of an existing netCDF file as template
 
-The utility function [`ncgen`](https://alexander-barth.github.io/NCDatasets.jl/stable/#NCDatasets.ncgen)
+The utility function [`ncgen`](https://juliageo.org/NCDatasets.jl/stable/#NCDatasets.ncgen)
 generates the Julia code that would produce a netCDF file with the same metadata as a template netCDF file.
 It is thus similar to the [command line tool `ncgen`](https://www.unidata.ucar.edu/software/netcdf/netcdf/ncgen.html)
 which can generate C or Fortran code from the output of [`ncdump`](https://www.unidata.ucar.edu/software/netcdf/netcdf/ncdump.html).
