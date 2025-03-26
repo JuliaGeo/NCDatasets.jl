@@ -1,4 +1,4 @@
-import NCDatasets
+using NCDatasets
 using Test
 
 ncfile1 = tempname()
