@@ -12,7 +12,7 @@ jobs:
         version:
           - 'lts'
           - '1'
-          - 'nightly'
+          #- 'nightly'
         os:
           - ubuntu-latest
           - macOS-latest
