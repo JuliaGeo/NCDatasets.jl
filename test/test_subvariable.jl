@@ -1,25 +1,10 @@
 
 using NCDatasets
-using NCDatasets: subsub, SubDataset
+using NCDatasets: SubDataset
 using DataStructures
 using Test
-
-@test subsub((1:10,),(2:10,)) == (2:10,)
-@test subsub((2:10,),(2:9,)) == (3:10,)
-@test subsub((2:2:10,),(2:3,)) == (4:2:6,)
-@test subsub((:,),(2:4,)) == (2:4,)
-@test subsub((2:2:10,),(3,)) == (6,)
-@test subsub((2:2:10,:),(2:3,2:4)) == (4:2:6,2:4)
-@test subsub((2:2:10,:),(2:3,2)) == (4:2:6,2)
-@test subsub((1,:),(2:3,)) == (1,2:3)
-@test subsub((1,:),(1,)) == (1,1)
-
-A = rand(10,10)
-ip = (2:2:10,:)
-i = (2:3,2:4)
-j = subsub(ip,i)
-A[ip...][i...] == A[j...]
-
+import CommonDataModel
+import DiskArrays
 
 
 fname = tempname()
@@ -89,6 +74,9 @@ ncvar_view = view(view(ncvar,:,1:2),1:2:6,:)
 
 @test data_view == Array(ncvar_view)
 @test data_view == ncvar_view
+
+@test ncvar_view isa CommonDataModel.SubVariable
+@test ncvar_view isa DiskArrays.AbstractSubDiskArray
 
 ind = CartesianIndex(1,1)
 @test ncvar_view[ind] == data_view[ind]
