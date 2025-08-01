@@ -3,6 +3,7 @@ using Dates
 using Printf
 using NCDatasets
 using DataStructures
+import DiskArrays
 
 sz = (4,5)
 filename = tempname()
@@ -10,6 +11,8 @@ filename = tempname()
 #if isfile(filename)
 #    rm(filename)
 #end
+
+@test NCDatasets.Variable <: DiskArrays.AbstractDiskArray
 
 # The mode "c" stands for creating a new file (clobber)
 NCDataset(filename,"c") do ds

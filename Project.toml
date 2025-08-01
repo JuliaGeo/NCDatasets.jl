@@ -17,7 +17,7 @@ Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
 [compat]
 CFTime = "0.1.1, 0.2"
-CommonDataModel = "0.3.4"
+CommonDataModel = "0.4"
 DataStructures = "0.17, 0.18"
 DiskArrays = "0.4.5"
 NetCDF_jll = "=400.701.400, =400.702.400, =400.902.5, =400.902.208, =400.902.209, =400.902.211, =401.900.300"
