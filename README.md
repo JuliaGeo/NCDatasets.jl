@@ -33,7 +33,7 @@ Pkg.add("NCDatasets")
 
 # Manual
 
-This Manual is a quick introduction in using NCDatasets.jl. For more details you can read the [stable](https://alexander-barth.github.io/NCDatasets.jl/stable/) or [latest](https://alexander-barth.github.io/NCDatasets.jl/latest/) documentation.
+This Manual is a quick introduction in using NCDatasets.jl. For more details you can read the [stable](https://juliageo.org/NCDatasets.jl/stable/) or [dev](https://juliageo.org/NCDatasets.jl/dev/) documentation.
 
 * [Create a netCDF file](#create-a-netcdf-file)
 * [Explore the content of a netCDF file](#explore-the-content-of-a-netcdf-file)
