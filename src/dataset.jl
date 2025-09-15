@@ -266,7 +266,7 @@ export NCDataset, Dataset
 
 Return a list of all variables names in NCDataset `ds`.
 """
-Base.keys(ds::NCDataset) = listVar(ds.ncid)
+varnames(ds::NCDataset) = listVar(ds.ncid)
 
 """
     path(ds::NCDataset)
