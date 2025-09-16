@@ -37,8 +37,6 @@ Return a tuple of integers with the size of the variable `var`.
 Base.size(v::Variable{T,N}) where {T,N} = ntuple(i -> nc_inq_dimlen(v.ds.ncid,v.dimids[i]),Val(N))
 
 
-Base.view(v::Variable,indices::Union{Int,Colon,AbstractVector{Int}}...) = SubVariable(v,indices...)
-
 """
     renameVar(ds::NCDataset,oldname,newname)
 
@@ -431,6 +429,15 @@ function _write_data_to_nc(v::Variable{T}, data, indexes::AbstractRange{<:Intege
 
     start,count,stride,jlshape = ncsub(v,indexes)
     return nc_put_vars(v.ds.ncid,v.varid,start,count,stride,T.(data))
+end
+
+# materialize disk arrays
+function _write_data_to_nc(v::Variable{T,N},data::DiskArrays.AbstractDiskArray,indexes::Integer...) where {T,N}
+    return _write_data_to_nc(v,Array(data),indexes...)
+end
+
+function _write_data_to_nc(v::Variable{T}, data::DiskArrays.AbstractDiskArray, indexes::AbstractRange{<:Integer}...) where T
+    return _write_data_to_nc(v,Array(data),indexes...)
 end
 
 function eachchunk(v::Variable)

@@ -42,7 +42,7 @@ import CommonDataModel: AbstractDataset, AbstractVariable,
     varbyattrib, CFStdName, @CF_str, ancillaryvariables, filter, coord, bounds,
     MFDataset, MFCFVariable,
     DeferDataset, metadata, Resource,
-    SubDataset, SubVariable, subsub,
+    SubDataset, SubVariable,
     chunking, deflate, checksum, fillmode,
     iswritable, sync, CatArrays,
     SubDataset,
@@ -74,9 +74,6 @@ include("defer.jl")
 include("multifile.jl")
 include("ncgen.jl")
 include("precompile.jl")
-
-DiskArrays.@implement_diskarray NCDatasets.Variable
-
 
 export CatArrays
 export CFTime
