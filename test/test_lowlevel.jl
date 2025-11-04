@@ -48,7 +48,18 @@ for sampledata in samples
     # reverse order
     varid = NCDatasets.nc_def_var(ncid, varname, xtype, reverse(dimids))
     NCDatasets.nc_put_att(ncid, varid, "attr-string-list",["one","two"])
+
+    # test nc_put_var1
+    # test nc_get_var1
+    index = [1 for i in 1:ndims(sampledata)] .- 1
+    NCDatasets.nc_put_var1(ncid,varid,index,first(sampledata))
+    @test NCDatasets.nc_get_var1(T,ncid,varid,index) == first(sampledata)
+
+    # test nc_put_var
     NCDatasets.nc_put_var(ncid, varid, sampledata)
+
+    #@test first(sampledata) == var1
+
     NCDatasets.nc_close(ncid)
 
     # load data
@@ -56,6 +67,12 @@ for sampledata in samples
     varid = NCDatasets.nc_inq_varid(ncid,varname)
     xtype2 = NCDatasets.nc_inq_vartype(ncid,varid)
     @test xtype == xtype
+
+    name2,jltype2,dimids2,natts2 = NCDatasets.nc_inq_var(ncid,varid)
+    @test name2 == varname
+    @test jltype2 == T
+    @test dimids2 == reverse(dimids)
+    @test natts2 == 1
 
     attrval = NCDatasets.nc_get_att(ncid, varid, "attr-string-list")
     @test attrval == ["one","two"]
@@ -82,4 +99,25 @@ ncid = NCDatasets.nc_create(filename,NCDatasets.NC_CLOBBER | NCDatasets.NC_NETCD
 NCDatasets.nc_close(ncid)
 
 ncid = NCDatasets.nc_open(split("$(filename)#foo",'#')[1],NCDatasets.NC_NOWRITE)
+NCDatasets.nc_close(ncid)
+
+
+# Set/get netcdf rc configuration
+# https://github.com/Unidata/netcdf-c/blob/main/docs/auth.md
+
+if NCDatasets.netcdf_version() > v"4.9.0"
+    NCDatasets.nc_rc_set("HTTP.SSL.VALIDATE","1")
+    @test NCDatasets.nc_rc_get("HTTP.SSL.VALIDATE") == "1"
+end
+
+@test_throws ErrorException NCDatasets.nc_rc_get("does_not_exists")
+
+# test NCDatasets.nc_inq_filter_avail
+
+filename = tempname()
+mode = NCDatasets.NC_CLOBBER
+ncid = NCDatasets.nc_create(filename,mode)
+id = 32015 # Zstandard
+# Zstandard is not available for NetCDF 3 files
+@test !NCDatasets.nc_inq_filter_avail(ncid,id)
 NCDatasets.nc_close(ncid)

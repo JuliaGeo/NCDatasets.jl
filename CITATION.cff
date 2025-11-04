@@ -1,0 +1,28 @@
+cff-version: "1.2.0"
+authors:
+- family-names: Barth
+  given-names: Alexander
+  orcid: "https://orcid.org/0000-0003-2952-5997"
+doi: 10.5281/zenodo.11067062
+message: If you use this software, please cite the article in the
+  Journal of Open Source Software.
+preferred-citation:
+  authors:
+  - family-names: Barth
+    given-names: Alexander
+    orcid: "https://orcid.org/0000-0003-2952-5997"
+  date-published: 2024-05-29
+  doi: 10.21105/joss.06504
+  issn: 2475-9066
+  issue: 97
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 6504
+  title: "NCDatasets.jl: a Julia package for manipulating netCDF data
+    sets"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.06504"
+  volume: 9
+title: "NCDatasets.jl: a Julia package for manipulating netCDF data
+  sets"

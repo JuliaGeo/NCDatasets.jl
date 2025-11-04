@@ -3,6 +3,7 @@ using Dates
 using Printf
 using NCDatasets
 using DataStructures
+import DiskArrays
 
 sz = (4,5)
 filename = tempname()
@@ -10,6 +11,8 @@ filename = tempname()
 #if isfile(filename)
 #    rm(filename)
 #end
+
+@test NCDatasets.Variable <: DiskArrays.AbstractDiskArray
 
 # The mode "c" stands for creating a new file (clobber)
 NCDataset(filename,"c") do ds
@@ -20,7 +23,7 @@ NCDataset(filename,"c") do ds
 
     v = defVar(ds,"small",Float64,("lon","lat"))
 #    @test_throws Union{NCDatasets.NetCDFError,DimensionMismatch} v[:] = zeros(sz[1]+1,sz[2])
-    @test_throws DimensionMismatch v[1:sz[1],1:sz[2]] = zeros(sz[1]+1,sz[2])
+    @test_throws Union{NCDatasets.NetCDFError,DimensionMismatch} v[1:sz[1],1:sz[2]] = zeros(sz[1]+1,sz[2])
     @test_throws NCDatasets.NetCDFError v[sz[1]+1,1] = 1
     @test_throws NCDatasets.NetCDFError v[-1,1] = 1
 
@@ -290,7 +293,6 @@ data2 = zeros(Int,10)
 close(ds)
 
 # issue 250
-
 fname = tempname()
 ds = NCDataset(fname,"c")
 defDim(ds,"lon",100)
@@ -299,20 +301,33 @@ v = defVar(ds,"temperature",Float32,("lon","lat"))
 data = [Float32(i+j) for i = 1:100, j = 1:110];
 v[:,:] = data;
 close(ds)
-
-# reading
 ds = NCDataset(fname)
-
-# works:
-ds["temperature"][CartesianIndices((1:10,10:30))]
-ds["temperature"][CartesianIndex(1,1)]
+@test ds["temperature"][CartesianIndices((1:10,10:30))] == data[CartesianIndices((1:10,10:30))]
+@test ds["temperature"][CartesianIndex(1,1)] == data[CartesianIndex(1,1)]
 
 # read in-place
 v = zeros(Float32, 10, 21);
 NCDatasets.load!(variable(ds, "temperature"), v, CartesianIndices((1:10,10:30)))
 @test v[:,:] == data[CartesianIndices((1:10,10:30))]
-
-
 vv = [1.0f0]
 NCDatasets.load!(variable(ds, "temperature"), vv, CartesianIndex(5,5))
 @test vv[1] == data[CartesianIndex(5,5)]
+close(ds)
+
+# issue 262
+fname = tempname()
+ds = NCDataset(fname,"c")
+defDim(ds,"lon",10)
+defDim(ds,"lat",11)
+data = [Float32(i+j) for i = 1:10, j = 1:11];
+data2 = similar(data)
+v = defVar(ds,"temperature",data,("lon","lat"))
+
+@test v[:,end:-1:1] == data[:,end:-1:1]
+@test v[:,end:-2:1] == data[:,end:-2:1]
+@test v[:,5:-1:1] == data[:,5:-1:1]
+@test v[:,5:-1:3] == data[:,5:-1:3]
+@test v[end:-1:1,:] == data[end:-1:1,:]
+
+NCDatasets.load!(variable(ds, "temperature"), data2, :,11:-1:1)
+@test data2 == data[:,end:-1:1]

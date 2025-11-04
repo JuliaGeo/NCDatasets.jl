@@ -36,28 +36,3 @@ ds = NCDataset("file.nc")
 temp = zeros(Float32,10,20)
 NCDatasets.load!(variable(ds,"temp"),temp,:,:)
 ```
-
-* Most julia functions (like `mean`, `sum`,... from the module Statistics) access an array element-wise. It is generally much faster to load the data in memory (if possible) to make the computation.
-
-```julia
-using NCDatasets, BenchmarkTools, Statistics
-ds = NCDataset("file.nc","c")
-data = randn(100,100);
-defVar(ds,"myvar",data,("lon","lat"))
-close(ds)
-
-ds = NCDataset("file.nc")
-@btime mean(ds["myvar"]) # takes 107.357 ms
-@btime mean(ds["myvar"][:,:]) # takes 106.873 μs, 1000 times faster
-close(ds)
-```
-
-* Avoid, when possible, indexing with arrays and `CartesianIndex` as they also result in loading the data element-wise.
-
-```julia
-ds = NCDataset("dataset.nc");
-v = ds["v1"][:,1:3,:]; # fast
-v = ds["v1"][:,:,CartesianIndex(1)] # slow
-v = ds["v1"][:,:,1] # fast
-close(ds)
-```

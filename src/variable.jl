@@ -37,8 +37,6 @@ Return a tuple of integers with the size of the variable `var`.
 Base.size(v::Variable{T,N}) where {T,N} = ntuple(i -> nc_inq_dimlen(v.ds.ncid,v.dimids[i]),Val(N))
 
 
-Base.view(v::Variable,indices::Union{Int,Colon,AbstractVector{Int}}...) = SubVariable(v,indices...)
-
 """
     renameVar(ds::NCDataset,oldname,newname)
 
@@ -435,6 +433,15 @@ function _write_data_to_nc(v::Variable{T}, data, indexes::AbstractRange{<:Intege
     return nc_put_vars(v.ds.ncid,v.varid,start,count,stride,T.(data))
 end
 
+# materialize disk arrays
+function _write_data_to_nc(v::Variable{T,N},data::DiskArrays.AbstractDiskArray,indexes::Integer...) where {T,N}
+    return _write_data_to_nc(v,Array(data),indexes...)
+end
+
+function _write_data_to_nc(v::Variable{T}, data::DiskArrays.AbstractDiskArray, indexes::AbstractRange{<:Integer}...) where T
+    return _write_data_to_nc(v,Array(data),indexes...)
+end
+
 function eachchunk(v::Variable)
     # storage will be reported as chunked for variables with unlimited dimension
     # by _chunking and chunksizes will 1 for the unlimited dimensions
@@ -445,7 +452,8 @@ function eachchunk(v::Variable)
         return DiskArrays.GridChunks(v, chunksizes)
     end
 end
-haschunks(v::Variable) = (_chunking(v)[1] == :contiguous ? DiskArrays.Unchunked() : DiskArrays.Chunked())
+haschunks(v::Variable) = (_chunking(v)[1] == :contiguous ? DiskArrays.Unchunked(DiskArrays.SubRanges(DiskArrays.CanStepRange(),1.0)) : 
+    DiskArrays.Chunked(DiskArrays.SubRanges(DiskArrays.CanStepRange(),1.0)))
 
 eachchunk(v::CFVariable{T,N,<:Variable}) where {T,N} = eachchunk(v.var)
 haschunks(v::CFVariable{T,N,<:Variable}) where {T,N} = haschunks(v.var)
@@ -539,38 +547,3 @@ function _range_indices_dest(of,v,rest...)
 end
 range_indices_dest(ri...) = _range_indices_dest((),ri...)
 
-function _batchgetindex(
-    v::Variable{T},
-    indices::Union{<:Integer,Colon,AbstractRange{<:Integer},AbstractVector{<:Integer}}...) where T
-
-    @debug "transform vector of indices to ranges"
-
-    sz_source = size(v)
-    ri = to_range_list.(indices,sz_source)
-    sz_dest = size_getindex(v,indices...)
-
-    N = length(indices)
-
-    ri_dest = range_indices_dest(ri...)
-    @debug "ri_dest $ri_dest"
-    @debug "ri $ri"
-
-    if all(==(1),length.(ri))
-        # single chunk
-        R = first(CartesianIndices(length.(ri)))
-        ind_source = ntuple(i -> ri[i][R[i]],N)
-        ind_dest = ntuple(i -> ri_dest[i][R[i]],length(ri_dest))
-        return v[ind_source...]
-    end
-
-    dest = Array{eltype(v),length(sz_dest)}(undef,sz_dest)
-    for R in CartesianIndices(length.(ri))
-        ind_source = ntuple(i -> ri[i][R[i]],N)
-        ind_dest = ntuple(i -> ri_dest[i][R[i]],length(ri_dest))
-        dest[ind_dest...] = v[ind_source...]
-    end
-    return dest
-end
-
-DiskArrays.batchgetindex(v::Variable,indices::Union{<:Integer,Colon,AbstractRange{<:Integer},AbstractVector{<:Integer}}...) = _batchgetindex(v,indices...)
-DiskArrays.batchgetindex(v::Variable,index::AbstractVector{Int}) = _batchgetindex(v,index)

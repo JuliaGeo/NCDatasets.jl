@@ -252,6 +252,7 @@ end
 # end
 
 function nc_create(path,cmode::Integer)
+    @debug "nc_create $path with mode $cmode"
     ncidp = Ref(Cint(0))
     check(ccall((:nc_create,libnetcdf),Cint,(Cstring,Cint,Ptr{Cint}),path,cmode,ncidp))
     return ncidp[]
@@ -595,7 +596,8 @@ end
 
 function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Vector{Any})
     T = promote_type(typeof.(data)...)
-    nc_put_att(ncid,varid,name,ncType[T],data)
+    @debug "promoted type for attribute $T"
+    nc_put_att(ncid,varid,name,ncType[T],T.(data))
 end
 
 # convert e.g. ranges to vectors
@@ -873,7 +875,7 @@ function nc_put_vara(ncid::Integer,varid::Integer,startp,countp,
 end
 
 function nc_get_vara!(ncid::Integer,varid::Integer,startp,countp,ip)
-    @debug "nc_get_vara!",startp,indexp
+    @debug "nc_get_vara!",startp,countp
     check(ccall((:nc_get_vara,libnetcdf),Cint,(Cint,Cint,Ptr{Csize_t},Ptr{Csize_t},Ptr{Nothing}),ncid,varid,startp,countp,ip))
 end
 
@@ -1025,7 +1027,26 @@ end
 
 function nc_get_vars!(ncid::Integer,varid::Integer,startp,countp,stridep,ip)
     @debug "nc_get_vars!: $startp,$countp,$stridep"
-    check(ccall((:nc_get_vars,libnetcdf),Cint,(Cint,Cint,Ptr{Csize_t},Ptr{Csize_t},Ptr{Cint},Ptr{Nothing}),ncid,varid,startp,countp,stridep,ip))
+
+    if any(<(0),stridep)
+        reverse_dim = stridep .< 0
+        strider = copy(stridep)
+        startr = copy(startp)
+
+        for i = 1:length(stridep)
+            if reverse_dim[i]
+                strider[i] = -stridep[i]
+                startr[i] = startp[i] + (countp[i]-1)*stridep[i]
+            end
+        end
+
+        check(ccall((:nc_get_vars,libnetcdf),Cint,(Cint,Cint,Ptr{Csize_t},Ptr{Csize_t},Ptr{Cint},Ptr{Nothing}),ncid,varid,startr,countp,strider,ip))
+
+        # reverse(reverse_dim) is necessary because stride uses the C ordering
+        reverse!(ip,dims=Tuple(findall(reverse(reverse_dim))))
+    else
+        check(ccall((:nc_get_vars,libnetcdf),Cint,(Cint,Cint,Ptr{Csize_t},Ptr{Csize_t},Ptr{Cint},Ptr{Nothing}),ncid,varid,startp,countp,stridep,ip))
+    end
 end
 
 
@@ -2182,7 +2203,8 @@ end
 
 function nc_rc_get(key)
     p = ccall((:nc_rc_get,libnetcdf),Cstring,(Cstring,),key)
-    if p !== C_NULL
+
+    if p != C_NULL
         unsafe_string(p)
     else
         error("NetCDF: nc_rc_get: unable to get key $key")
@@ -2210,7 +2232,7 @@ function init_certificate_authority()
 
         if err != NC_NOERR
             @warn "setting HTTP.SSL.CAINFO using NC_rcfile_insert " *
-                "failed with error $err. See https://github.com/Alexander-Barth/NCDatasets.jl/issues/173 for more information. "
+                "failed with error $err. See https://github.com/JuliaGeo/NCDatasets.jl/issues/173 for more information. "
 
             @debug begin
                 lookup = @ccall(libnetcdf.NC_rclookup(key::Cstring, hostport::Cstring, path::Cstring)::Cstring)

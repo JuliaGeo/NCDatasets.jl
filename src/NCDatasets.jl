@@ -14,7 +14,7 @@ unit = v.attrib["units"]
 close(ds)
 ```
 
-More information is available at https://github.com/Alexander-Barth/NCDatasets.jl .
+More information is available at https://github.com/JuliaGeo/NCDatasets.jl .
 """
 module NCDatasets
 
@@ -36,12 +36,13 @@ import CommonDataModel: AbstractDataset, AbstractVariable,
     CFVariable, variable, cfvariable, defVar, load!,
     path, name, isopen, unlimited, dataset,
     groupname, groupnames, group, defGroup, Groups,
+    varnames,
     dimnames, dim, defDim, Dimensions,
     attribnames, attrib, defAttrib, delAttrib, Attributes,
     varbyattrib, CFStdName, @CF_str, ancillaryvariables, filter, coord, bounds,
     MFDataset, MFCFVariable,
     DeferDataset, metadata, Resource,
-    SubDataset, SubVariable, subsub,
+    SubDataset, SubVariable,
     chunking, deflate, checksum, fillmode,
     iswritable, sync, CatArrays,
     SubDataset,
@@ -51,7 +52,7 @@ import CommonDataModel: AbstractDataset, AbstractVariable,
 
 
 import DiskArrays
-import DiskArrays: readblock!, writeblock!, eachchunk, haschunks, batchgetindex
+import DiskArrays: readblock!, writeblock!, eachchunk, haschunks
 
 function __init__()
     NetCDF_jll.is_available() && init_certificate_authority()
@@ -73,9 +74,6 @@ include("defer.jl")
 include("multifile.jl")
 include("ncgen.jl")
 include("precompile.jl")
-
-DiskArrays.@implement_diskarray NCDatasets.Variable
-
 
 export CatArrays
 export CFTime

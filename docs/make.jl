@@ -25,7 +25,7 @@ makedocs(
     doctest = false,
     format = Documenter.HTML(
         prettyurls = get(ENV, "CI", nothing) == "true",
-        canonical = "https://alexander-barth.github.io/NCDatasets.jl",
+        canonical = "https://juliageo.github.io/NCDatasets.jl",
     ),
     pages = [
         "Introduction" => "index.md",
@@ -41,4 +41,4 @@ makedocs(
     checkdocs = :none,
 )
 
-deploydocs(repo = "github.com/Alexander-Barth/NCDatasets.jl.git")
+deploydocs(repo = "github.com/JuliaGeo/NCDatasets.jl.git")

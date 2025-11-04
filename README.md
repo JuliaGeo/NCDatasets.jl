@@ -1,22 +1,22 @@
 # NCDatasets
+[![documentation stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliageo.org/NCDatasets.jl/stable/)
+[![documentation dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliageo.org/NCDatasets.jl/dev/)
 
 [![Build Status](https://github.com/Alexander-Barth/NCDatasets.jl/workflows/CI/badge.svg)](https://github.com/Alexander-Barth/NCDatasets.jl/actions)
-[![codecov.io](http://codecov.io/github/Alexander-Barth/NCDatasets.jl/coverage.svg?branch=master)](http://app.codecov.io/github/Alexander-Barth/NCDatasets.jl?branch=master)
-[![documentation stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://alexander-barth.github.io/NCDatasets.jl/stable/)
-[![documentation dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://alexander-barth.github.io/NCDatasets.jl/dev/)
+[![codecov](https://codecov.io/github/Alexander-Barth/NCDatasets.jl/graph/badge.svg?token=SXpIBsfRrI)](https://codecov.io/github/Alexander-Barth/NCDatasets.jl)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.06504/status.svg)](https://doi.org/10.21105/joss.06504)
 
 
 `NCDatasets` allows one to read and create netCDF files.
-NetCDF data set and attribute list behave like Julia dictionaries and variables like Julia arrays. This package implements the [CommonDataModel.jl](https://github.com/JuliaGeo/CommonDataModel.jl) interface, which mean that the datasets can be accessed in the same way as GRIB files opened with [GRIBDatasets.jl](https://github.com/JuliaGeo/GRIBDatasets.jl).
-
+NetCDF data set and attribute list behave like Julia dictionaries and variables like Julia arrays. This package implements the [CommonDataModel.jl](https://github.com/JuliaGeo/CommonDataModel.jl) interface, which mean that the datasets can be accessed in the same way as GRIB files ([GRIBDatasets.jl](https://github.com/JuliaGeo/GRIBDatasets.jl)) and Zarr files ([ZarrDatasets.jl](https://github.com/JuliaGeo/ZarrDatasets.jl)).
 
 The module `NCDatasets` provides support for the following [netCDF CF conventions](http://cfconventions.org/):
 * `_FillValue` will be returned as `missing` ([more information](https://docs.julialang.org/en/v1/manual/missing/))
 * `scale_factor` and `add_offset` are applied if present
 * time variables (recognized by the `units` attribute) are returned as `DateTime` objects.
-* support of the [CF calendars](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.7/cf-conventions.html#calendar) (standard, gregorian, proleptic gregorian, julian, all leap, no leap, 360 day)
+* support of the [CF calendars](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.11/cf-conventions.html#calendar) (standard, gregorian, proleptic gregorian, julian, all leap, no leap, 360 day) using [CFTime](https://github.com/JuliaGeo/CFTime.jl)
 * the raw data can also be accessed (without the transformations above).
-* [contiguous ragged array representation](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.10/cf-conventions.html#_contiguous_ragged_array_representation)
+* [contiguous ragged array representation](http://cfconventions.org/Data/cf-conventions/cf-conventions-1.11/cf-conventions.html#_contiguous_ragged_array_representation)
 
 Other features include:
 * Support for NetCDF 4 compression and variable-length arrays (i.e. arrays of vectors where each vector can have potentailly a different length)
@@ -33,7 +33,7 @@ Pkg.add("NCDatasets")
 
 # Manual
 
-This Manual is a quick introduction in using NCDatasets.jl. For more details you can read the [stable](https://alexander-barth.github.io/NCDatasets.jl/stable/) or [latest](https://alexander-barth.github.io/NCDatasets.jl/latest/) documentation.
+This Manual is a quick introduction in using NCDatasets.jl. For more details you can read the [stable](https://juliageo.org/NCDatasets.jl/stable/) or [dev](https://juliageo.org/NCDatasets.jl/dev/) documentation.
 
 * [Create a netCDF file](#create-a-netcdf-file)
 * [Explore the content of a netCDF file](#explore-the-content-of-a-netcdf-file)

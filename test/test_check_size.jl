@@ -33,10 +33,10 @@ ds["w"][:,1:15] = ones(10,15)
 @test size(ds["w"]) == (10,15)
 
 # w cannot grow along a fixed dimension
-@test_throws DimensionMismatch ds["w"][:,:] = ones(11,15)
+@test_throws Union{NCDatasets.NetCDFError,DimensionMismatch} ds["w"][:, :] = ones(11, 15)
 
 # NetCDF: Index exceeds dimension bound
-@test_throws NCDatasets.NetCDFError ds["u"][100,100]
+@test_throws Union{NCDatasets.NetCDFError,BoundsError} ds["u"][100,100]
 close(ds)
 rm(filename)
 

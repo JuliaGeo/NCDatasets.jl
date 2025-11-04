@@ -27,7 +27,7 @@ end
 
 T = eltype(data)
 filename = tempname()
-filename = "foo.nc"
+
 isfile(filename) && rm(filename)
 ncid = nc_create(filename, NC_NETCDF4|NC_CLOBBER)
 

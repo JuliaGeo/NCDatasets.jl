@@ -64,10 +64,6 @@ data = ncvar[:] # here [0., 1.]
 The variable `ncvar` can be indexed in the same way as `ncvar_cf` explained above.
 
 
-!!! note
-    `NCDatasets.Variable` and `NCDatasets.CFVariable` implement the interface of `AbstractArray`. It is thus possible to call any function that accepts an `AbstractArray`. But functions like `mean`, `sum` (and many more) would load every element individually which is very inefficient for large fields read from disk. You should instead convert such a variable to a standard Julia `Array` and then do computations with it. See also the [performance tips](@ref performance_tips) for more information.
-
-
 The following functions are convenient for working with variables:
 
 ```@docs

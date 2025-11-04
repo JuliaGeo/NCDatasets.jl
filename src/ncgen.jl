@@ -18,7 +18,7 @@ end
 Escape string for variable names.
 """
 function escapevar(val)
-    return replace(val," " => "_")
+    return replace(val," " => "_", "-" => "_")
 end
 
 function ncgen(io::IO,fname; newfname = "filename.nc")

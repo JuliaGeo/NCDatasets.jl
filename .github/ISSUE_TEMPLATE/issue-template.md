@@ -1,3 +1,12 @@
+---
+name: Issue template
+about: Please describe the issue
+title: ''
+labels: ''
+assignees: ''
+
+---
+
 **Describe the bug**
 
 A description of what the bug is.

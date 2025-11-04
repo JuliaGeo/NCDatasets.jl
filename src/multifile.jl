@@ -9,7 +9,7 @@ vector of file names.
 Variables are aggregated over the first unlimited dimension or over
 the dimension `aggdim` if specified. Variables without the dimensions `aggdim`
 are not aggregated. All variables containing the dimension `aggdim` are
-aggregated. The variable who do not contain the dimension `aggdim` are assumed
+aggregated. The variables that do not contain the dimension `aggdim` are assumed
 constant.
 
 If variables should be aggregated over a new dimension (not present in the

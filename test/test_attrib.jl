@@ -126,4 +126,14 @@ end
 
 rm(filename)
 
+
 #filename = "/tmp/mytest.nc"
+
+# test untyped attributes
+filename = tempname()
+vector_attrib = Any[Int32(1),Int32(2)]
+ds = NCDataset(filename,"c")
+# test deletion of attributes
+ds.attrib["vector_attrib"] = vector_attrib
+@test ds.attrib["vector_attrib"] == vector_attrib
+close(ds)
