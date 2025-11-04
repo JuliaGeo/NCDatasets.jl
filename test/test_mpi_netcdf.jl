@@ -1,9 +1,9 @@
+using Test
 using MPIPreferences
 using MPI
 using NCDatasets
 import NCDatasets: NCDataset
-using NCDatasets: nc_create, NC_NETCDF4, NC_CLOBBER, nc_close, check, libnetcdf, nc_def_dim, nc_def_var, nc_put_var1, check
-
+using NCDatasets: nc_create, NC_NETCDF4, NC_CLOBBER, nc_close, check, libnetcdf, nc_def_dim, nc_def_var, nc_put_var1, check, NC_NOWRITE
 
 function nc_create_par(path,cmode,mpi_comm::MPI.Comm,mpi_info::MPI.Info)
     ncidp = Ref{Cint}()
@@ -35,10 +35,6 @@ function NCDataset(mpi_comm::MPI.Comm,
                    mode::AbstractString = "r";
                    mpi_info = MPI.INFO_NULL,
                    format::Symbol = :netcdf4,
-                   share::Bool = false,
-                   diskless::Bool = false,
-                   persist::Bool = false,
-                   memory::Union{Vector{UInt8},Nothing} = nothing,
                    maskingvalue = missing,
                    attrib = [])
 
@@ -55,29 +51,12 @@ function NCDataset(mpi_comm::MPI.Comm,
             throw(NetCDFError(-1, "Unsupported mode '$(mode)' for filename '$(filename)'"))
         end
 
-    if diskless
-        ncmode = ncmode | NC_DISKLESS
-
-        if persist
-            ncmode = ncmode | NC_PERSIST
-        end
-    end
-
-    if share
-        @debug "share mode"
-        ncmode = ncmode | NC_SHARE
-    end
 
     @debug "ncmode: $ncmode"
-    #cmode = NC_CLOBBER | NC_NETCDF4
 
     isdefmode = Ref(false)
     if (mode == "r") || (mode == "a")
-        if memory == nothing
-            ncid = nc_open(filename,ncmode)
-        else
-            ncid = nc_open_mem(filename,ncmode,memory)
-        end
+        ncid = nc_open_par(filename,ncmode,mpi_comm,mpi_info)
     elseif mode == "c"
         if format == :netcdf5_64bit_data
             ncmode = ncmode | NC_64BIT_DATA
@@ -99,6 +78,9 @@ function NCDataset(mpi_comm::MPI.Comm,
 
     iswritable = mode != "r"
 
+#    ds = NCDataset(
+#        ncid,iswritable,isdefmode,
+#        maskingvalue = maskingvalue)
     ds = NCDataset(ncid,iswritable,isdefmode)
 
     # set global attributes
@@ -120,10 +102,18 @@ csize = MPI.Comm_size(mpi_comm)
 
 
 filename = "/tmp/foo.nc"
-ds = NCDataset(mpi_comm,filename)
+ds = NCDataset(mpi_comm,filename,"c")
 
 defDim(ds,"rank",csize)
 defVar(ds,"var",Float64,("rank",))
 
 ds["var"][rank+1] = rank
 close(ds)
+
+
+# read
+ds = NCDataset(mpi_comm,filename)
+
+@test ds["var"][rank+1] == rank
+close(ds)
+
