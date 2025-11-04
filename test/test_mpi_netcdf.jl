@@ -42,12 +42,70 @@ function NCDataset(mpi_comm::MPI.Comm,
                    maskingvalue = missing,
                    attrib = [])
 
-    cmode = NC_CLOBBER | NC_NETCDF4
-    ncid = nc_create_par(filename,cmode,mpi_comm,mpi_info)
-    iswritable = true
     isdefmode = Ref(false)
 
+    ncmode =
+        if mode == "r"
+            NC_NOWRITE
+        elseif mode == "a"
+            NC_WRITE
+        elseif mode == "c"
+            NC_CLOBBER
+        else
+            throw(NetCDFError(-1, "Unsupported mode '$(mode)' for filename '$(filename)'"))
+        end
+
+    if diskless
+        ncmode = ncmode | NC_DISKLESS
+
+        if persist
+            ncmode = ncmode | NC_PERSIST
+        end
+    end
+
+    if share
+        @debug "share mode"
+        ncmode = ncmode | NC_SHARE
+    end
+
+    @debug "ncmode: $ncmode"
+    #cmode = NC_CLOBBER | NC_NETCDF4
+
+    isdefmode = Ref(false)
+    if (mode == "r") || (mode == "a")
+        if memory == nothing
+            ncid = nc_open(filename,ncmode)
+        else
+            ncid = nc_open_mem(filename,ncmode,memory)
+        end
+    elseif mode == "c"
+        if format == :netcdf5_64bit_data
+            ncmode = ncmode | NC_64BIT_DATA
+        elseif format == :netcdf3_64bit_offset
+            ncmode = ncmode | NC_64BIT_OFFSET
+        elseif format == :netcdf4_classic
+            ncmode = ncmode | NC_NETCDF4 | NC_CLASSIC_MODEL
+        elseif format == :netcdf4
+            ncmode = ncmode | NC_NETCDF4
+        elseif format == :netcdf3_classic
+            # do nothing
+        else
+            throw(NetCDFError(-1, "Unkown format '$(format)' for filename '$(filename)'"))
+        end
+
+        ncid = nc_create_par(filename,ncmode,mpi_comm,mpi_info)
+        isdefmode[] = true
+    end
+
+    iswritable = mode != "r"
+
     ds = NCDataset(ncid,iswritable,isdefmode)
+
+    # set global attributes
+    for (attname,attval) in attrib
+        ds.attrib[attname] = attval
+    end
+
     return ds
 end
 
