@@ -7,6 +7,7 @@ testdir = @__DIR__
 prog = joinpath(testdir, "test_mpi_script.jl")
 fn = tempname()
 
+run(`$(Base.julia_cmd()) --project=$testdir --eval "using Pkg; Pkg.instantiate()"`)
 run(`$(mpiexec()) -n $nprocs $(Base.julia_cmd()) --project=$testdir --startup-file=no $prog $fn`)
 # run with raise an error if prog fails
 
