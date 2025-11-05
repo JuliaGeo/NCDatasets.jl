@@ -60,7 +60,6 @@ jobs:
         run: |
            using Pkg
            Pkg.add(url="https://github.com/Alexander-Barth/NetCDF_jll.jl")
-           Pkg.develop(path=".")
            if Sys.isapple()
            #run(`sha256sum /Users/runner/.julia/artifacts/ae95712771ea771cf8a1779162ce95329f840f1d/lib/libnetcdf.19.dylib`)
            #run(`otool -L /Users/runner/.julia/artifacts/ae95712771ea771cf8a1779162ce95329f840f1d/lib/libnetcdf.19.dylib`)
