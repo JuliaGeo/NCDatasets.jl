@@ -296,7 +296,7 @@ All metadata operators (creating dimensions, variables, attributes, groups or ty
 Reading and writing data of netCDF variables can be done *independently* (default) or *collectively*. If a variable (or whole dataset) is marked for *collectively* data access, the underlying HDF5 library can enable additional optimization.
 More information is available in the [NetCDF documentation](https://web.archive.org/web/20240414204638/https://docs.unidata.ucar.edu/netcdf-c/current/parallel_io.html).
 
-Only the NetCDF 4 format can be currently used for parallel access. On Windows, the MPI interface is (currently unsupported)[https://github.com/JuliaPackaging/Yggdrasil/issues/8523]. Help from developpers with access to Windows would be appreciated.
+Only the NetCDF 4 format can be currently used for parallel access. On Windows, the MPI interface is [currently unsupported](https://github.com/JuliaPackaging/Yggdrasil/issues/8523). Help from developpers with access to Windows would be appreciated.
 
 ```julia
 using MPI
