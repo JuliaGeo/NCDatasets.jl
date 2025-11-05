@@ -295,6 +295,7 @@ Experimental MPI support is available as a package extension. It is important to
 All metadata operators (creating dimensions, variables, attributes, groups or types) must be done *collectively*.
 Reading and writing data of netCDF variables can be done *independently* (default) or *collectively*. If a variable (or whole dataset) is marked for *collectively* data access, the underlying HDF5 library can enable additional optimization.
 More information is available in the [NetCDF documentation](https://web.archive.org/web/20240414204638/https://docs.unidata.ucar.edu/netcdf-c/current/parallel_io.html).
+For the MPI IO standard, collective IO means that all MPI processes execute all the same OI functions (calling for example [MPI_File_write_at_all](https://www.mpich.org/static/docs/v4.1/www3/MPI_File_write_at_all.html)). If this is not the case, then the access is independently (calling for example [MPI_File_write_at](https://www.mpich.org/static/docs/v4.1/www3/MPI_File_write_at.html)).
 
 Only the NetCDF 4 format can be currently used for parallel access. On Windows, the MPI interface is [currently unsupported](https://github.com/JuliaPackaging/Yggdrasil/issues/8523). Help from developpers with access to Windows would be appreciated.
 
