@@ -113,3 +113,12 @@ ncvar = @test_logs (:warn,r".*not_a_unit.*") begin
 end
 @test eltype(ncvar) == Float32
 close(ds)
+
+
+# issue 291
+using Dates
+filename = tempname()
+ds = NCDataset(filename,"c");
+ncv = defVar(ds,"data",Date(2000):Month(1):Date(2001), ("time",))
+@test ncv[:] == Date(2000):Month(1):Date(2001)
+close(ds)
