@@ -25,7 +25,7 @@ If you want to try the latest development version, again go into package manager
 
 ```julia
 using Pkg
-Pkg.add(PackageSpec(name="NCDatasets", rev="master"))
+Pkg.add(PackageSpec(name="NCDatasets", rev="main"))
 ```
 
 ## Contents

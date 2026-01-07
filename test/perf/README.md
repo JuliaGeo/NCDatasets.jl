@@ -66,4 +66,4 @@ If all packages are installed in the home directory of an unpriviledges user e.g
 HOME=/home/my_user_name ./benchmark.sh --drop-caches
 ```
 
-The table in the [README file](https://github.com/Alexander-Barth/NCDatasets.jl/blob/master/README.md) are obtained with this option enabled.
+The table in the [README file](https://github.com/JuliaGeo/NCDatasets.jl/blob/main/README.md) are obtained with this option enabled.
