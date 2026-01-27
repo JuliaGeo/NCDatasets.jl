@@ -1,5 +1,27 @@
 # Known issues
 
+## Thread safety
+
+The underlying netcdf-c library is not threadsafe. More information is available at the [netcdf issue 1373](https://github.com/Unidata/netcdf-c/issues/1373).
+Consider to use locks to serialize the file access, for example:
+
+
+``` julia
+ds = NCDataset("file.nc","c")
+# define all variables
+ncsla = defVar(...)
+
+netcdf_lock = ReentrantLock()
+
+Threads.@threads for n = 1:ntime
+    fi = some_computation()
+    lock(netcdf_lock) do
+       ncsla[:,:,n] = fi
+    end
+end
+
+```
+
 ## NetCDF: Not a valid data type or `_FillValue` type mismatch
 
 Trying to define the `_FillValue`, produces the following error:
