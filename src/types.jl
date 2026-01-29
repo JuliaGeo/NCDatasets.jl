@@ -31,7 +31,7 @@ mutable struct NCDataset{TDS,Tmaskingvalue} <: AbstractNCDataset where TDS <: Un
     iswritable::Bool
     # true of the NetCDF is in define mode (i.e. metadata can be added, but not data)
     # need to be a reference, so that remains syncronised when copied
-    isdefmode::Ref{Bool}
+    isdefmode::Base.RefValue{Bool}
     # mapping between variables related via the bounds attribute
     # It is only used for read-only datasets to improve performance
     _boundsmap::Dict{String,String}
