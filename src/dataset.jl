@@ -53,8 +53,10 @@ function datamode(ds::Dataset)
 end
 
 function datamode(f::Function,ds::Dataset)
-    datamode(ds)
-    f()
+    lock(NETCDF_LOCK) do
+        datamode(ds)
+        f()
+    end
 end
 
 "Make sure that a dataset is in define mode"
@@ -66,8 +68,10 @@ function defmode(ds::Dataset)
 end
 
 function defmode(f::Function,ds::Dataset)
-    defmode(ds)
-    f()
+    lock(NETCDF_LOCK) do
+        defmode(ds)
+        f()
+    end
 end
 
 

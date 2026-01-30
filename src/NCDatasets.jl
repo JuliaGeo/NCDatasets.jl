@@ -63,6 +63,7 @@ const SymbolOrString = Union{Symbol, AbstractString}
 
 include("types.jl")
 include("errorhandling.jl")
+include("lock.jl")
 include("netcdf_c.jl")
 include("dataset.jl")
 include("attributes.jl")
