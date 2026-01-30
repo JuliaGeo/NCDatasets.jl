@@ -110,7 +110,7 @@ function NCDataset(comm::MPI.Comm,filename::AbstractString,
                    attrib = [])
 
     ncid = -1
-    isdefmode = Ref(false)
+    isdefmode = fill(false)
     ncmode = _dataset_ncmode(filename,mode,format;
                              diskless = diskless,
                              persist = persist,
