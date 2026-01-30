@@ -78,7 +78,7 @@ end
 
 function NCDataset(ncid::Integer,
                    iswritable::Bool,
-                   isdefmode::Ref{Bool};
+                   isdefmode::Array{Bool,0};
                    parentdataset = nothing,
                    maskingvalue = missing,
                    )
@@ -238,7 +238,7 @@ function NCDataset(filename::AbstractString,
                    attrib = [])
 
     ncid = -1
-    isdefmode = Ref(false)
+    isdefmode = fill(false)
     ncmode = _dataset_ncmode(filename,mode,format;
                              diskless = diskless,
                              persist = persist,
