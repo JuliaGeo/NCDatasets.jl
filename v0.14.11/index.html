@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Introduction · NCDatasets.jl</title><meta name="title" content="Introduction · NCDatasets.jl"/><meta property="og:title" content="Introduction · NCDatasets.jl"/><meta property="twitter:title" content="Introduction · NCDatasets.jl"/><meta name="description" content="Documentation for NCDatasets.jl."/><meta property="og:description" content="Documentation for NCDatasets.jl."/><meta property="twitter:description" content="Documentation for NCDatasets.jl."/><meta property="og:url" content="https://juliageo.github.io/NCDatasets.jl/"/><meta property="twitter:url" content="https://juliageo.github.io/NCDatasets.jl/"/><link rel="canonical" href="https://juliageo.github.io/NCDatasets.jl/"/><script data-outdated-warner src="assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="search_index.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href><img src="assets/logo.svg" alt="NCDatasets.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href>NCDatasets.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li class="is-active"><a class="tocitem" href>Introduction</a><ul class="internal"><li><a class="tocitem" href="#Installation"><span>Installation</span></a></li><li><a class="tocitem" href="#Contents"><span>Contents</span></a></li><li><a class="tocitem" href="#Quick-start"><span>Quick start</span></a></li><li><a class="tocitem" href="#API-and-semantic-versioning"><span>API and semantic versioning</span></a></li></ul></li><li><a class="tocitem" href="dataset/">Datasets</a></li><li><a class="tocitem" href="dimensions/">Dimensions</a></li><li><a class="tocitem" href="variables/">Variables</a></li><li><a class="tocitem" href="attributes/">Attributes</a></li><li><a class="tocitem" href="performance/">Performance tips</a></li><li><a class="tocitem" href="other/">Other features</a></li><li><a class="tocitem" href="issues/">Known issues</a></li><li><a class="tocitem" href="tutorials/">Tutorials</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Introduction</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Introduction</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/JuliaGeo/NCDatasets.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/JuliaGeo/NCDatasets.jl/blob/main/docs/src/index.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="NCDatasets.jl"><a class="docs-heading-anchor" href="#NCDatasets.jl">NCDatasets.jl</a><a id="NCDatasets.jl-1"></a><a class="docs-heading-anchor-permalink" href="#NCDatasets.jl" title="Permalink"></a></h1><p>Documentation for <a href="https://github.com/JuliaGeo/NCDatasets.jl">NCDatasets.jl</a>, a Julia package for loading and writing NetCDF (<a href="https://www.unidata.ucar.edu/software/netcdf/">Network Common Data Form</a>) files. NCDatasets.jl implements the for the NetCDF format the interface defined in <a href="https://github.com/JuliaGeo/CommonDataModel.jl">CommonDataModel.jl</a>. All functions defined by CommonDataModel.jl are also available for NetCDF data, including:</p><ul><li>virtually concatenating multiple files along a given dimension</li><li>create a virtual subset (<code>view</code>) by indices or by values of coordinate variables (<code>CommonDataModel.select</code>, <code>CommonDataModel.@select</code>)</li><li>group, map and reduce (with <code>mean</code>, standard deviation <code>std</code>, ...) a variable (<code>CommonDataModel.groupby</code>, <code>CommonDataModel.@groupby</code>) and rolling reductions like running means <code>CommonDataModel.rolling</code>).</li></ul><h2 id="Installation"><a class="docs-heading-anchor" href="#Installation">Installation</a><a id="Installation-1"></a><a class="docs-heading-anchor-permalink" href="#Installation" title="Permalink"></a></h2><p>Inside the Julia shell, you can download and install NCDatasets using the following commands:</p><pre><code class="language-julia hljs">using Pkg
+Pkg.add(&quot;NCDatasets&quot;)</code></pre><p>Or by typing <code>]add NCDatasets</code> using the package manager REPL-mode.</p><h3 id="Latest-development-version"><a class="docs-heading-anchor" href="#Latest-development-version">Latest development version</a><a id="Latest-development-version-1"></a><a class="docs-heading-anchor-permalink" href="#Latest-development-version" title="Permalink"></a></h3><p>If you want to try the latest development version, again go into package manager mode and simply type</p><pre><code class="language-julia hljs">using Pkg
+Pkg.add(PackageSpec(name=&quot;NCDatasets&quot;, rev=&quot;main&quot;))</code></pre><h2 id="Contents"><a class="docs-heading-anchor" href="#Contents">Contents</a><a id="Contents-1"></a><a class="docs-heading-anchor-permalink" href="#Contents" title="Permalink"></a></h2><p>To get started quickly see the <a href="#Quick-start">Quick start</a> section. Otherwise see the following pages for details:</p><ul><li><a href="dataset/#Datasets">Datasets</a> : reading/writing NetCDF datasets (including NetCDF groups) and examining their contents.</li><li><a href="dimensions/#Dimensions">Dimensions</a> : accessing/creating NetCDF dimensions</li><li><a href="variables/#Variables">Variables</a> : accessing/examining the variables (or dimensions) stored within a NetCDF dataset.</li><li><a href="attributes/#Attributes">Attributes</a> : accessing/creating NetCDF attributes</li><li>See <a href="other/#Fill-values-and-missing-values">Fill values and missing values</a>, <a href="performance/#performance_tips">Performance tips</a>, <a href="other/#Other-features">Other features</a> and <a href="issues/#Known-issues">Known issues</a> for more information.</li></ul><h2 id="Quick-start"><a class="docs-heading-anchor" href="#Quick-start">Quick start</a><a id="Quick-start-1"></a><a class="docs-heading-anchor-permalink" href="#Quick-start" title="Permalink"></a></h2><p>This is a quick start guide that outlines basic loading, reading, etc. usage. For more details please see the individual pages of the documentation.</p><ul><li><a href="#Explore-the-content-of-a-netCDF-file">Explore the content of a netCDF file</a></li><li><a href="#Load-a-netCDF-file">Load a netCDF file</a></li><li><a href="#Create-a-netCDF-file">Create a netCDF file</a></li><li><a href="#Edit-an-existing-netCDF-file">Edit an existing netCDF file</a></li><li><a href="#Create-a-netCDF-file-using-the-metadata-of-an-existing-netCDF-file-as-template">Create a netCDF file using the metadata of an existing netCDF file as template</a></li><li><a href="#Get-one-or-several-variables-by-specifying-the-value-of-an-attribute">Get one or several variables by specifying the value of an attribute</a></li><li><a href="#Load-a-file-with-unknown-structure">Load a file with unknown structure</a></li></ul><h3 id="Explore-the-content-of-a-netCDF-file"><a class="docs-heading-anchor" href="#Explore-the-content-of-a-netCDF-file">Explore the content of a netCDF file</a><a id="Explore-the-content-of-a-netCDF-file-1"></a><a class="docs-heading-anchor-permalink" href="#Explore-the-content-of-a-netCDF-file" title="Permalink"></a></h3><p>Before reading the data from a netCDF file, it is often useful to explore the list of variables and attributes defined in it.</p><p>For interactive use, the following commands (without ending semicolon) display the content of the file similarly to <code>ncdump -h file.nc</code>:</p><pre><code class="language-julia hljs">using NCDatasets
+ds = NCDataset(&quot;file.nc&quot;)</code></pre><p>which produces a listing like:</p><pre><code class="nohighlight hljs">NCDataset: file.nc
+Group: /
+
+Dimensions
+   time = 115
+
+Variables
+  time   (115)
+    Datatype:    Float64
+    Dimensions:  time
+    Attributes:
+     calendar             = gregorian
+     standard_name        = time
+     units                = days since 1950-01-01 00:00:00
+[...]</code></pre><p>This creates the central structure of NCDatasets.jl, <code>NCDataset</code>, which represents the contents of the netCDF file (without immediately loading everything in memory).</p><p>The following displays the information just for the variable <code>varname</code>:</p><pre><code class="language-julia hljs">ds[&quot;varname&quot;]</code></pre><p>To get a list of global attributes, you can use:</p><pre><code class="language-julia hljs">ds.attrib</code></pre><h3 id="Load-a-netCDF-file"><a class="docs-heading-anchor" href="#Load-a-netCDF-file">Load a netCDF file</a><a id="Load-a-netCDF-file-1"></a><a class="docs-heading-anchor-permalink" href="#Load-a-netCDF-file" title="Permalink"></a></h3><p>Loading a variable with known structure can be achieved by accessing the variables and attributes directly by their name.</p><pre><code class="language-julia hljs"># The mode &quot;r&quot; stands for read-only. The mode &quot;r&quot; is the default mode and the parameter can be omitted.
+ds = NCDataset(&quot;/tmp/test.nc&quot;,&quot;r&quot;)
+v = ds[&quot;temperature&quot;]
+
+# load a subset
+subdata = v[10:30,30:5:end]
+
+# load all data
+data = v[:,:]
+
+# load all data ignoring attributes like scale_factor, add_offset, _FillValue and time units
+data2 = v.var[:,:]
+
+
+# load an attribute
+unit = v.attrib[&quot;units&quot;]
+close(ds)</code></pre><p>In the example above, the subset can also be loaded with:</p><pre><code class="language-julia hljs">subdata = NCDataset(&quot;/tmp/test.nc&quot;)[&quot;temperature&quot;][10:30,30:5:end]</code></pre><p>This might be useful in an interactive session. However, the file <code>test.nc</code> is not closed, which can be a problem if you open many files. On Linux the number of opened files is often limited to 1024 (soft limit). If you write to a file, you should also always close the file to make sure that the data is properly written to the disk. (open files will get closed eventually when the dataset variable is finalized by julia&#39;s garbage collector).</p><p>An alternative way to ensure the file has been closed is to use a <code>do</code> block: the file will be closed automatically when leaving the block.</p><pre><code class="language-julia hljs">data = NCDataset(filename,&quot;r&quot;) do ds
+    ds[&quot;temperature&quot;][:,:]
+end # ds is closed</code></pre><p>In general, names (variable names, dimension names, attributes name and group names) can either by <code>&quot;strings&quot;</code> or <code>:symbols</code>.</p><pre><code class="language-julia hljs">data_units = ds[:temperature].attrib[:units]
+# is the same as
+data_units = ds[&quot;temperature&quot;].attrib[&quot;units&quot;]</code></pre><h3 id="Create-a-netCDF-file"><a class="docs-heading-anchor" href="#Create-a-netCDF-file">Create a netCDF file</a><a id="Create-a-netCDF-file-1"></a><a class="docs-heading-anchor-permalink" href="#Create-a-netCDF-file" title="Permalink"></a></h3><p>The following gives an example of how to create a netCDF file by defining dimensions, variables and attributes.</p><pre><code class="language-julia hljs">using NCDatasets
+# This creates a new NetCDF file /tmp/test.nc.
+# The mode &quot;c&quot; stands for creating a new file (clobber)
+ds = NCDataset(&quot;/tmp/test.nc&quot;,&quot;c&quot;)
+
+# Define the dimension &quot;lon&quot; and &quot;lat&quot; with the size 100 and 110 resp.
+defDim(ds,&quot;lon&quot;,100)
+defDim(ds,&quot;lat&quot;,110)
+
+# Define a global attribute
+ds.attrib[&quot;title&quot;] = &quot;this is a test file&quot;
+
+# Define the variables temperature
+v = defVar(ds,&quot;temperature&quot;,Float32,(&quot;lon&quot;,&quot;lat&quot;))
+
+# Generate some example data
+data = [Float32(i+j) for i = 1:100, j = 1:110]
+
+# write a single column
+v[:,1] = data[:,1]
+
+# write a the complete data set
+v[:,:] = data
+
+# write attributes
+v.attrib[&quot;units&quot;] = &quot;degree Celsius&quot;
+v.attrib[&quot;comments&quot;] = &quot;this is a string attribute with Unicode Ω ∈ ∑ ∫ f(x) dx&quot;
+
+close(ds)</code></pre><p>An equivalent way to create the previous netCDF would be the following code:</p><pre><code class="language-julia hljs">using NCDatasets
+using DataStructures
+data = [Float32(i+j) for i = 1:100, j = 1:110]
+
+NCDataset(&quot;/tmp/test2.nc&quot;,&quot;c&quot;,attrib = OrderedDict(&quot;title&quot; =&gt; &quot;this is a test file&quot;)) do ds
+    # Define the variable temperature. The dimension &quot;lon&quot; and &quot;lat&quot; with the
+    # size 100 and 110 resp are implicitly created
+    defVar(ds,&quot;temperature&quot;,data,(&quot;lon&quot;,&quot;lat&quot;), attrib = OrderedDict(
+           &quot;units&quot; =&gt; &quot;degree Celsius&quot;,
+           &quot;comments&quot; =&gt; &quot;this is a string attribute with Unicode Ω ∈ ∑ ∫ f(x) dx&quot;
+    ))
+end</code></pre><h3 id="Edit-an-existing-netCDF-file"><a class="docs-heading-anchor" href="#Edit-an-existing-netCDF-file">Edit an existing netCDF file</a><a id="Edit-an-existing-netCDF-file-1"></a><a class="docs-heading-anchor-permalink" href="#Edit-an-existing-netCDF-file" title="Permalink"></a></h3><p>When you need to modify the variables or the attributes of a netCDF, you have to open it with the <code>&quot;a&quot;</code> option. Here, for instance, we add a global attribute <em>creator</em> to the file created in the previous step.</p><pre><code class="language-julia hljs">ds = NCDataset(&quot;/tmp/test.nc&quot;,&quot;a&quot;)
+ds.attrib[&quot;creator&quot;] = &quot;your name&quot;
+close(ds);</code></pre><h3 id="Create-a-netCDF-file-using-the-metadata-of-an-existing-netCDF-file-as-template"><a class="docs-heading-anchor" href="#Create-a-netCDF-file-using-the-metadata-of-an-existing-netCDF-file-as-template">Create a netCDF file using the metadata of an existing netCDF file as template</a><a id="Create-a-netCDF-file-using-the-metadata-of-an-existing-netCDF-file-as-template-1"></a><a class="docs-heading-anchor-permalink" href="#Create-a-netCDF-file-using-the-metadata-of-an-existing-netCDF-file-as-template" title="Permalink"></a></h3><p>The utility function <a href="https://juliageo.org/NCDatasets.jl/stable/#NCDatasets.ncgen"><code>ncgen</code></a> generates the Julia code that would produce a netCDF file with the same metadata as a template netCDF file. It is thus similar to the <a href="https://www.unidata.ucar.edu/software/netcdf/netcdf/ncgen.html">command line tool <code>ncgen</code></a> which can generate C or Fortran code from the output of <a href="https://www.unidata.ucar.edu/software/netcdf/netcdf/ncdump.html"><code>ncdump</code></a>.</p><pre><code class="language-julia hljs">using Downloads: download
+# download an example file
+ncfile = download(&quot;https://www.unidata.ucar.edu/software/netcdf/examples/sresa1b_ncar_ccsm3-example.nc&quot;)
+# generate Julia code
+ncgen(ncfile)</code></pre><p>The produces the Julia code (only the beginning of the code is shown):</p><pre><code class="language-julia hljs">ds = NCDataset(&quot;filename.nc&quot;,&quot;c&quot;)
+# Dimensions
+
+ds.dim[&quot;lat&quot;] = 128;
+ds.dim[&quot;lon&quot;] = 256;
+ds.dim[&quot;bnds&quot;] = 2;
+ds.dim[&quot;plev&quot;] = 17;
+ds.dim[&quot;time&quot;] = 1;
+
+# Declare variables
+
+ncarea = defVar(ds,&quot;area&quot;, Float32, (&quot;lon&quot;, &quot;lat&quot;))
+ncarea.attrib[&quot;long_name&quot;] = &quot;Surface area&quot;;
+ncarea.attrib[&quot;units&quot;] = &quot;meter2&quot;;
+# ...</code></pre><h3 id="Get-one-or-several-variables-by-specifying-the-value-of-an-attribute"><a class="docs-heading-anchor" href="#Get-one-or-several-variables-by-specifying-the-value-of-an-attribute">Get one or several variables by specifying the value of an attribute</a><a id="Get-one-or-several-variables-by-specifying-the-value-of-an-attribute-1"></a><a class="docs-heading-anchor-permalink" href="#Get-one-or-several-variables-by-specifying-the-value-of-an-attribute" title="Permalink"></a></h3><p>The variable names are not always standardized. For example, the longitude can be named: <code>lon</code>, <code>LON</code>, <code>longitude</code>, <code>łøñgitüdè</code>, ...</p><p>The solution implemented in the function <code>varbyattrib</code> consists in searching for the variables that have specified value for a given attribute.</p><pre><code class="language-julia hljs">nclon = varbyattrib(ds, standard_name = &quot;longitude&quot;);</code></pre><p>will return the list of variables of the dataset <code>ds</code> that have &quot;longitude&quot; as standard name. To directly load the data of the first variable with the attribute <code>standard_name</code> equal to <code>&quot;longitude&quot;</code> one can do the following:</p><pre><code class="language-julia hljs">data = varbyattrib(ds, standard_name = &quot;longitude&quot;)[1][:]</code></pre><p>As looking-up a variable by standard name is quite common, one can also use the <code>@CF_str</code> macro and index the dataset using a string prefixed by <code>CF</code>.</p><pre><code class="language-julia hljs">using NCDatasets: @CF_str
+ds[CF&quot;longitude&quot;]</code></pre><p>If multiple variables share the same standard name, such statements <code>ds[CF&quot;longitude&quot;]</code> are ambiguous and an error is returned. This is typically the case for e.g. ocean models like ROMS where different variables (u, v and w velocity) are defined on different staggered grids (i.e. shifted by a half grid-cell from each other). To disambiguate, one can first index the dataset <code>ds</code> with main data variable (e.g. vertical velocity) and then again extract the longitude associated to the data variable.</p><pre><code class="language-julia hljs">ds[CF&quot;upward_sea_water_velocity&quot;][CF&quot;longitude&quot;]</code></pre><p>Such statement is no longer ambiguous as from the dimension names it is clear which longitude has to be accessed.</p><h3 id="Load-a-file-with-unknown-structure"><a class="docs-heading-anchor" href="#Load-a-file-with-unknown-structure">Load a file with unknown structure</a><a id="Load-a-file-with-unknown-structure-1"></a><a class="docs-heading-anchor-permalink" href="#Load-a-file-with-unknown-structure" title="Permalink"></a></h3><p>If the structure of the netCDF file is not known before-hand, the program must check if a variable or attribute exists (with the <code>haskey</code> function) before loading it or alternatively place the loading in a <code>try</code>-<code>catch</code> block. It is also possible to iterate over all variables or attributes (global attributes or variable attributes) in the same syntax as iterating over a dictionary. However, unlike Julia dictionaries, the order of the attributes and variables is preserved and presented as they are stored in the netCDF file.</p><pre><code class="language-julia hljs"># Open a file as read-only
+ds = NCDataset(&quot;/tmp/test.nc&quot;,&quot;r&quot;)
+
+# check if a file has a variable with a given name
+if haskey(ds,&quot;temperature&quot;)
+    println(&quot;The file has a variable &#39;temperature&#39;&quot;)
+end
+
+# get a list of all variable names
+@show keys(ds)
+
+# iterate over all variables
+for (varname,var) in ds
+    @show (varname,size(var))
+end
+
+# query size of a variable (without loading it)
+v = ds[&quot;temperature&quot;]
+@show size(v)
+
+# similar for global and variable attributes
+
+if haskey(ds.attrib,&quot;title&quot;)
+    println(&quot;The file has the global attribute &#39;title&#39;&quot;)
+end
+
+# get an list of all attribute names
+@show keys(ds.attrib)
+
+# iterate over all attributes
+for (attname,attval) in ds.attrib
+    @show (attname,attval)
+end
+
+# get the attribute &quot;units&quot; of the variable v
+# but return the default value (here &quot;adimensional&quot;)
+# if the attribute does not exists
+
+units = get(v,&quot;units&quot;,&quot;adimensional&quot;)
+close(ds)</code></pre><h2 id="API-and-semantic-versioning"><a class="docs-heading-anchor" href="#API-and-semantic-versioning">API and semantic versioning</a><a id="API-and-semantic-versioning-1"></a><a class="docs-heading-anchor-permalink" href="#API-and-semantic-versioning" title="Permalink"></a></h2><p>The package aims to following <a href="https://semver.org/">semantic versioning</a>. <a href="https://docs.julialang.org/en/v1/manual/faq/#How-does-Julia-define-its-public-API">As in julia</a>, what is considered as public API and covered by semantic versioning is what documented and not marked as experimental or internal.</p></article><nav class="docs-footer"><a class="docs-footer-nextpage" href="dataset/">Datasets »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Friday 30 January 2026 12:44">Friday 30 January 2026</span>. Using Julia version 1.12.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
