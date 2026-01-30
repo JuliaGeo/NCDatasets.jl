@@ -82,3 +82,13 @@ end
         include("test_mpi_netcdf.jl")
     end
 end
+
+@testset "Threads" begin
+    # run fails if there is an error
+    fname = tempname()
+    run(`$(Base.julia_cmd()) --threads=8 test_threads.jl $fname`)
+
+    NCDataset(fname,"r") do ds
+        @test length(keys(ds)) == 100
+    end
+end
