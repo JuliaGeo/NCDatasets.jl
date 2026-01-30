@@ -53,7 +53,7 @@ function datamode(ds::Dataset)
 end
 
 function datamode(f::Function,ds::Dataset)
-    datamode()
+    datamode(ds)
     f()
 end
 
