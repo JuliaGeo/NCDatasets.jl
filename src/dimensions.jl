@@ -58,8 +58,10 @@ close(ds)
 ```
 """
 function defDim(ds::NCDataset,name::SymbolOrString,len)
-    defmode(ds) # make sure that the file is in define mode
-    dimid = nc_def_dim(ds.ncid,name,(isinf(len) ? NC_UNLIMITED : len))
+    # make sure that the file is in define mode
+    defmode(ds) do
+        dimid = nc_def_dim(ds.ncid,name,(isinf(len) ? NC_UNLIMITED : len))
+    end
     return nothing
 end
 export defDim
@@ -70,9 +72,11 @@ export defDim
 Renames the dimenion `oldname` in the dataset `ds` with the name `newname`.
 """
 function renameDim(ds::NCDataset,oldname::SymbolOrString,newname::SymbolOrString)
-    defmode(ds) # make sure that the file is in define mode
-    dimid = nc_inq_dimid(ds.ncid,oldname)
-    nc_rename_dim(ds.ncid,dimid,newname)
+    # make sure that the file is in define mode
+    defmode(ds) do
+        dimid = nc_inq_dimid(ds.ncid,oldname)
+        nc_rename_dim(ds.ncid,dimid,newname)
+    end
     return nothing
 end
 export renameDim

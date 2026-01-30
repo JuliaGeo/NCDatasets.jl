@@ -105,46 +105,48 @@ function defVar(ds::NCDataset,name::SymbolOrString,vtype::DataType,dimnames;
                 nofill = false,
                 typename = nothing,
                 attrib = ())
-    defmode(ds) # make sure that the file is in define mode
-    dimids = Cint[nc_inq_dimid(ds.ncid,dimname) for dimname in dimnames[end:-1:1]]
+     # make sure that the file is in define mode
+    defmode(ds) do
+        dimids = Cint[nc_inq_dimid(ds.ncid,dimname) for dimname in dimnames[end:-1:1]]
 
-    typeid =
-        if vtype <: Vector
-            # variable-length type
-            typeid = nc_def_vlen(ds.ncid, typename, ncType[eltype(vtype)])
-        else
-            # base-type
-            haskey(ncType, vtype) || error("$vtype not supported")
-            ncType[vtype]
+        typeid =
+            if vtype <: Vector
+                # variable-length type
+                typeid = nc_def_vlen(ds.ncid, typename, ncType[eltype(vtype)])
+            else
+                # base-type
+                haskey(ncType, vtype) || error("$vtype not supported")
+                ncType[vtype]
+            end
+
+        varid = nc_def_var(ds.ncid,name,typeid,dimids)
+
+        if chunksizes !== nothing
+            storage = :chunked
+            # this will fail on NetCDF-3 files
+            nc_def_var_chunking(ds.ncid,varid,storage,reverse(chunksizes))
         end
 
-    varid = nc_def_var(ds.ncid,name,typeid,dimids)
+        if shuffle || (deflatelevel !== nothing)
+            deflate = deflatelevel !== nothing
 
-    if chunksizes !== nothing
-        storage = :chunked
-        # this will fail on NetCDF-3 files
-        nc_def_var_chunking(ds.ncid,varid,storage,reverse(chunksizes))
-    end
+            # this will fail on NetCDF-3 files
+            nc_def_var_deflate(ds.ncid,varid,shuffle,deflate,deflatelevel)
+        end
 
-    if shuffle || (deflatelevel !== nothing)
-        deflate = deflatelevel !== nothing
+        if checksum !== nothing
+            nc_def_var_fletcher32(ds.ncid,varid,checksum)
+        end
 
-        # this will fail on NetCDF-3 files
-        nc_def_var_deflate(ds.ncid,varid,shuffle,deflate,deflatelevel)
-    end
+        if fillvalue !== nothing
+            nc_def_var_fill(ds.ncid, varid, nofill, vtype(fillvalue))
+        end
 
-    if checksum !== nothing
-        nc_def_var_fletcher32(ds.ncid,varid,checksum)
-    end
-
-    if fillvalue !== nothing
-        nc_def_var_fill(ds.ncid, varid, nofill, vtype(fillvalue))
-    end
-
-    v = ds[name]
-    for (attname,attval) in attrib
-        @debug "variable $name: setting $attname" attval typeof(attval) eltype(v)
-        v.attrib[attname] = attval
+        v = ds[name]
+        for (attname,attval) in attrib
+            @debug "variable $name: setting $attname" attval typeof(attval) eltype(v)
+            v.attrib[attname] = attval
+        end
     end
 
     # note: element type of ds[name] potentially changed

@@ -52,12 +52,22 @@ function datamode(ds::Dataset)
     end
 end
 
+function datamode(f::Function,ds::Dataset)
+    datamode()
+    f()
+end
+
 "Make sure that a dataset is in define mode"
 function defmode(ds::Dataset)
     if !ds.isdefmode[]
         nc_redef(ds.ncid)
         ds.isdefmode[] = true
     end
+end
+
+function defmode(f::Function,ds::Dataset)
+    defmode(ds)
+    f()
 end
 
 
@@ -294,8 +304,9 @@ export path
 Write all changes in NCDataset `ds` to the disk.
 """
 function sync(ds::NCDataset)
-    datamode(ds)
-    nc_sync(ds.ncid)
+    datamode(ds) do
+        nc_sync(ds.ncid)
+    end
 end
 export sync
 

@@ -81,8 +81,10 @@ ds.attrib["title"] = ["my title"]
 close(ds)
 """
 function defAttrib(ds::Union{Dataset,Variable},name::SymbolOrString,data)
-    defmode(_dataset(ds)) # make sure that the file is in define mode
-    return nc_put_att(_ncid(ds),_varid(ds),name,data)
+    # make sure that the file is in define mode
+    defmode(_dataset(ds)) do
+        return nc_put_att(_ncid(ds),_varid(ds),name,data)
+    end
 end
 
 
@@ -101,7 +103,9 @@ Base.haskey(a::CommonDataModel.Attributes{<:Union{Dataset,Variable}},name::Symbo
 Delete the attribute `name` in the dataset or variable.
 """
 function delAttrib(ds::Union{Dataset,Variable},name::SymbolOrString)
-    defmode(_dataset(ds)) # make sure that the file is in define mode
-    nc_del_att(_ncid(ds),_varid(ds),name)
+    # make sure that the file is in define mode
+    defmode(_dataset(ds)) do
+        nc_del_att(_ncid(ds),_varid(ds),name)
+    end
     return nothing
 end

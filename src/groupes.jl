@@ -39,15 +39,16 @@ Create the group with the name `groupname` in the dataset `ds`.
 `attrib` is a list of attribute name and attribute value pairs (see `NCDataset`).
 """
 function defGroup(ds::NCDataset,groupname::SymbolOrString; attrib = [])
-    defmode(ds) # make sure that the file is in define mode
-    grp_ncid = nc_def_grp(ds.ncid,groupname)
-    ds = NCDataset(grp_ncid,ds.iswritable,ds.isdefmode; parentdataset = ds)
+    # make sure that the file is in define mode
+    defmode(ds) do
+        grp_ncid = nc_def_grp(ds.ncid,groupname)
+        ds = NCDataset(grp_ncid,ds.iswritable,ds.isdefmode; parentdataset = ds)
 
-    # set global attributes for group
-    for (attname,attval) in attrib
-        ds.attrib[attname] = attval
+        # set global attributes for group
+        for (attname,attval) in attrib
+            ds.attrib[attname] = attval
+        end
     end
-
     return ds
 end
 export defGroup

@@ -44,9 +44,10 @@ Rename the variable called `oldname` to `newname`.
 """
 function renameVar(ds::NCDataset,oldname::AbstractString,newname::AbstractString)
     # make sure that the file is in define mode
-    defmode(ds)
-    varid = nc_inq_varid(ds.ncid,oldname)
-    nc_rename_var(ds.ncid,varid,newname)
+    defmode(ds) do
+        varid = nc_inq_varid(ds.ncid,oldname)
+        nc_rename_var(ds.ncid,varid,newname)
+    end
     return nothing
 end
 export renameVar
@@ -391,9 +392,10 @@ export nomissing
 # (see https://github.com/Alexander-Barth/NCDatasets.jl/pull/205#issuecomment-1589575041)
 
 function readblock!(v::Variable, aout, indexes::AbstractRange...)
-    datamode(v.ds)
-    _read_data_from_nc!(v, aout, indexes...)
-    return aout
+    datamode(v.ds) do
+        _read_data_from_nc!(v, aout, indexes...)
+        return aout
+    end
 end
 
 readblock!(v::Variable, aout) = _read_data_from_nc!(v::Variable, aout)
@@ -415,9 +417,10 @@ end
 _read_data_from_nc!(v::Variable, aout) = _read_data_from_nc!(v, aout, 1)
 
 function writeblock!(v::Variable, data, indexes::AbstractRange...)
-    datamode(v.ds)
-    _write_data_to_nc(v, data, indexes...)
-    return data
+    datamode(v.ds) do
+        _write_data_to_nc(v, data, indexes...)
+        return data
+    end
 end
 
 function _write_data_to_nc(v::Variable{T,N},data,indexes::Integer...) where {T,N}
