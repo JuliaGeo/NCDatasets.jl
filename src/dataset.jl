@@ -44,7 +44,6 @@ function isopen(ds::NCDataset)
     end
 end
 
-"Make sure that a dataset is in data mode"
 function datamode(ds::Dataset)
     if ds.isdefmode[]
         nc_enddef(ds.ncid)
@@ -52,14 +51,19 @@ function datamode(ds::Dataset)
     end
 end
 
+"""
+    datamode(f::Function,ds::Dataset)
+
+Make sure that a dataset `is` in data mode when executing the function `f`.
+The call of `f` is protected using a reentrant lock for thread-safety.
+"""
 function datamode(f::Function,ds::Dataset)
-    lock(NETCDF_LOCK) do
+    lock(ds.lock) do
         datamode(ds)
         f()
     end
 end
 
-"Make sure that a dataset is in define mode"
 function defmode(ds::Dataset)
     if !ds.isdefmode[]
         nc_redef(ds.ncid)
@@ -67,8 +71,14 @@ function defmode(ds::Dataset)
     end
 end
 
+"""
+    defmode(f::Function,ds::Dataset)
+
+Make sure that a dataset `is` in define mode when executing the function `f`.
+The call of `f` is protected using a reentrant lock for thread-safety.
+"""
 function defmode(f::Function,ds::Dataset)
-    lock(NETCDF_LOCK) do
+    lock(ds.lock) do
         defmode(ds)
         f()
     end
@@ -97,6 +107,7 @@ function NCDataset(ncid::Integer,
         isdefmode,
         Dict{String,String}(),
         maskingvalue,
+        ReentrantLock(),
     )
 
     if !iswritable
