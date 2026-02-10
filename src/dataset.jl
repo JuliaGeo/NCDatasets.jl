@@ -54,7 +54,7 @@ end
 """
     datamode(f::Function,ds::Dataset)
 
-Make sure that a dataset `is` in data mode when executing the function `f`.
+Make sure that a dataset `ds` is in data mode when executing the function `f`.
 The call of `f` is protected using a reentrant lock for thread-safety.
 """
 function datamode(f::Function,ds::Dataset)
@@ -74,7 +74,7 @@ end
 """
     defmode(f::Function,ds::Dataset)
 
-Make sure that a dataset `is` in define mode when executing the function `f`.
+Make sure that a dataset `ds` is in define mode when executing the function `f`.
 The call of `f` is protected using a reentrant lock for thread-safety.
 """
 function defmode(f::Function,ds::Dataset)
