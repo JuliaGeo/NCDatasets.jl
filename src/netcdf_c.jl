@@ -277,7 +277,7 @@ end
     else
         # otherwise throw an error message
         # with a more helpful error message (i.e. with the path)
-        throw(NetCDFError(code, "Opening path $(path): $(nc_strerror_nolock(code))"))
+        throw(NetCDFError(code, "Opening path $(path): $(nc_strerror(code))"))
     end
 end
 
@@ -295,7 +295,7 @@ end
     else
         # otherwise throw an error message
         # with a more helpful error message (i.e. with the path)
-        throw(NetCDFError(code, "Opening path $(path): $(nc_strerror_nolock(code))"))
+        throw(NetCDFError(code, "Opening path $(path): $(nc_strerror(code))"))
     end
 end
 
@@ -368,7 +368,7 @@ end
 
 @with_lock function nc_inq_dimids(ncid::Integer,include_parents::Bool)
     ndimsp = Ref(Cint(0))
-    ndims = nc_inq_ndims_nolock(ncid)
+    ndims = nc_inq_ndims(ncid)
     dimids = Vector{Cint}(undef,ndims)
     check(ccall((:nc_inq_dimids,libnetcdf),Cint,(Cint,Ptr{Cint},Ptr{Cint},Cint),ncid,ndimsp,dimids,include_parents))
 
@@ -489,7 +489,7 @@ end
 end
 
 @with_lock function nc_inq_compound_fielddim_sizes(ncid::Integer,xtype::Integer,fieldid::Integer)
-    ndims = nc_inq_compound_fieldndims_nolock(ncid,xtype,fieldid)
+    ndims = nc_inq_compound_fieldndims(ncid,xtype,fieldid)
     dim_sizes = zeros(Cint,ndims)
     check(ccall((:nc_inq_compound_fielddim_sizes,libnetcdf),Cint,(Cint,nc_type,Cint,Ptr{Cint}),ncid,xtype,fieldid,dim_sizes))
     return dim_sizes
@@ -557,7 +557,7 @@ end
 
 @with_lock function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::AbstractString)
     if Symbol(name) == :_FillValue
-        nc_put_att_string_nolock(ncid,varid,"_FillValue",[data])
+        nc_put_att_string(ncid,varid,"_FillValue",[data])
     else
         check(ccall((:nc_put_att_text,libnetcdf),Cint,(Cint,Cint,Cstring,Csize_t,Cstring),
                     ncid,varid,name,sizeof(data),data))
@@ -615,7 +615,7 @@ end
 
 
 @with_lock function nc_get_att(ncid::Integer,varid::Integer,name)
-    xtype,len = nc_inq_att_nolock(ncid,varid,name)
+    xtype,len = nc_inq_att(ncid,varid,name)
 
     if xtype == NC_CHAR
         val = Vector{UInt8}(undef,len)
@@ -685,13 +685,13 @@ end
 
 
 @with_lock function nc_insert_enum(ncid::Integer,xtype::Integer,name,value,
-                        T = nc_inq_enum_nolock(ncid,typeid)[2])
+                        T = nc_inq_enum(ncid,typeid)[2])
     valuep = Ref{T}(value)
     check(ccall((:nc_insert_enum,libnetcdf),Cint,(Cint,nc_type,Cstring,Ptr{Nothing}),ncid,xtype,name,valuep))
 end
 
 @with_lock function nc_inq_enum_member(ncid::Integer,xtype::Integer,idx::Integer,
-                            T::Type = nc_inq_enum_nolock(ncid,typeid)[2])
+                            T::Type = nc_inq_enum(ncid,typeid)[2])
     valuep = Ref{T}()
     cmember_name = zeros(UInt8,NCDatasets.NC_MAX_NAME+1)
 
@@ -1157,7 +1157,7 @@ end
 #no_fill is a boolean and fill_value the fill value (in the appropriate type)
 #"""
 @with_lock function nc_inq_var_fill(ncid::Integer,varid::Integer)
-    T = jlType[nc_inq_vartype_nolock(ncid,varid)]
+    T = jlType[nc_inq_vartype(ncid,varid)]
     no_fillp = Ref(Cint(0))
 
     if T == String
@@ -1527,7 +1527,7 @@ end
 
 
 @with_lock function nc_inq_var(ncid::Integer,varid::Integer)
-    ndims = nc_inq_varndims_nolock(ncid,varid)
+    ndims = nc_inq_varndims(ncid,varid)
 
     ndimsp = Ref(Cint(0))
     cname = zeros(UInt8,NC_MAX_NAME+1)
@@ -1583,7 +1583,7 @@ end
 end
 
 @with_lock function nc_inq_vardimid(ncid::Integer,varid::Integer)
-    ndims = nc_inq_varndims_nolock(ncid,varid)
+    ndims = nc_inq_varndims(ncid,varid)
     dimids = zeros(Cint,ndims)
     check(ccall((:nc_inq_vardimid,libnetcdf),Cint,(Cint,Cint,Ptr{Cint}),ncid,varid,dimids))
     return dimids
@@ -2251,6 +2251,6 @@ end
         end
     else
         @debug "nc_rc_set: set $key to $value"
-        nc_rc_set_nolock(key,value)
+        nc_rc_set(key,value)
     end
 end
