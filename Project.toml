@@ -3,7 +3,7 @@ uuid = "85f8d34a-cbdd-5861-8df4-14fed0d494ab"
 keywords = ["netcdf", "climate and forecast conventions", "oceanography", "meteorology", "climatology", "opendap"]
 license = "MIT"
 desc = "Load and create NetCDF files in Julia"
-version = "0.14.11"
+version = "0.14.12"
 
 [deps]
 CFTime = "179af706-886a-5703-950a-314cd64e0468"
