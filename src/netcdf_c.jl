@@ -627,12 +627,13 @@ end
             return Char(val[1])
         end
 
-        if any(val .== 0)
+        pos0 = findfirst(iszero,val)
+        if !isnothing(pos0)
             # consider the null terminating character if present
             # see issue #12
-            return unsafe_string(pointer(val))
+            return String(view(val,1:pos0-1))
         else
-            return unsafe_string(pointer(val),length(val))
+            return String(val)
         end
     elseif xtype == NC_STRING
         val = Vector{Ptr{UInt8}}(undef,len)
