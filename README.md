@@ -2,8 +2,8 @@
 [![documentation stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliageo.org/NCDatasets.jl/stable/)
 [![documentation dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliageo.org/NCDatasets.jl/dev/)
 
-[![Build Status](https://github.com/Alexander-Barth/NCDatasets.jl/workflows/CI/badge.svg)](https://github.com/Alexander-Barth/NCDatasets.jl/actions)
-[![codecov](https://codecov.io/github/Alexander-Barth/NCDatasets.jl/graph/badge.svg?token=SXpIBsfRrI)](https://codecov.io/github/Alexander-Barth/NCDatasets.jl)
+[![Build Status](https://github.com/JuliaGeo/NCDatasets.jl/workflows/CI/badge.svg)](https://github.com/JuliaGeo/NCDatasets.jl/actions)
+[![codecov](https://codecov.io/github/JuliaGeo/NCDatasets.jl/graph/badge.svg?token=SXpIBsfRrI)](https://codecov.io/github/JuliaGeo/NCDatasets.jl)
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.06504/status.svg)](https://doi.org/10.21105/joss.06504)
 
 
