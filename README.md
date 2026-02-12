@@ -8,7 +8,7 @@
 
 
 `NCDatasets` allows one to read and create netCDF files.
-NetCDF data set and attribute list behave like Julia dictionaries and variables like Julia arrays. This package implements the [CommonDataModel.jl](https://github.com/JuliaGeo/CommonDataModel.jl) interface, which mean that the datasets can be accessed in the same way as GRIB files ([GRIBDatasets.jl](https://github.com/JuliaGeo/GRIBDatasets.jl)) and Zarr files ([ZarrDatasets.jl](https://github.com/JuliaGeo/ZarrDatasets.jl)).
+NetCDF data set and attribute list behave like Julia dictionaries and variables like Julia arrays. The documentation is available [here](https://juliageo.org/NCDatasets.jl/stable/). This package implements the [CommonDataModel.jl](https://github.com/JuliaGeo/CommonDataModel.jl) interface, which mean that the datasets can be accessed in the same way as GRIB files ([GRIBDatasets.jl](https://github.com/JuliaGeo/GRIBDatasets.jl)) and Zarr files ([ZarrDatasets.jl](https://github.com/JuliaGeo/ZarrDatasets.jl)).
 
 The module `NCDatasets` provides support for the following [netCDF CF conventions](http://cfconventions.org/):
 * `_FillValue` will be returned as `missing` ([more information](https://docs.julialang.org/en/v1/manual/missing/))
