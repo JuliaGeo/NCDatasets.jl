@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Tutorials · NCDatasets.jl</title><meta name="title" content="Tutorials · NCDatasets.jl"/><meta property="og:title" content="Tutorials · NCDatasets.jl"/><meta property="twitter:title" content="Tutorials · NCDatasets.jl"/><meta name="description" content="Documentation for NCDatasets.jl."/><meta property="og:description" content="Documentation for NCDatasets.jl."/><meta property="twitter:description" content="Documentation for NCDatasets.jl."/><meta property="og:url" content="https://juliageo.github.io/NCDatasets.jl/tutorials/"/><meta property="twitter:url" content="https://juliageo.github.io/NCDatasets.jl/tutorials/"/><link rel="canonical" href="https://juliageo.github.io/NCDatasets.jl/tutorials/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.svg" alt="NCDatasets.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">NCDatasets.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Introduction</a></li><li><a class="tocitem" href="../dataset/">Datasets</a></li><li><a class="tocitem" href="../dimensions/">Dimensions</a></li><li><a class="tocitem" href="../variables/">Variables</a></li><li><a class="tocitem" href="../attributes/">Attributes</a></li><li><a class="tocitem" href="../performance/">Performance tips</a></li><li><a class="tocitem" href="../other/">Other features</a></li><li><a class="tocitem" href="../issues/">Known issues</a></li><li class="is-active"><a class="tocitem" href>Tutorials</a><ul class="internal"><li><a class="tocitem" href="#Data-from-Copernicus-Marine"><span>Data from Copernicus Marine</span></a></li><li><a class="tocitem" href="#Data-from-NASA-EarthData"><span>Data from NASA EarthData</span></a></li><li><a class="tocitem" href="#Access-data-from-S3-object-storage"><span>Access data from S3 object storage</span></a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Tutorials</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Tutorials</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/JuliaGeo/NCDatasets.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/JuliaGeo/NCDatasets.jl/blob/main/docs/src/tutorials.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Tutorials"><a class="docs-heading-anchor" href="#Tutorials">Tutorials</a><a id="Tutorials-1"></a><a class="docs-heading-anchor-permalink" href="#Tutorials" title="Permalink"></a></h1><h2 id="Data-from-Copernicus-Marine"><a class="docs-heading-anchor" href="#Data-from-Copernicus-Marine">Data from Copernicus Marine</a><a id="Data-from-Copernicus-Marine-1"></a><a class="docs-heading-anchor-permalink" href="#Data-from-Copernicus-Marine" title="Permalink"></a></h2><p>This examples shows how to download sea surface temperature from the <a href="https://doi.org/10.48670/moi-00172">Mediterranean Sea High Resolution and Ultra High Resolution Sea Surface Temperature Analysis </a> provided by <a href="https://marine.copernicus.eu/">Copernicus Marine Service</a>. Username and password are obtained after <a href="https://resources.marine.copernicus.eu/registration-form">registration</a>.</p><p>The username and password can be added to the URL. For example <code>https://example.org/path</code> should become <code>https://username:password@example.org/path</code>:</p><pre><code class="language-julia hljs">using NCDatasets, PyPlot, Statistics, URIs
+
+username = &quot;your_username&quot;
+password = &quot;your_password&quot;
+
+url = &quot;https://nrt.cmems-du.eu/thredds/dodsC/SST_MED_SST_L4_NRT_OBSERVATIONS_010_004_a_V2&quot;
+
+# add username and password to url
+# username or password can contain special characters
+username_escaped = URIs.escapeuri(username)
+password_escaped = URIs.escapeuri(password)
+url2 = string(URI(URI(url),userinfo = string(username_escaped,&quot;:&quot;,password_escaped)))
+
+ds = NCDataset(url2)
+
+ncvar = ds[&quot;analysed_sst&quot;];
+SST = ncvar[:,:,1]
+lon = ds[&quot;lon&quot;][:]
+lat = ds[&quot;lat&quot;][:]
+SST_time = ds[&quot;time&quot;][1]
+
+clf()
+pcolormesh(lon,lat,nomissing(SST,NaN)&#39;)
+cbar = colorbar(orientation=&quot;horizontal&quot;)
+cbar.set_label(ncvar.attrib[&quot;units&quot;])
+gca().set_aspect(1/cosd(mean(lat)))
+
+title(&quot;$(ncvar.attrib[&quot;long_name&quot;]) $SST_time&quot;)</code></pre><p>Alternatively, one can also create the files <code>.netrc</code> and <code>.ncrc</code> in the your home directory with your credentials as explained for the NASA EarthData example which allows you to manage your passwords in a central configuration file and reduce the risk to accidentally share your credentials.</p><p><img src="../assets/example_SST_CMEMS.png" alt="example_SST_CMEMS.png"/></p><h2 id="Data-from-NASA-EarthData"><a class="docs-heading-anchor" href="#Data-from-NASA-EarthData">Data from NASA EarthData</a><a id="Data-from-NASA-EarthData-1"></a><a class="docs-heading-anchor-permalink" href="#Data-from-NASA-EarthData" title="Permalink"></a></h2><p>This example shows show to download data via OPeNDAP from the <a href="https://www.earthdata.nasa.gov/">NASA EarthData</a> which requires a username and password.</p><p>You need to be registered at <a href="https://urs.earthdata.nasa.gov/users/new">https://urs.earthdata.nasa.gov/users/new</a> to get your credentials.</p><p>The example requires NCDatasets 0.12.5.</p><p>Simply adding username and password to the URL for NASA Earth Data OPeNDPAP services is unfortunately not sufficient as it uses a different authentication mechanism.</p><p>Create a <code>.netrc</code> file with the following content in your home directory:</p><pre><code class="nohighlight hljs">machine urs.earthdata.nasa.gov
+    login YOUR_USERNAME
+    password YOUR_PASSWORD</code></pre><p>where <code>YOUR_USERNAME</code> and <code>YOUR_PASSWORD</code> is your Earth Data username and password.</p><p>Create a <code>.ncrc</code> file with  the following content in your home directory<sup class="footnote-reference"><a id="citeref-1" href="#footnote-1" class="footnote-ref">[1]</a><span class="footnote-preview" id="fn-1"></span></sup>:</p><pre><code class="nohighlight hljs">HTTP.NETRC=/home/abarth/.netrc</code></pre><p>where <code>HTTP.NETRC</code> is the full path to your new <code>.netrc</code> file<sup class="footnote-reference"><a id="citeref-2" href="#footnote-2" class="footnote-ref">[2]</a><span class="footnote-preview" id="fn-2"></span></sup>. You can test whether your configuration files are correct independently of NCDatasets by using the tool <code>ncdump</code>:</p><pre><code class="language-bash hljs">ncdump -h &quot;https://opendap.earthdata.nasa.gov/providers/POCLOUD/collections/GHRSST%20Level%204%20MUR%20Global%20Foundation%20Sea%20Surface%20Temperature%20Analysis%20(v4.1)/granules/20190101090000-JPL-L4_GHRSST-SSTfnd-MUR-GLOB-v02.0-fv04.1&quot;</code></pre><p>This should return the metadata of the OPeNDAP resource:</p><pre><code class="nohighlight hljs">netcdf \20190101090000-JPL-L4_GHRSST-SSTfnd-MUR-GLOB-v02.0-fv04 {
+dimensions:
+	lat = 17999 ;
+	lon = 36000 ;
+	time = 1 ;
+variables:
+	short analysed_sst(time, lat, lon) ;
+[...]</code></pre><p>This is the typical error message which is returned when the credentials are not configured properly:</p><pre><code class="nohighlight hljs">syntax error, unexpected WORD_WORD, expecting SCAN_ATTR or SCAN_DATASET or SCAN_ERROR
+context: HTTP^ Basic: Access denied.</code></pre><p>When there is an error on the server side (500 internal server error), you might get the following error:</p><pre><code class="nohighlight hljs">syntax error, unexpected $end, expecting SCAN_ATTR or SCAN_DATASET or SCAN_ERROR
+context: ^
+ncdump: https://opendap.earthdata.nasa.gov/providers/POCLOUD/collections/GHRSST%20Level%204%20MUR%20Global%20Foundation%20Sea%20Surface%20Temperature%20Analysis%20(v4.1)/granules/20190101090000-JPL-L4_GHRSST-SSTfnd-MUR-GLOB-v02.0-fv04.1: NetCDF: Malformed or inaccessible DAP2 DDS or DAP4 DMR response</code></pre><p>Here we use the <a href="https://podaac.jpl.nasa.gov/dataset/MUR-JPL-L4-GLOB-v4.1">GHRSST Level 4 MUR Global Foundation Sea Surface Temperature Analysis (v4.1)</a> dataset. In the following example, we download the data via OPeNDAP for a chosen bounding box and given time instance.</p><pre><code class="language-julia hljs">using NCDatasets, PyPlot, Dates, Statistics
+
+url = &quot;https://opendap.earthdata.nasa.gov/providers/POCLOUD/collections/GHRSST%20Level%204%20MUR%20Global%20Foundation%20Sea%20Surface%20Temperature%20Analysis%20(v4.1)/granules/20190101090000-JPL-L4_GHRSST-SSTfnd-MUR-GLOB-v02.0-fv04.1&quot;
+
+ds = NCDataset(url)
+
+# range of longitude
+lonr = (-6, 37.0)
+
+# range of latitude
+latr = (29, 45.875)
+
+ds_subset = NCDatasets.@select(
+    ds[&quot;analysed_sst&quot;],
+    $lonr[1] &lt;= lon &lt;= $lonr[2] &amp;&amp; $latr[1] &lt;= lat &lt;= $latr[2])
+
+ncvar = ds_subset[&quot;analysed_sst&quot;]
+SST = ncvar[:,:,1]
+lon = ds_subset[&quot;lon&quot;][:]
+lat = ds_subset[&quot;lat&quot;][:]
+time = ds_subset[&quot;time&quot;][1]
+
+
+clf()
+pcolormesh(lon,lat,nomissing(SST,NaN)&#39;);
+gca().set_aspect(1/cosd(mean(lat)))
+
+cbar = colorbar(orientation=&quot;horizontal&quot;)
+cbar.set_label(ncvar.attrib[&quot;units&quot;])
+
+plt.title(&quot;$(ncvar.attrib[&quot;long_name&quot;]) $time&quot;)</code></pre><p>This script produces the following plot:</p><p><img src="../assets/example_SST.png" alt="example_SST.png"/></p><h2 id="Access-data-from-S3-object-storage"><a class="docs-heading-anchor" href="#Access-data-from-S3-object-storage">Access data from S3 object storage</a><a id="Access-data-from-S3-object-storage-1"></a><a class="docs-heading-anchor-permalink" href="#Access-data-from-S3-object-storage" title="Permalink"></a></h2><p>NASA EarthData is also available from AWS S3 object storage at the AWS region us-west-2. This example assumes that you have access to an AWS instance in this region (available through e.g. <a href="https://pangeo.io/cloud.html">Pangeo Cloud</a> after registration thanks to funding from the NASA&#39;s ACCESS/AWS Cloud Credits for Research program and the fine folks at <a href="https://github.com/pangeo-data">Pangeo</a>).</p><p>The S3 access tokens available from <a href="https://archive.podaac.earthdata.nasa.gov/s3credentials">https://archive.podaac.earthdata.nasa.gov/s3credentials</a> are only valid for 1 hour. It is therefore preferable to get this token programmatically using your EarthData username and password. The function <code>earthdata_s3credentials</code> is a translation of <a href="https://web.archive.org/web/20220623090241/https://nasa.github.io/cumulus-distribution-api/#temporary-s3-credentials">&quot;Sample script to receive credentials&quot;</a> to Julia:</p><pre><code class="language-julia hljs">using AWS, Base64, JSON3, HTTP, NCDatasets, URIs
+using AWS: @service
+@service S3
+
+function earthdata_s3credentials(
+    username, password;
+    credentials_url = &quot;https://archive.podaac.earthdata.nasa.gov/s3credentials&quot;)
+
+    origin = URI(credentials_url).scheme
+
+    resp = HTTP.get(credentials_url,redirect=false)
+    authorize_url = Dict(resp.headers)[&quot;Location&quot;]
+
+    auth = base64encode(string(username,&quot;:&quot;,password))
+
+    resp2 = HTTP.post(authorize_url,[&quot;Origin&quot; =&gt; origin],
+                      &quot;credentials=$auth&quot;,redirect=false)
+    redirect_url=Dict(resp2.headers)[&quot;Location&quot;]
+
+    # cookie jar
+    jar = Dict{String, Set{HTTP.Cookie}}()
+
+    # raises a 500 error, as in the shell script, but we get a cookie!
+    HTTP.get(redirect_url; cookies=true,
+             cookiejar = jar, redirect = false,
+             status_exception = false)
+
+    resp4 = HTTP.get(credentials_url; cookies=true, cookiejar = jar, redirect = false)
+
+    cred = JSON3.read(resp4.body)
+    return cred
+end
+
+# add your credentials here (or get it programmatically from environment variables or a file)
+username = &quot;...&quot;
+password = &quot;...&quot;
+
+cred = earthdata_s3credentials(username,password)
+@info &quot;Token expires: $(cred.expiration)&quot;
+
+
+ENV[&quot;AWS_ACCESS_KEY_ID&quot;] = cred.accessKeyId;
+ENV[&quot;AWS_SECRET_ACCESS_KEY&quot;] = cred.secretAccessKey;
+ENV[&quot;AWS_SESSION_TOKEN&quot;] = cred.sessionToken;
+
+c = AWS.global_aws_config();
+
+resp = S3.list_objects(&quot;podaac-ops-cumulus-protected&quot;,
+     Dict(&quot;prefix&quot; =&gt; &quot;MODIS_TERRA_L3_SST_MID-IR_DAILY_4KM_NIGHTTIME_V2019.0/&quot;,
+          &quot;delimiter&quot; =&gt; &#39;/&#39;))
+
+# download the first object
+data = S3.get_object(&quot;podaac-ops-cumulus-protected&quot;,resp[&quot;Contents&quot;][1][&quot;Key&quot;]);
+
+# load the NetCDF dataset
+ds = NCDataset(&quot;temp-memory&quot;,&quot;r&quot;,memory = data)</code></pre><p>Output:</p><pre><code class="nohighlight hljs">CDataset: temp-memory
+Group: /
+
+Dimensions
+   lat = 4320
+   lon = 8640
+   rgb = 3
+   eightbitcolor = 256
+
+Variables
+  sst4   (8640 × 4320)
+    Datatype:    Int16
+    Dimensions:  lon × lat
+    Attributes:
+     long_name            = 4um Sea Surface Temperature
+[...]</code></pre><p>The example requires NCDatasets 0.12.5 which allows one to read a NetCDF dataset directly from a vector of bytes in memory.</p><p>To debug, it is useful to run the <code>aws</code> shell command to list all keys in the buckets (it requires the <code>AWS_*</code> environment variables to be set):</p><pre><code class="language-bash hljs">aws s3 ls s3://podaac-ops-cumulus-protected/MODIS_TERRA_L3_SST_THERMAL_DAILY_4KM_NIGHTTIME_V2019.0/</code></pre><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-1"><a class="tag is-link" href="#citeref-1">1</a>Windows users need to create a <code>.dodsrc</code> configuration file (instead of the <code>.ncrc</code> file) and place it in the current working directory or set the <code>HOME</code> environment variable (see <a href="https://github.com/Unidata/netcdf-c/issues/2380">https://github.com/Unidata/netcdf-c/issues/2380</a>). This NetCDF bug is likely to be fixed in NetCDF version 4.9.1.</li><li class="footnote" id="footnote-2"><a class="tag is-link" href="#citeref-2">2</a>More information is available at <a href="https://docs.unidata.ucar.edu/netcdf-c/4.8.1/md_auth.html">https://docs.unidata.ucar.edu/netcdf-c/4.8.1/md_auth.html</a>.</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../issues/">« Known issues</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Saturday 28 February 2026 13:36">Saturday 28 February 2026</span>. Using Julia version 1.12.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Other features · NCDatasets.jl</title><meta name="title" content="Other features · NCDatasets.jl"/><meta property="og:title" content="Other features · NCDatasets.jl"/><meta property="twitter:title" content="Other features · NCDatasets.jl"/><meta name="description" content="Documentation for NCDatasets.jl."/><meta property="og:description" content="Documentation for NCDatasets.jl."/><meta property="twitter:description" content="Documentation for NCDatasets.jl."/><meta property="og:url" content="https://juliageo.github.io/NCDatasets.jl/other/"/><meta property="twitter:url" content="https://juliageo.github.io/NCDatasets.jl/other/"/><link rel="canonical" href="https://juliageo.github.io/NCDatasets.jl/other/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.svg" alt="NCDatasets.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">NCDatasets.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Introduction</a></li><li><a class="tocitem" href="../dataset/">Datasets</a></li><li><a class="tocitem" href="../dimensions/">Dimensions</a></li><li><a class="tocitem" href="../variables/">Variables</a></li><li><a class="tocitem" href="../attributes/">Attributes</a></li><li><a class="tocitem" href="../performance/">Performance tips</a></li><li class="is-active"><a class="tocitem" href>Other features</a><ul class="internal"><li><a class="tocitem" href="#Multi-file-support"><span>Multi-file support</span></a></li><li><a class="tocitem" href="#CF-Standard-Names"><span>CF Standard Names</span></a></li><li><a class="tocitem" href="#Views"><span>Views</span></a></li><li><a class="tocitem" href="#Data-selection-based-on-values"><span>Data selection based on values</span></a></li><li><a class="tocitem" href="#Fill-values-and-missing-values"><span>Fill values and missing values</span></a></li><li><a class="tocitem" href="#Experimental-functions"><span>Experimental functions</span></a></li><li><a class="tocitem" href="#Experimental-MPI-support"><span>Experimental MPI support</span></a></li></ul></li><li><a class="tocitem" href="../issues/">Known issues</a></li><li><a class="tocitem" href="../tutorials/">Tutorials</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Other features</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Other features</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/JuliaGeo/NCDatasets.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/JuliaGeo/NCDatasets.jl/blob/main/docs/src/other.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Other-features"><a class="docs-heading-anchor" href="#Other-features">Other features</a><a id="Other-features-1"></a><a class="docs-heading-anchor-permalink" href="#Other-features" title="Permalink"></a></h1><h2 id="Multi-file-support"><a class="docs-heading-anchor" href="#Multi-file-support">Multi-file support</a><a id="Multi-file-support-1"></a><a class="docs-heading-anchor-permalink" href="#Multi-file-support" title="Permalink"></a></h2><p>Multiple files can also be aggregated over a given dimension (or the record dimension). In this example, 3 sea surface temperature fields from the 1992-01-01 to 1992-01-03 are aggregated using the OPeNDAP service from PODAAC.</p><pre><code class="language-julia hljs">using NCDatasets, Printf, Dates
+
+function url(dt)
+  doy = @sprintf(&quot;%03d&quot;,Dates.dayofyear(dt))
+  y = @sprintf(&quot;%04d&quot;,Dates.year(dt))
+  yyyymmdd = Dates.format(dt,&quot;yyyymmdd&quot;)
+  return &quot;https://podaac-opendap.jpl.nasa.gov:443/opendap/allData/ghrsst/data/GDS2/L4/GLOB/CMC/CMC0.2deg/v2/$y/$doy/$(yyyymmdd)120000-CMC-L4_GHRSST-SSTfnd-CMC0.2deg-GLOB-v02.0-fv02.0.nc&quot;
+end
+
+ds = NCDataset(url.(DateTime(1992,1,1):Dates.Day(1):DateTime(1992,1,3)),aggdim = &quot;time&quot;);
+SST2 = ds[&quot;analysed_sst&quot;][:,:,:];
+close(ds)</code></pre><p>If there is a network or server issue, you will see an error message like <code>NetCDF: I/O failure</code>.</p><h2 id="CF-Standard-Names"><a class="docs-heading-anchor" href="#CF-Standard-Names">CF Standard Names</a><a id="CF-Standard-Names-1"></a><a class="docs-heading-anchor-permalink" href="#CF-Standard-Names" title="Permalink"></a></h2><p>The CF Conventions do not define how the different NetCDF variables are named, but the meaning of a variable is defined by the <a href="https://cfconventions.org/standard-names.html"><code>standard_name</code></a> attribute.</p><pre><code class="language-julia hljs">using NCDatasets, DataStructures
+ds = NCDataset(tempname(),&quot;c&quot;)
+
+nclon = defVar(ds,&quot;lon&quot;, 1:10, (&quot;lon&quot;,),attrib = OrderedDict(
+    &quot;standard_name&quot;             =&gt; &quot;longitude&quot;,
+))
+nclat = defVar(ds,&quot;lat&quot;, 1:11, (&quot;lat&quot;,),attrib = OrderedDict(
+    &quot;standard_name&quot;             =&gt; &quot;latitude&quot;,
+))
+ncvar = defVar(ds,&quot;bat&quot;, zeros(10,11), (&quot;lon&quot;, &quot;lat&quot;), attrib = OrderedDict(
+    &quot;standard_name&quot;             =&gt; &quot;height&quot;,
+))
+
+ncbat = ds[CF&quot;height&quot;]
+# the same as
+# ncbat = varbyattrib(ds,standard_name = &quot;height&quot;)[1]
+
+name(ncbat)
+# output
+&quot;bat&quot;</code></pre><p>If there are multiple variables with the <code>standard_name</code> equal to <code>height</code>, an error is returned because it is ambiguous which variable should be accessed.</p><p>All variables whose dimensions are also dimensions of <code>ncbat</code> are considered as related and can also be accessed by sub-setting <code>ncbat</code> with their variable names of CF Standard name:</p><pre><code class="language-julia hljs">nclon_of_bat = ncbat[CF&quot;longitude&quot;]
+# same as
+# nclon_of_bat = ncbat[&quot;lon&quot;]
+name(nclon_of_bat)
+# output
+&quot;lon&quot;</code></pre><p>The previous call to <code>ncbat[CF&quot;longitude&quot;]</code> would also worked if there are multiple variables with a standard name <code>longitude</code> defined in a dataset as long as they have different dimension names (which is commonly the case for model output on staggered grid such as <a href="https://www.myroms.org/">Regional Ocean Modeling System</a>).</p><h2 id="Views"><a class="docs-heading-anchor" href="#Views">Views</a><a id="Views-1"></a><a class="docs-heading-anchor-permalink" href="#Views" title="Permalink"></a></h2><p>In Julia, a <a href="https://docs.julialang.org/en/v1/base/arrays/#Views-(SubArrays-and-other-view-types)">view of an array</a> is a subset of an array but whose elements still point to the original parent array. If one modifies an element of a view, the corresponding element in the parent array is modified too:</p><pre><code class="language-julia hljs">A = zeros(4,4)
+subset = @view A[2:3,2:4]
+# or
+# subset = view(A,2:3,2:4)
+
+subset[1,1] = 2
+A[2,2]
+# output
+2.0</code></pre><p>Views do not use copy of the array. The parent array and the indices of the view are obtained via the function <a href="https://docs.julialang.org/en/v1/base/arrays/#Base.parent"><code>parent</code></a> and <a href="https://docs.julialang.org/en/v1/base/arrays/#Base.parentindices"><code>parentindices</code></a>.</p><pre><code class="language-julia hljs">parent(subset) == A
+# true, as both arrays are the same
+
+parentindices(subset)
+# output
+(2:3, 2:4)</code></pre><p>In NCDatasets, variables can also be sliced as a view:</p><pre><code class="language-julia hljs">using NCDatasets, DataStructures
+ds = NCDataset(tempname(),&quot;c&quot;)
+
+nclon = defVar(ds,&quot;lon&quot;, 1:10, (&quot;lon&quot;,))
+nclat = defVar(ds,&quot;lat&quot;, 1:11, (&quot;lat&quot;,))
+ncvar = defVar(ds,&quot;bat&quot;, zeros(10,11), (&quot;lon&quot;, &quot;lat&quot;), attrib = OrderedDict(
+    &quot;standard_name&quot;             =&gt; &quot;height&quot;,
+))
+
+ncvar_subset = @view ncvar[2:4,2:3]
+# or
+# ncvar_subset = view(ncvar,2:4,2:3)
+
+ncvar_subset[1,1] = 2
+# ncvar[2,2] is now 2
+
+ncvar_subset.attrib[&quot;standard_name&quot;]
+
+# output
+&quot;height&quot;</code></pre><p>This is useful for example when even the sliced array is too large to be loaded in RAM or when all attributes need to be preserved for the sliced array.</p><p>The variables <code>lon</code> and <code>lat</code> are related to <code>bat</code> because all dimensions of the variables <code>lon</code> and <code>lat</code> are also dimensions of <code>bat</code> (which is commonly the case for coordinate variables). Such related variables can be retrieved by indexing the NetCDF variables with the name of the corresponding variable:</p><pre><code class="language-julia hljs">lon_subset = ncvar_subset[&quot;lon&quot;]
+lon_subset[:] == [2, 3, 4]
+# output
+true</code></pre><p>A view of a NetCDF variable also implements the function <code>parent</code> and <code>parentindices</code> with the same meaning as for julia <code>Array</code>s.</p><p>A whole dataset can also be sliced using a <code>view(ds, dim1=range1, dim2=range2...)</code>. For example:</p><pre><code class="language-julia hljs">ds_subset = view(ds, lon = 2:3, lat = 2:4)
+# or
+# ds_subset = @view ds[lon = 2:3, lat = 2:4]
+ds_subset.dim[&quot;lon&quot;]
+
+# output
+2</code></pre><p>Such sliced datasets can for example be saved into a new NetCDF file using <code>write</code>:</p><pre><code class="language-julia hljs">write(&quot;slice.nc&quot;,ds_subset)</code></pre><p>Any dimension not mentioned in the <code>@view</code> call is not sliced. While <code>@view</code> produces a slice based on indices, the <code>NCDatasets.@select</code> macro produces a slice (of an NetCDF variable or dataset) based on the values of other related variables (typically coordinates).</p><h2 id="Data-selection-based-on-values"><a class="docs-heading-anchor" href="#Data-selection-based-on-values">Data selection based on values</a><a id="Data-selection-based-on-values-1"></a><a class="docs-heading-anchor-permalink" href="#Data-selection-based-on-values" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="CommonDataModel.@select"><a class="docstring-binding" href="#CommonDataModel.@select"><code>CommonDataModel.@select</code></a> — <span class="docstring-category">Macro</span></summary><section><div><pre><code class="language-julia hljs">vsubset = CommonDataModel.@select(v,expression)
+dssubset = CommonDataModel.@select(ds,expression)</code></pre><p>Return a subset of the variable <code>v</code> (or dataset <code>ds</code>) satisfying the condition <code>expression</code> as a view. The condition has the following form:</p><p><code>condition₁ &amp;&amp; condition₂ &amp;&amp; condition₃ ... conditionₙ</code></p><p>Every condition should involve a single 1D variable (typically a coordinate variable, referred as <code>coord</code> below). If <code>v</code> is a variable, the related 1D variable should have a shared dimension with the variable <code>v</code>. All local variables need to have a <code>$</code> prefix (see examples below). This macro is experimental and subjected to change.</p><p>Every condition can either perform:</p><ul><li><p>a nearest match: <code>coord ≈ target_coord</code> (for <code>≈</code> type <code>\approx</code> followed by the TAB-key). Only the data corresponding to the index closest to <code>target_coord</code> is loaded.</p></li><li><p>a nearest match with tolerance: <code>coord ≈ target_coord ± tolerance</code>. As before, but if the difference between the closest value in <code>coord</code> and <code>target_coord</code> is larger (in absolute value) than <code>tolerance</code>, an empty array is returned.</p></li><li><p>a condition operating on scalar values. For example, a <code>condition</code> equal to <code>10 &lt;= lon &lt;= 20</code> loads all data with the longitude between 10 and 20 or <code>abs(lat) &gt; 60</code> loads all variables with a latitude north of 60° N and south of 60° S (assuming that the has the 1D variables <code>lon</code> and <code>lat</code> for longitude and latitude).</p></li></ul><p>Only the data which satisfies all conditions is loaded. All conditions must be chained with an <code>&amp;&amp;</code> (logical and). They should not contain additional parenthesis or other logical operators such as <code>||</code> (logical or).</p><p>To convert the view into a regular array one can use <code>collect</code>, <code>Array</code> or regular indexing. As in julia, views of scalars are wrapped into a zero dimensional arrays which can be dereferenced by using <code>[]</code>. Modifying a view will modify the underlying file (if the file is opened as writable, otherwise an error is issued).</p><p>As for any view, one can use <code>parentindices(vsubset)</code> to get the indices matching a select query.</p><p><strong>Examples</strong></p><p>Create a sample file with random data:</p><pre><code class="language-julia hljs">using NCDatasets, Dates
+using CommonDataModel: @select
+# or
+# using NCDatasets: @select
+
+fname = &quot;sample_file.nc&quot;
+lon = -180:180
+lat = -90:90
+time = DateTime(2000,1,1):Day(1):DateTime(2000,1,3)
+SST = randn(length(lon),length(lat),length(time))
+
+ds = NCDataset(fname,&quot;c&quot;)
+defVar(ds,&quot;lon&quot;,lon,(&quot;lon&quot;,));
+defVar(ds,&quot;lat&quot;,lat,(&quot;lat&quot;,));
+defVar(ds,&quot;time&quot;,time,(&quot;time&quot;,));
+defVar(ds,&quot;SST&quot;,SST,(&quot;lon&quot;,&quot;lat&quot;,&quot;time&quot;));
+
+
+# load by bounding box
+v = @select(ds[&quot;SST&quot;],30 &lt;= lon &lt;= 60 &amp;&amp; 40 &lt;= lat &lt;= 80)
+
+# substitute a local variable in condition using $
+lonr = (30,60) # longitude range
+latr = (40,80) # latitude range
+
+v = @select(ds[&quot;SST&quot;],$lonr[1] &lt;= lon &lt;= $lonr[2] &amp;&amp; $latr[1] &lt;= lat &lt;= $latr[2])
+
+# You can also select based on `ClosedInterval`s from `IntervalSets.jl`.
+# Both 30..60 and 60 ± 20 construct `ClosedInterval`s, see their documentation for details.
+
+lon_interval = 30..60
+lat_interval = 60 ± 20
+v = @select(ds[&quot;SST&quot;], lon ∈ $lon_interval &amp;&amp; lat ∈ $lat_interval)
+
+# get the indices matching the select query
+(lon_indices,lat_indices,time_indices) = parentindices(v)
+
+# get longitude matchting the select query
+v_lon = v[&quot;lon&quot;]
+
+# find the nearest time instance
+v = @select(ds[&quot;SST&quot;],time ≈ DateTime(2000,1,4))
+
+# find the nearest time instance but not earlier or later than 2 hours
+# an empty array is returned if no time instance is present
+
+v = @select(ds[&quot;SST&quot;],time ≈ DateTime(2000,1,3,1) ± Hour(2))
+
+close(ds)</code></pre><p>Any 1D variable with the same dimension name can be used in <code>@select</code>. For example, if we have a time series of temperature and salinity, the temperature values can also be selected based on salinity:</p><pre><code class="language-julia hljs">using NCDatasets, Dates
+using CommonDataModel: @select
+fname = &quot;sample_series.nc&quot;
+# create a sample time series
+time = DateTime(2000,1,1):Day(1):DateTime(2009,12,31)
+salinity = randn(length(time)) .+ 35
+temperature = randn(length(time))
+
+NCDataset(fname,&quot;c&quot;) do ds
+    defVar(ds,&quot;time&quot;,time,(&quot;time&quot;,));
+    defVar(ds,&quot;salinity&quot;,salinity,(&quot;time&quot;,));
+    defVar(ds,&quot;temperature&quot;,temperature,(&quot;time&quot;,));
+end
+
+ds = NCDataset(fname)
+
+# load all temperature data from January where the salinity is larger than 35.
+v = @select(ds[&quot;temperature&quot;],Dates.month(time) == 1 &amp;&amp; salinity &gt;= 35)
+
+# this is equivalent to:
+v2 = ds[&quot;temperature&quot;][findall(Dates.month.(time) .== 1 .&amp;&amp; salinity .&gt;= 35)]
+
+v == v2
+# returns true
+close(ds)</code></pre><div class="admonition is-info" id="Note-2ada4c8c21ca10b1"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-2ada4c8c21ca10b1" title="Permalink"></a></header><div class="admonition-body"><p>For optimal performance, one should try to load contiguous data ranges, in particular when the data is loaded over HTTP/OPeNDAP.</p></div></div></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaGeo/CommonDataModel.jl/blob/v0.4.2/src/select.jl#L98-L219">source</a></section></details></article><h2 id="Fill-values-and-missing-values"><a class="docs-heading-anchor" href="#Fill-values-and-missing-values">Fill values and missing values</a><a id="Fill-values-and-missing-values-1"></a><a class="docs-heading-anchor-permalink" href="#Fill-values-and-missing-values" title="Permalink"></a></h2><p>In the NetCDF <a href="https://cfconventions.org/Data/cf-conventions/cf-conventions-1.11/cf-conventions.html#missing-data">CF conventions</a> there are the attributes <code>_FillValue</code> (single scalar)  and <code>missing_value</code> (single scalar or possibly a vector with multiple missing values). Value in the netCDF file matching, these attributes are replaced by the <a href="https://docs.julialang.org/en/v1/manual/missing/"><code>Missing</code> type</a> in Julia per default. However, for some applications, it is more convenient to use another special value like the special floating point number <code>NaN</code>.</p><p>For example, this is a netCDF file where the variable <code>var</code> contains a <code>missing</code> which is automatically replaced by the fill value 9999.</p><pre><code class="language-julia hljs">using NCDatasets
+data = [1. 2. 3.; missing 20. 30.]
+ds = NCDataset(&quot;example.nc&quot;,&quot;c&quot;)
+defVar(ds,&quot;var&quot;,data,(&quot;lon&quot;,&quot;lat&quot;),fillvalue = 9999.)</code></pre><p>The raw data as stored in the NetCDF file is available using the property <code>.var</code>:</p><pre><code class="language-julia hljs">ds[&quot;var&quot;].var[:,:]
+# 2×3 Matrix{Float64}:
+#     1.0   2.0   3.0
+#  9999.0  20.0  30.0</code></pre><p>Per default, the fill value is replaced by <code>missing</code> when indexing <code>ds[&quot;var&quot;]</code>:</p><pre><code class="language-julia hljs">ds[&quot;var&quot;][:,:]
+# 2×3 Matrix{Union{Missing, Float64}}:
+# 1.0        2.0   3.0
+#  missing  20.0  30.0</code></pre><p>The function <code>nomissing</code> allows to replace all missing value with a different value like <code>NaN</code>:</p><pre><code class="language-julia hljs">var_nan = nomissing(ds[&quot;var&quot;][:,:],NaN)
+# 2×3 Matrix{Float64}:
+#   1.0   2.0   3.0
+#  NaN    20.0  30.0
+close(ds)</code></pre><p>Such substitution can also be made more automatic using the experimental parameter <code>maskingvalue</code> that can be user per variable:</p><pre><code class="language-julia hljs">ds = NCDataset(&quot;example.nc&quot;,&quot;r&quot;)
+ncvar_nan = cfvariable(ds,&quot;var&quot;,maskingvalue = NaN)
+ncvar_nan[:,:]
+# 2×3 Matrix{Float64}:
+#   1.0   2.0   3.0
+# NaN    20.0  30.0
+close(ds)</code></pre><p>Or per data-set:</p><pre><code class="language-julia hljs">ds = NCDataset(&quot;example.nc&quot;,&quot;r&quot;, maskingvalue = NaN)
+ds[&quot;var&quot;][:,:]
+# 2×3 Matrix{Float64}:
+#   1.0   2.0   3.0
+# NaN    20.0  30.0
+close(ds)</code></pre><p>Note, choosing the <code>maskingvalue</code> affects the element type of the NetCDF variable using julia type promotion rules, in particular note that following vector:</p><pre><code class="language-julia hljs">[1, NaN]
+# 2-element Vector{Float64}:
+#    1.0
+#  NaN</code></pre><p>is a vector with the element type <code>Float64</code> and not <code>Union{Float64,Int}</code>. All integers are thus promoted to floating point number as <code>NaN</code> is a <code>Float64</code>. Since NaN is considered as a <code>Float64</code> in Julia, we have also a promotion to <code>Float64</code> in such cases:</p><pre><code class="language-julia hljs">[1f0, NaN]
+# 2-element Vector{Float64}:
+#   1.0
+# NaN</code></pre><p>where <code>1f0</code> is the <code>Float32</code> number 1. Consider to use <code>NaN32</code> to avoid this promotion (which is automatically converted to 64-bit NaN for a <code>Float64</code> array):</p><pre><code class="language-julia hljs">using NCDatasets
+data32 = [1f0 2f0 3f0; missing 20f0 30f0]
+data64 = [1. 2. 3.; missing 20. 30.]
+ds = NCDataset(&quot;example_float32_64.nc&quot;,&quot;c&quot;)
+defVar(ds,&quot;var32&quot;,data32,(&quot;lon&quot;,&quot;lat&quot;),fillvalue = 9999f0)
+defVar(ds,&quot;var64&quot;,data64,(&quot;lon&quot;,&quot;lat&quot;),fillvalue = 9999.)
+close(ds)
+
+ds = NCDataset(&quot;example_float32_64.nc&quot;,&quot;r&quot;, maskingvalue = NaN32)
+ds[&quot;var32&quot;][:,:]
+# 2×3 Matrix{Float32}:
+#   1.0   2.0   3.0
+# NaN    20.0  30.0
+
+ds[&quot;var64&quot;][:,:]
+# 2×3 Matrix{Float64}:
+#   1.0   2.0   3.0
+# NaN    20.0  30.0</code></pre><p>Promoting an integer to a floating point number can lead to loss of precision. These are the smallest integers that cannot be represented as 32 and 64-bit floating numbers:</p><pre><code class="language-julia hljs">Float32(16_777_217) == 16_777_217 # false
+Float64(9_007_199_254_740_993) == 9_007_199_254_740_993 # false</code></pre><p><code>NaN</code> should not be used for an array of dates, character or strings as it will result in an array with the element type <code>Any</code> following julia&#39;s promotion rules. The use of <code>missing</code> as fill value, is thus preferable in the general case.</p><h2 id="Experimental-functions"><a class="docs-heading-anchor" href="#Experimental-functions">Experimental functions</a><a id="Experimental-functions-1"></a><a class="docs-heading-anchor-permalink" href="#Experimental-functions" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="CommonDataModel.ancillaryvariables"><a class="docstring-binding" href="#CommonDataModel.ancillaryvariables"><code>CommonDataModel.ancillaryvariables</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">ncvar = CommonDataModel.ancillaryvariables(ncv::CFVariable,modifier)</code></pre><p>Return the first ancillary variables from the NetCDF (or other format) variable <code>ncv</code> with the standard name modifier <code>modifier</code>. It can be used for example to access related variable like status flags.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaGeo/CommonDataModel.jl/blob/v0.4.2/src/cfconventions.jl#L12-L19">source</a></section></details></article><article><details class="docstring" open="true"><summary id="Base.filter"><a class="docstring-binding" href="#Base.filter"><code>Base.filter</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">data = CommonDataModel.filter(ncv, indices...; accepted_status_flags = nothing)</code></pre><p>Load and filter observations by replacing all variables without an acepted status flag to <code>missing</code>. It is used the attribute <code>ancillary_variables</code> to identify the status flag.</p><pre><code class="language-julia hljs"># da[&quot;data&quot;] is 2D matrix
+good_data = NCDatasets.filter(ds[&quot;data&quot;],:,:, accepted_status_flags = [&quot;good_data&quot;,&quot;probably_good_data&quot;])</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaGeo/CommonDataModel.jl/blob/v0.4.2/src/cfconventions.jl#L89-L101">source</a></section></details></article><h2 id="Experimental-MPI-support"><a class="docs-heading-anchor" href="#Experimental-MPI-support">Experimental MPI support</a><a id="Experimental-MPI-support-1"></a><a class="docs-heading-anchor-permalink" href="#Experimental-MPI-support" title="Permalink"></a></h2><p>Experimental MPI support is available as a package extension. It is important to load <code>MPI</code> in addition to <code>NCDatasets</code> to enable this package extension. All metadata operators (creating dimensions, variables, attributes, groups or types) must be done <em>collectively</em>. Reading and writing data of netCDF variables can be done <em>independently</em> (default) or <em>collectively</em>. If a variable (or whole dataset) is marked for <em>collectively</em> data access, the underlying HDF5 library can enable additional optimization. More information is available in the <a href="https://web.archive.org/web/20240414204638/https://docs.unidata.ucar.edu/netcdf-c/current/parallel_io.html">NetCDF documentation</a>. For the MPI IO standard, collective IO means that all MPI processes execute all the same OI functions (calling for example <a href="https://www.mpich.org/static/docs/v4.1/www3/MPI_File_write_at_all.html">MPI<em>File</em>write<em>at</em>all</a>). If this is not the case, then the access is independently (calling for example <a href="https://www.mpich.org/static/docs/v4.1/www3/MPI_File_write_at.html">MPI<em>File</em>write_at</a>).</p><p>Only the NetCDF 4 format can be currently used for parallel access. On Windows, the MPI interface is <a href="https://github.com/JuliaPackaging/Yggdrasil/issues/8523">currently unsupported</a>. Help from developpers with access to Windows would be appreciated.</p><pre><code class="language-julia hljs">using MPI
+using NCDatasets
+
+MPI.Init()
+
+mpi_comm = MPI.COMM_WORLD
+mpi_comm_size = MPI.Comm_size(mpi_comm)
+mpi_rank = MPI.Comm_rank(mpi_comm)
+
+# The file needs to be the same for all processes
+filename = &quot;file.nc&quot;
+
+# index based on MPI rank
+i = mpi_rank + 1
+
+# create the netCDF file
+ds = NCDataset(mpi_comm,filename,&quot;c&quot;)
+
+# define the dimensions
+defDim(ds,&quot;lon&quot;,10)
+defDim(ds,&quot;lat&quot;,mpi_comm_size)
+ncv = defVar(ds,&quot;temp&quot;,Int32,(&quot;lon&quot;,&quot;lat&quot;))
+
+# enable colletive access (:independent is the default)
+NCDatasets.paraccess(ncv.var,:collective)
+
+ncv[:,i] .= mpi_rank
+
+ncv.attrib[&quot;units&quot;] = &quot;degree Celsius&quot;
+ds.attrib[&quot;comment&quot;] = &quot;MPI test&quot;
+close(ds)</code></pre><article><details class="docstring" open="true"><summary id="NCDatasets.NCDataset-Tuple{MPI.Comm, AbstractString, AbstractString}"><a class="docstring-binding" href="#NCDatasets.NCDataset-Tuple{MPI.Comm, AbstractString, AbstractString}"><code>NCDatasets.NCDataset</code></a> — <span class="docstring-category">Method</span></summary><section><div><pre><code class="language-julia hljs">ds = NCDataset(comm::MPI.Comm,filename::AbstractString,
+               mode::AbstractString = &quot;r&quot;;
+               info = MPI.INFO_NULL,
+               maskingvalue = missing,
+               attrib = [])</code></pre><p>Open or create a netCDF file <code>filename</code> for parallel IO using the MPI communicator <code>comm</code>. <code>info</code> is a <a href="https://juliaparallel.org/MPI.jl/stable/reference/advanced/#Info-objects">MPI info object</a> containing IO hints or <code>MPI.INFO_NULL</code> (default). The <code>mode</code> is either <code>&quot;r&quot;</code> (default) to open an existing netCDF file in read-only mode, <code>&quot;c&quot;</code>  to create a new netCDF file  (an existing file with the same name will be overwritten) or <code>&quot;a&quot;</code> to append to an existing file.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaGeo/NCDatasets.jl/blob/7bf2709d5cfb1e9056213acac407a0d692064a98/ext/NCDatasetsMPIExt.jl#L87-L101">source</a></section></details></article><article><details class="docstring" open="true"><summary id="NCDatasets.paraccess"><a class="docstring-binding" href="#NCDatasets.paraccess"><code>NCDatasets.paraccess</code></a> — <span class="docstring-category">Function</span></summary><section><div><pre><code class="language-julia hljs">NCDatasets.paraccess(ncv::Variable,par_access::Symbol)
+NCDatasets.paraccess(ds::NCDataset,par_access::Symbol)</code></pre><p>Change the parallel access mode of the variable <code>ncv</code> or all variables of the dataset <code>ds</code> for writing or reading data. <code>par_access</code> is either <code>:collective</code> or <code>:independent</code>. <code>NCDatasets.paraccess</code> will raise an error if <code>MPI</code> is not loaded.</p><p>More information is available in the <a href="https://web.archive.org/web/20240414204638/https://docs.unidata.ucar.edu/netcdf-c/current/parallel_io.html">NetCDF documentation</a>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/JuliaGeo/NCDatasets.jl/blob/7bf2709d5cfb1e9056213acac407a0d692064a98/ext/NCDatasetsMPIExt.jl#L55-L62">source</a></section></details></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../performance/">« Performance tips</a><a class="docs-footer-nextpage" href="../issues/">Known issues »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Saturday 28 February 2026 13:36">Saturday 28 February 2026</span>. Using Julia version 1.12.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
