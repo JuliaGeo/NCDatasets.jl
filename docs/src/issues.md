@@ -22,6 +22,9 @@ end
 
 ```
 
+Since version 0.14.12, NCDatasets uses a reentrant lock internally to protect the access to the netCDF c library to work-around this limitation. An additional lock in user-code should no longer be necessary.
+
+
 ## NetCDF: Not a valid data type or `_FillValue` type mismatch
 
 Trying to define the `_FillValue`, produces the following error:

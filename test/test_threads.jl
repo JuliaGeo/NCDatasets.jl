@@ -5,8 +5,9 @@ using Test
 
 
 fname = (length(ARGS) > 0 ? ARGS[1] : tempname())
+ntasks = (length(ARGS) > 1 ? parse(Int,ARGS[2]) : 100)
 
-format = :netcdf5_64bit_data
+#format = :netcdf5_64bit_data
 format = :netcdf4
 
 ds = NCDataset(fname,"c"; format)
@@ -24,6 +25,7 @@ kwargs =
     end
 
 function defnc(ds,t,data)
+    sleep(rand() * 0.01) # jitter
     defDim(ds,"lon$t",100)
     defDim(ds,"lat$t",110)
     ds.attrib["title$t"] = "this is a test file"
@@ -32,11 +34,16 @@ function defnc(ds,t,data)
                    "units" => "degree Celsius",
                    "scale_factor" => 10,
                ), kwargs...)
+
+    @test ds.attrib["title$t"] == "this is a test file"
+    @test v.attrib["units"] == "degree Celsius"
+    @test v.attrib["scale_factor"] == 10
+
     v[:,:] = data;
     return nothing
 end
 
-chunks = 1:100
+chunks = 1:ntasks
 
 tasks = map(chunks) do t
     Threads.@spawn defnc(ds,t,data);

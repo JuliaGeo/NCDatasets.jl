@@ -86,9 +86,18 @@ end
 @testset "Threads" begin
     # run fails if there is an error
     fname = tempname()
-    run(`$(Base.julia_cmd()) --threads=8 test_threads.jl $fname`)
+    ntasks = 100
+    run(`$(Base.julia_cmd()) --threads=8 test_threads.jl $fname $ntasks`)
 
+    # check result on disk
     NCDataset(fname,"r") do ds
-        @test length(keys(ds)) == 100
+        @test length(keys(ds)) == ntasks
+
+        for t = 1:ntasks
+            v = ds["temperature$t"]
+            @test ds.attrib["title$t"] == "this is a test file"
+            @test v.attrib["units"] == "degree Celsius"
+            @test v.attrib["scale_factor"] == 10
+        end
     end
 end
