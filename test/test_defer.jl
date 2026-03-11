@@ -2,7 +2,7 @@ using Test
 using NCDatasets
 using DataStructures
 
-function example_file(i,array)
+function example_file_defer(i,array)
     fname = tempname()
     @debug "fname $fname"
 
@@ -61,7 +61,7 @@ end
 A = randn(2,3,1)
 
 
-fname = example_file(1,A)
+fname = example_file_defer(1,A)
 
 
 ds = NCDataset(fname)
