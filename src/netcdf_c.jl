@@ -242,6 +242,11 @@ function convert(::Type{Array{nc_vlen_t{T},N}},data::Array{Vector{T},N}) where {
     return tmp
 end
 
+# replacement for unsafe_string(pointer(name))
+# https://github.com/JuliaGeo/NCDatasets.jl/issues/297
+function safe_string(name::AbstractVector{UInt8},len=findfirst(iszero,name)-1)
+    return String(view(name,1:len))
+end
 
 @with_lock function nc_inq_libvers()
     unsafe_string(ccall((:nc_inq_libvers,libnetcdf),Cstring,()))
@@ -306,7 +311,7 @@ end
     path = zeros(UInt8,pathlenp[]+1)
     check(ccall((:nc_inq_path,libnetcdf),Cint,(Cint,Ptr{Csize_t},Ptr{UInt8}),ncid,pathlenp,path))
 
-    return unsafe_string(pointer(path))
+    return safe_string(path)
 end
 
 # @with_lock function nc_inq_ncid(ncid::Integer,name,grp_ncid)
@@ -330,7 +335,7 @@ end
 
     check(ccall((:nc_inq_grpname,libnetcdf),Cint,(Cint,Ptr{UInt8}),ncid,name))
 
-    return unsafe_string(pointer(name))
+    return safe_string(name)
 end
 
 # @with_lock function nc_inq_grpname_full(ncid::Integer,lenp,full_name)
@@ -433,13 +438,13 @@ end
 
     check(ccall((:nc_inq_compound,libnetcdf),Cint,(Cint,nc_type,Ptr{UInt8},Ptr{Csize_t},Ptr{Csize_t}),ncid,xtype,name,sizep,nfieldsp))
 
-    return unsafe_string(pointer(name)), sizep[], nfieldsp[]
+    return safe_string(name), sizep[], nfieldsp[]
 end
 
 @with_lock function nc_inq_compound_name(ncid::Integer,xtype::Integer)
     name = zeros(UInt8,NC_MAX_NAME+1)
     check(ccall((:nc_inq_compound_name,libnetcdf),Cint,(Cint,nc_type,Ptr{UInt8}),ncid,xtype,name))
-    return unsafe_string(pointer(name))
+    return safe_string(name)
 end
 
 @with_lock function nc_inq_compound_size(ncid::Integer,xtype::Integer)
@@ -461,7 +466,7 @@ end
 @with_lock function nc_inq_compound_fieldname(ncid::Integer,xtype::Integer,fieldid::Integer)
     name = zeros(UInt8,NC_MAX_NAME+1)
     check(ccall((:nc_inq_compound_fieldname,libnetcdf),Cint,(Cint,nc_type,Cint,Ptr{UInt8}),ncid,xtype,fieldid,name))
-    return unsafe_string(pointer(name))
+    return safe_string(name)
 end
 
 @with_lock function nc_inq_compound_fieldindex(ncid::Integer,xtype::Integer,name)
@@ -511,7 +516,7 @@ end
 
     check(ccall((:nc_inq_vlen,libnetcdf),Cint,(Cint,nc_type,Ptr{UInt8},Ptr{Csize_t},Ptr{nc_type}),ncid,xtype,name,datum_sizep,base_nc_typep))
 
-    return unsafe_string(pointer(name)),datum_sizep[],base_nc_typep[]
+    return safe_string(name),datum_sizep[],base_nc_typep[]
 end
 
 @with_lock function nc_free_vlen(vl::nc_vlen_t{T}) where {T}
@@ -547,7 +552,7 @@ end
 
     check(ccall((:nc_inq_user_type,libnetcdf),Cint,(Cint,nc_type,Ptr{UInt8},Ptr{Csize_t},Ptr{nc_type},Ptr{Csize_t},Ptr{Cint}),ncid,xtype,name,sizep,base_nc_typep,nfieldsp,classp))
 
-    return unsafe_string(pointer(name)),sizep[],base_nc_typep[],nfieldsp[],classp[]
+    return safe_string(name),sizep[],base_nc_typep[],nfieldsp[],classp[]
 end
 
 @with_lock function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,typeid::Integer,data::Vector)
@@ -675,7 +680,7 @@ end
 
     check(ccall((:nc_inq_enum,libnetcdf),Cint,(Cint,nc_type,Ptr{UInt8},Ptr{NCDatasets.nc_type},Ptr{Csize_t},Ptr{Csize_t}),ncid,xtype,cname,base_nc_typep,base_sizep,num_membersp))
 
-    type_name = unsafe_string(pointer(cname))
+    type_name = safe_string(cname)
     base_nc_type = base_nc_typep[]
     num_members = num_membersp[]
     base_size = base_sizep[]
@@ -697,7 +702,7 @@ end
 
     check(ccall((:nc_inq_enum_member,libnetcdf),Cint,(Cint,nc_type,Cint,Ptr{UInt8},Ptr{Nothing}),ncid,xtype,idx,cmember_name,valuep))
 
-    member_name = unsafe_string(pointer(cmember_name))
+    member_name = safe_string(cmember_name)
 
     return member_name,valuep[]
 end
@@ -705,7 +710,7 @@ end
 @with_lock function nc_inq_enum_ident(ncid::Integer,xtype::Integer,value)
     cidentifier = zeros(UInt8,NCDatasets.NC_MAX_NAME+1)
     check(ccall((:nc_inq_enum_ident,libnetcdf),Cint,(Cint,nc_type,Clonglong,Ptr{UInt8}),ncid,xtype,Clonglong(value),cidentifier))
-    identifier = unsafe_string(pointer(cidentifier))
+    identifier = safe_string(cidentifier)
     return identifier
 end
 
@@ -792,7 +797,6 @@ function nc_get_var!(ncid::Integer,varid::Integer,ip::Array{String,N}) where N
     tmp = Array{Ptr{UInt8},N}(undef,size(ip))
     nc_get_var!(ncid,varid,tmp)
     for i in eachindex(tmp)
-        #ip[:] = unsafe_string.(tmp)
         ip[i] = unsafe_string(tmp[i])
     end
 end
@@ -1326,7 +1330,7 @@ end
 
     check(ccall((:nc_inq_dimname,libnetcdf),Cint,(Cint,Cint,Ptr{UInt8}),ncid,dimid,cname))
 
-    return unsafe_string(pointer(cname))
+    return safe_string(cname)
 end
 
 @with_lock function nc_inq_dimlen(ncid::Integer,dimid::Integer)
@@ -1376,7 +1380,7 @@ end
     # really necessary?
     cname[end]=0
 
-   return unsafe_string(pointer(cname))
+   return safe_string(cname)
 end
 
 # @with_lock function nc_copy_att(ncid_in::Integer,varid_in::Integer,name,ncid_out::Integer,varid_out::Integer)
@@ -1537,7 +1541,7 @@ end
 
     check(ccall((:nc_inq_var,libnetcdf),Cint,(Cint,Cint,Ptr{UInt8},Ptr{nc_type},Ptr{Cint},Ptr{Cint},Ptr{Cint}),ncid,varid,cname,xtypep,ndimsp,dimids,nattsp))
 
-    name = unsafe_string(pointer(cname))
+    name = safe_string(cname)
 
     xtype = xtypep[]
     jltype = _jltype(ncid,xtype)
@@ -1567,7 +1571,7 @@ end
 @with_lock function nc_inq_varname(ncid::Integer,varid::Integer)
     cname = zeros(UInt8,NC_MAX_NAME+1)
     check(ccall((:nc_inq_varname,libnetcdf),Cint,(Cint,Cint,Ptr{UInt8}),ncid,varid,cname))
-    return unsafe_string(pointer(cname))
+    return safe_string(cname)
 end
 
 @with_lock function nc_inq_vartype(ncid::Integer,varid::Integer)
