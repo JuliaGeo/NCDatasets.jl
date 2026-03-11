@@ -8,7 +8,7 @@ dimlen = 10
 T = Int32
 data = Vector{Vector{T}}(undef,dimlen)
 for i = 1:length(data)
-    data[i] = T.(collect(1:i) .+ 100 * i) 
+    data[i] = T.(collect(1:i) .+ 100 * i)
 end
 
 ncdata = Vector{NCDatasets.nc_vlen_t{T}}(undef,dimlen)
@@ -55,7 +55,7 @@ xtype = NCDatasets.nc_inq_vartype(ncid,varid)
 
 @test xtype == typeids[1]
 
-if xtype >= NCDatasets.NC_FIRSTUSERTYPEID 
+if xtype >= NCDatasets.NC_FIRSTUSERTYPEID
     #@show xtype,NCDatasets.NC_VLEN
 
     typename,shape,base_nc_type,numfields,class = NCDatasets.nc_inq_user_type(ncid,xtype)
@@ -79,5 +79,3 @@ if xtype >= NCDatasets.NC_FIRSTUSERTYPEID
 end
 
 NCDatasets.nc_close(ncid)
-
-
