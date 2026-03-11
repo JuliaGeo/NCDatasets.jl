@@ -1,6 +1,3 @@
-
-const NETCDF_LOCK = ReentrantLock()
-
 macro with_lock(exp)
     @assert exp.head == :function
 
