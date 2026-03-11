@@ -87,7 +87,8 @@ end
     # run fails if there is an error
     fname = tempname()
     ntasks = 100
-    run(`$(Base.julia_cmd()) --threads=8 test_threads.jl $fname $ntasks`)
+    script = joinpath(@__DIR__,"test_threads.jl")
+    run(`$(Base.julia_cmd()) --threads=8 $script $fname $ntasks`)
 
     # check result on disk
     NCDataset(fname,"r") do ds
