@@ -596,7 +596,9 @@ function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Char
 end
 
 function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Vector{T}) where T <: AbstractString
-    nc_put_att(ncid,varid,name,ncType[String],pointer.(data))
+    GC.@preserve data begin
+        nc_put_att(ncid,varid,name,ncType[String],pointer.(data))
+    end
 end
 
 function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Vector{T}) where {T}
@@ -732,14 +734,18 @@ function nc_put_var(ncid::Integer,varid::Integer,data::Array{Char,N}) where N
 end
 
 function nc_put_var(ncid::Integer,varid::Integer,data::Array{String,N}) where N
-    # pointer.(data) is surprisingly a scalar pointer Ptr{UInt8} if data is a
-    # Array{T,0}
-    tmp = map(pointer,data)
-    nc_put_var(ncid,varid,tmp)
+    GC.@preserve data begin
+        # pointer.(data) is surprisingly a scalar pointer Ptr{UInt8} if data is a
+        # Array{T,0}
+        tmp = map(pointer,data)
+        nc_put_var(ncid,varid,tmp)
+    end
 end
 
 function nc_put_var(ncid::Integer,varid::Integer,data::Array{Vector{T},N}) where {T,N}
-    nc_put_var(ncid,varid,convert(Array{nc_vlen_t{T},N},data))
+    GC.@preserve data begin
+        nc_put_var(ncid,varid,convert(Array{nc_vlen_t{T},N},data))
+    end
 end
 
 @with_lock function nc_unsafe_put_var(ncid::Integer,varid::Integer,data::Array)
@@ -815,8 +821,10 @@ end
 end
 
 @with_lock function nc_put_var1(ncid::Integer,varid::Integer,indexp,op::Vector{T}) where T
-    tmp = nc_vlen_t{T}(length(op), pointer(op))
-    check(ccall((:nc_put_var1,libnetcdf),Cint,(Cint,Cint,Ptr{Csize_t},Ptr{Nothing}),ncid,varid,indexp,Ref(tmp)))
+    GC.@preserve op begin
+        tmp = nc_vlen_t{T}(length(op), pointer(op))
+        check(ccall((:nc_put_var1,libnetcdf),Cint,(Cint,Cint,Ptr{Csize_t},Ptr{Nothing}),ncid,varid,indexp,Ref(tmp)))
+    end
 end
 
 @with_lock function nc_put_var1(ncid::Integer,varid::Integer,indexp,op::T) where T
@@ -873,14 +881,18 @@ function nc_put_vara(ncid::Integer,varid::Integer,startp,countp,op::Array{Char,N
 end
 
 function nc_put_vara(ncid::Integer,varid::Integer,startp,countp,op::Array{String,N}) where N
-    nc_put_vara(ncid,varid,startp,countp,pointer.(op))
+    GC.@preserve op begin
+        nc_put_vara(ncid,varid,startp,countp,pointer.(op))
+    end
 end
 
 function nc_put_vara(ncid::Integer,varid::Integer,startp,countp,
                      op::Array{Vector{T},N}) where {T,N}
 
-    nc_put_vara(ncid,varid,startp,countp,
-                convert(Array{nc_vlen_t{T},N},op))
+    GC.@preserve op begin
+        nc_put_vara(ncid,varid,startp,countp,
+                    convert(Array{nc_vlen_t{T},N},op))
+    end
 end
 
 @with_lock function nc_get_vara!(ncid::Integer,varid::Integer,startp,countp,ip)
@@ -927,14 +939,17 @@ end
 
 function nc_put_vars(ncid::Integer,varid::Integer,startp,countp,stridep,
                      op::Array{String,N}) where N
-    nc_put_vars(ncid,varid,startp,countp,stridep,pointer.(op))
+    GC.@preserve op begin
+        nc_put_vars(ncid,varid,startp,countp,stridep,pointer.(op))
+    end
 end
 
 function nc_put_vars(ncid::Integer,varid::Integer,startp,countp,stridep,
                      op::Array{Vector{T},N}) where {T,N}
-
-    nc_put_vars(ncid,varid,startp,countp,stridep,
-                convert(Array{nc_vlen_t{T},N},op))
+    GC.@preserve op begin
+        nc_put_vars(ncid,varid,startp,countp,stridep,
+                    convert(Array{nc_vlen_t{T},N},op))
+    end
 end
 
 function _nc_check_size_put_vars(ncid,varid,countp,op)
@@ -1149,11 +1164,13 @@ end
 end
 
 @with_lock function nc_def_var_fill(ncid::Integer,varid::Integer,no_fill::Bool,fill_value::String)
-    check(ccall((:nc_def_var_fill,libnetcdf),Cint,(Cint,Cint,Cint,Ptr{Nothing}),
-                ncid,
-                varid,
-                Cint(no_fill),
-                [pointer(fill_value)]))
+    GC.@preserve fill_value begin
+        check(ccall((:nc_def_var_fill,libnetcdf),Cint,(Cint,Cint,Cint,Ptr{Nothing}),
+                    ncid,
+                    varid,
+                    Cint(no_fill),
+                    [pointer(fill_value)]))
+    end
 end
 
 #"""
@@ -1405,9 +1422,11 @@ end
 
 @with_lock function nc_put_att_string(ncid::Integer,varid::Integer,name,data)
     len = length(data)
-    op = pointer(pointer.(data))
+    GC.@preserve data begin
+        op = pointer(pointer.(data))
 
-    check(ccall((:nc_put_att_string,libnetcdf),Cint,(Cint,Cint,Cstring,Cint,Ptr{Cstring}),ncid,varid,name,len,op))
+        check(ccall((:nc_put_att_string,libnetcdf),Cint,(Cint,Cint,Cstring,Cint,Ptr{Cstring}),ncid,varid,name,len,op))
+    end
 end
 
 # @with_lock function nc_get_att_string(ncid::Integer,varid::Integer,name,ip)
