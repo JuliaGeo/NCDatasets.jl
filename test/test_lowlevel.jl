@@ -24,7 +24,7 @@ samples = [
 
 
 for sampledata in samples
-    local start, varid, varid, T, dimids, ncid, xtype, name2
+    local start, varid, varid, T, dimids, ncid, xtype, name2, mode
     rm(filename;force=true)
 
     # write data

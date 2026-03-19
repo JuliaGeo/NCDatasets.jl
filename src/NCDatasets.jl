@@ -30,9 +30,7 @@ using CommonDataModel
 using CommonDataModel: dims, attribs, groups
 import CommonDataModel: AbstractDataset, AbstractVariable,
     boundsParentVar, initboundsmap!,
-    fillvalue, fill_and_missing_values,
-    scale_factor, add_offset, time_origin, time_factor,
-    CFtransformdata!,
+    fillvalue,
     CFVariable, variable, cfvariable, defVar, load!,
     path, name, isopen, unlimited, dataset,
     groupname, groupnames, group, defGroup, Groups,
