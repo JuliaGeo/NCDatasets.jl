@@ -23,7 +23,7 @@ NCDatasetsMPIExt = "MPI"
 
 [compat]
 CFTime = "0.2.7"
-CommonDataModel = "0.4.2"
+CommonDataModel = "0.4.3"
 DataStructures = "0.17, 0.18, 0.19"
 DiskArrays = "0.4.5"
 MPI = "0.20"
