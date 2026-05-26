@@ -27,7 +27,8 @@ forecast_temp = forecast_group["temperature"]
 """
 function group(ds::NCDataset,groupname::SymbolOrString)
     grp_ncid = nc_inq_grp_ncid(ds.ncid,groupname)
-    ds = NCDataset(grp_ncid,ds.iswritable,ds.isdefmode; parentdataset = ds)
+    ds = NCDataset(grp_ncid,ds.iswritable,ds.isdefmode; parentdataset = ds,
+                   maskingvalue = maskingvalue(ds))
     return ds
 end
 
