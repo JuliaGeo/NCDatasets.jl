@@ -178,7 +178,12 @@ for deferopen in (false,true)
     show(buf,mfds)
     occursin("time = 3",String(take!(buf)))
 
+    @test isopen(mfds) == true
     close(mfds)
+
+    @test isopen(mfds) == false
+
+    @test_throws Exception mfds["lon"]
 end
 
 
