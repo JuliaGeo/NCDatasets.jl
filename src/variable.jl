@@ -62,6 +62,14 @@ function variable(ds::NCDataset,varid::Integer)
     nctype = _jltype(ds.ncid,nc_inq_vartype(ds.ncid,varid))
     ndims = length(dimids)
 
+    v = Variable{nctype,ndims,typeof(ds)}(ds,varid, (reverse(dimids)...,))
+    
+    if is_var_nc_enum(ds.ncid,varid)
+        return NcEnumVariable{String,ndims,nctype,typeof(ds)}(v)
+    else
+        return v
+    end
+
     # reverse dimids to have the dimension order in Fortran style
     return Variable{nctype,ndims,typeof(ds)}(ds,varid, (reverse(dimids)...,))
 end

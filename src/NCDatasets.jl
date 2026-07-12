@@ -47,7 +47,8 @@ import CommonDataModel: AbstractDataset, AbstractVariable,
     @select, select, Near, coordinate_value, coordinate_names, split_by_and,
     chunking, deflate, checksum,
     maskingvalue
-
+    
+import CommonDataModel: AbstractCategoricalVariable, getvaluearray, getmapping
 
 import DiskArrays
 import DiskArrays: readblock!, writeblock!, eachchunk, haschunks
@@ -68,6 +69,7 @@ include("attributes.jl")
 include("dimensions.jl")
 include("groupes.jl")
 include("variable.jl")
+include("nc_enum_variable.jl")
 include("cfvariable.jl")
 include("defer.jl")
 include("multifile.jl")
