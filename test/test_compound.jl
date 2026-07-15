@@ -174,3 +174,8 @@ nc_close(ncid)
 #=
 run(`ncdump $filename`)
 =#
+
+using Downloads: download
+
+fname = download("https://raw.githubusercontent.com/Unidata/netcdf-c/refs/tags/v4.8.1/dap4_test/nctestfiles/test_struct_array.nc")
+ds = NCDataset(fname)
