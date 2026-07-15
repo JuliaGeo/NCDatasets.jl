@@ -1,6 +1,12 @@
 # TODO: module needs to be per group
 module NCReconstructedTypes end
 
+function usertype!(ds::Dataset,typename,jltype)
+    ds.usertypes[Symbol(typename)] = jltype
+end
+
+usertype(ds::Dataset,typename) = get(ds.usertypes,Symbol(typename),nothing)
+
 function reconstruct_compound_type(ncid,xtype,usertypes)
     type_name,type_size,nfields = nc_inq_compound(ncid,xtype)
 

@@ -2,6 +2,8 @@ using Test
 using NCDatasets
 using NCDatasets: nc_create, NC_NETCDF4, NC_CLOBBER, NC_NOWRITE, nc_def_dim, nc_def_compound, nc_insert_compound, nc_def_var, nc_put_var, nc_close, NC_INT, nc_unsafe_put_var, libnetcdf, check, ncType, nc_open, nc_inq_vartype, nc_inq_compound_nfields, nc_inq_compound_size, nc_inq_compound_name, nc_inq_compound_fieldoffset,nc_inq_compound_fieldndims,nc_inq_compound_fielddim_sizes, nc_inq_compound_fieldname, nc_inq_compound_fieldindex, nc_inq_compound_fieldtype, nc_inq_compound, nc_inq_varid, nc_get_var!, nc_insert_array_compound, reconstruct_compound_type, create_compound_type
 
+
+using NCDatasets: usertype, usertype!
 # mutable struct are not supported
 # https://discourse.julialang.org/t/passing-an-array-of-structures-through-ccall/5194
 
@@ -136,7 +138,7 @@ data_loaded = ds["data"].var[:,:]
 
 T = typeof(data_loaded[1,1])
 
-@test ds.usertypes[:s1] == T
+@test usertype(ds,:s1) == T
 @test sizeof(T) == sizeof(s1)
 @test fieldcount(T) == fieldcount(s1)
 for i = 1:fieldcount(T)
@@ -149,7 +151,8 @@ end
 @test typeof(ds["data"][1,1]) == T
 
 
-ds.usertypes[:s1] = s1
+usertype!(ds,:s1,s1)
+
 data_loaded = ds["data"].var[:,:]
 @test eltype(data_loaded) == s1
 @test data_loaded == data
