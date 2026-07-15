@@ -130,11 +130,11 @@ defDim(ds,"y",3)
 ncv = defVar(ds,"data",s1,("x","y"))
 
 @test eltype(ncv) == s1
-ncv.var[:,:] = data
+ncv[:,:] = data
 close(ds)
 
 ds = NCDataset(fname)
-data_loaded = ds["data"].var[:,:]
+data_loaded = ds["data"][:,:]
 
 T = typeof(data_loaded[1,1])
 
@@ -153,7 +153,7 @@ end
 
 usertype!(ds,:s1,s1)
 
-data_loaded = ds["data"].var[:,:]
+data_loaded = ds["data"][:,:]
 @test eltype(data_loaded) == s1
 @test data_loaded == data
 
