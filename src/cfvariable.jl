@@ -115,11 +115,14 @@ function defVar(ds::NCDataset,name::SymbolOrString,vtype::DataType,dimnames;
                 typeid = nc_def_vlen(ds.ncid, typename, ncType[eltype(vtype)])
             elseif haskey(ncType, vtype)
                 ncType[vtype]
-            else
-                @info "assume type $vtype is a struct "
+            elseif length(fieldnames(vtype)) > 0
+                @debug "assume type $vtype is a struct "
                 typename = (isnothing(typename) ? string(vtype) : typename)
                 ds.usertypes[Symbol(typename)] = vtype
                 create_compound_type(ds.ncid,vtype,typename)
+            else
+                @warn "unsupported type: class=$(class)"
+                Nothing
             end
 
         varid = nc_def_var(ds.ncid,name,typeid,dimids)

@@ -104,7 +104,7 @@ end
 nc_close(ncid)
 
 
-run(`ncdump $filename`)
+#run(`ncdump $filename`)
 
 
 using Downloads: download
@@ -157,4 +157,39 @@ data_loaded = ds["data"][:,:]
 @test eltype(data_loaded) == s1
 @test data_loaded == data
 
-run(`ncdump $fname`)
+#run(`ncdump $fname`)
+
+# two NetCDF file using the same compound type name but with different layout
+n = 10
+
+struct Complex1
+    r::Float32
+    i::Float32
+end
+
+data1 = Complex1.(rand(Float32,n),rand(Float32,n))
+
+fname1 = tempname()
+NCDataset(fname1,"c") do ds1
+    defVar(ds1,"data",data1,("x",); typename = "Complex")
+end
+
+struct Complex2
+    real::Float64
+    imag::Float64
+end
+
+data2 = Complex2.(rand(Float64,n),rand(Float64,n))
+
+fname2 = tempname()
+NCDataset(fname2,"c") do ds2
+    defVar(ds2,"data",data2,("x",); typename = "Complex")
+end
+
+#run(`ncdump $fname2`)
+
+ds1 = NCDataset(fname1);
+@test ds1["data"][1].r == data1[1].r
+
+ds2 = NCDataset(fname2);
+@test ds2["data"][1].real == data2[1].real
