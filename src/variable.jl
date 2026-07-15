@@ -433,7 +433,9 @@ function _write_data_to_nc(v::Variable{T}, data, indexes::AbstractRange{<:Intege
     ind = prod(length.(indexes)) == 1 ? first.(indexes) : to_indices(v,indexes)
 
     start,count,stride,jlshape = ncsub(v,indexes)
-    return nc_put_vars(v.ds.ncid,v.varid,start,count,stride,T.(data))
+
+    Tdata = (T == eltype(data) ? data : T.(data))
+    return nc_put_vars(v.ds.ncid,v.varid,start,count,stride,Tdata)
 end
 
 # materialize disk arrays

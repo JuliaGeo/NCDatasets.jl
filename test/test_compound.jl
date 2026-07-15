@@ -128,5 +128,7 @@ defDim(ds,"y",3)
 ncv = defVar(ds,"data",s1,("x","y"))
 
 @test eltype(ncv) == s1
+ncv.var[:,:] = data
+close(ds)
 
-#ncv.var[:,:] = data
+run(`ncdump $fname`)
