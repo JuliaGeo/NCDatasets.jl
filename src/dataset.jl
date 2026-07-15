@@ -91,6 +91,7 @@ function NCDataset(ncid::Integer,
                    isdefmode::Array{Bool,0};
                    parentdataset = nothing,
                    maskingvalue = missing,
+                   usertypes = Dict{String,Module}(),
                    )
 
     function _finalize(ds)
@@ -100,6 +101,7 @@ function NCDataset(ncid::Integer,
         end
     end
     @debug "maskingvalue" maskingvalue
+
     ds = NCDataset{typeof(parentdataset),typeof(maskingvalue)}(
         parentdataset,
         ncid,
@@ -108,6 +110,7 @@ function NCDataset(ncid::Integer,
         Dict{String,String}(),
         maskingvalue,
         ReentrantLock(),
+        usertypes,
     )
 
     if !iswritable

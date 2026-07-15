@@ -38,6 +38,7 @@ mutable struct NCDataset{TDS,Tmaskingvalue} <: AbstractNCDataset where TDS <: Un
     _boundsmap::Dict{String,String}
     maskingvalue::Tmaskingvalue
     lock::ReentrantLock
+    usertypes::Dict{String,Module}
 end
 
 const Dataset = NCDataset

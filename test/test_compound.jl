@@ -179,3 +179,13 @@ using Downloads: download
 
 fname = download("https://raw.githubusercontent.com/Unidata/netcdf-c/refs/tags/v4.8.1/dap4_test/nctestfiles/test_struct_array.nc")
 ds = NCDataset(fname)
+
+array = ds["s"].var[:,:]
+@test array[1,1].x == 1
+@test array[1,1].y == -1
+
+@test array[1,2].x == -1
+@test array[1,2].y == 3
+
+close(ds)
+#run(`ncdump $fname`)
