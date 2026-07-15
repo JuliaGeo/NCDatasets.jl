@@ -131,4 +131,27 @@ ncv = defVar(ds,"data",s1,("x","y"))
 ncv.var[:,:] = data
 close(ds)
 
+ds = NCDataset(fname)
+data_loaded = ds["data"].var[:,:]
+
+T = typeof(data_loaded[1,1])
+
+@test ds.usertypes[:s1] == T
+@test sizeof(T) == sizeof(s1)
+@test fieldcount(T) == fieldcount(s1)
+for i = 1:fieldcount(T)
+    @test fieldoffset(T,i) == fieldoffset(s1,i)
+    @test fieldtype(T,i) == fieldtype(s1,i)
+end
+
+@test data_loaded[1,1].i1 == data[1,1].i1
+
+@test typeof(ds["data"][1,1]) == T
+
+
+ds.usertypes[:s1] = s1
+data_loaded = ds["data"].var[:,:]
+@test eltype(data_loaded) == s1
+@test data_loaded == data
+
 run(`ncdump $fname`)

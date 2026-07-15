@@ -1,3 +1,4 @@
+# TODO: module needs to be per group
 module NCReconstructedTypes end
 
 function reconstruct_compound_type(ncid,xtype,usertypes)
@@ -22,9 +23,6 @@ function reconstruct_compound_type(ncid,xtype,usertypes)
             fT2 = NTuple{Int(dim_sizes[1]),fT}
             push!(types,fT2)
         end
-
-        # assume scalars for now
-        #@assert nc_inq_compound_fieldndims(ncid,xtype,fieldid) == 0
     end
 
     # TODO: use different module for scope
@@ -46,7 +44,7 @@ function reconstruct_compound_type(ncid,xtype,usertypes)
 
     invokelatest() do
         T2 = getfield(NCReconstructedTypes, reconname)
-#        usertypes[type_name] = NCReconstructedTypes
+        usertypes[Symbol(type_name)] = T2
         return T2
     end
 end
