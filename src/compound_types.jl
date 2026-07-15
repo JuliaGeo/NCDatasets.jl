@@ -1,7 +1,11 @@
 module NCReconstructedTypes end
 
-function reconstruct_compound_type(ncid,xtype)
+function reconstruct_compound_type(ncid,xtype,usertypes)
     type_name,type_size,nfields = nc_inq_compound(ncid,xtype)
+
+    if haskey(usertypes,Symbol(type_name))
+        return usertypes[Symbol(type_name)]
+    end
 
     cnames = Symbol.(nc_inq_compound_fieldname.(ncid,xtype,0:(nfields-1)))
 
@@ -47,3 +51,28 @@ function reconstruct_compound_type(ncid,xtype)
     end
 end
 
+
+function create_compound_type(ncid,T,type_name)
+    typeid = nc_def_compound(ncid, sizeof(T), type_name)
+
+    for i = 1:fieldcount(T)
+        offset = fieldoffset(T,i)
+        fT = fieldtype(T,i)
+        if fT <: NTuple
+            elT = fT.types[1]
+            @assert all(fT.types .== elT)
+            nctype = ncType[elT]
+            dim_sizes = [length(fT.types)]
+            nc_insert_array_compound(
+                ncid,typeid,fieldname(T,i),
+                offset,nctype,dim_sizes)
+        else
+            nctype = ncType[fieldtype(T,i)]
+            nc_insert_compound(
+                ncid, typeid, fieldname(T,i),
+                offset, nctype)
+        end
+    end
+
+    return typeid
+end

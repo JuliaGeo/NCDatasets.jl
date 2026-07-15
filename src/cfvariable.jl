@@ -113,10 +113,13 @@ function defVar(ds::NCDataset,name::SymbolOrString,vtype::DataType,dimnames;
             if vtype <: Vector
                 # variable-length type
                 typeid = nc_def_vlen(ds.ncid, typename, ncType[eltype(vtype)])
-            else
-                # base-type
-                haskey(ncType, vtype) || error("$vtype not supported")
+            elseif haskey(ncType, vtype)
                 ncType[vtype]
+            else
+                @info "assume type $vtype is a struct "
+                type_name = string(vtype)
+                ds.usertypes[Symbol(type_name)] = vtype
+                create_compound_type(ds.ncid,vtype,type_name)
             end
 
         varid = nc_def_var(ds.ncid,name,typeid,dimids)

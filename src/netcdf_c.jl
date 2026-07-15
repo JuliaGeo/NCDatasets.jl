@@ -1539,7 +1539,7 @@ function _jltype(ncid,xtype,usertypes)
             if class == NC_VLEN
                 Vector{jlType[base_nc_type]}
             elseif class == NC_COMPOUND
-                reconstruct_compound_type(ncid,xtype)
+                reconstruct_compound_type(ncid,xtype,usertypes)
             else
                 @warn "unsupported type: class=$(class)"
                 Nothing

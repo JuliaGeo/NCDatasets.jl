@@ -91,7 +91,7 @@ function NCDataset(ncid::Integer,
                    isdefmode::Array{Bool,0};
                    parentdataset = nothing,
                    maskingvalue = missing,
-                   usertypes = Dict{String,Module}(),
+                   usertypes = Dict{Symbol,DataType}(),
                    )
 
     function _finalize(ds)

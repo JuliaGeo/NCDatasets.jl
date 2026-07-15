@@ -1,6 +1,6 @@
 using Test
 using NCDatasets
-using NCDatasets: nc_create, NC_NETCDF4, NC_CLOBBER, NC_NOWRITE, nc_def_dim, nc_def_compound, nc_insert_compound, nc_def_var, nc_put_var, nc_close, NC_INT, nc_unsafe_put_var, libnetcdf, check, ncType, nc_open, nc_inq_vartype, nc_inq_compound_nfields, nc_inq_compound_size, nc_inq_compound_name, nc_inq_compound_fieldoffset,nc_inq_compound_fieldndims,nc_inq_compound_fielddim_sizes, nc_inq_compound_fieldname, nc_inq_compound_fieldindex, nc_inq_compound_fieldtype, nc_inq_compound, nc_inq_varid, nc_get_var!, nc_insert_array_compound, reconstruct_compound_type
+using NCDatasets: nc_create, NC_NETCDF4, NC_CLOBBER, NC_NOWRITE, nc_def_dim, nc_def_compound, nc_insert_compound, nc_def_var, nc_put_var, nc_close, NC_INT, nc_unsafe_put_var, libnetcdf, check, ncType, nc_open, nc_inq_vartype, nc_inq_compound_nfields, nc_inq_compound_size, nc_inq_compound_name, nc_inq_compound_fieldoffset,nc_inq_compound_fieldndims,nc_inq_compound_fielddim_sizes, nc_inq_compound_fieldname, nc_inq_compound_fieldindex, nc_inq_compound_fieldtype, nc_inq_compound, nc_inq_varid, nc_get_var!, nc_insert_array_compound, reconstruct_compound_type, create_compound_type
 
 # mutable struct are not supported
 # https://discourse.julialang.org/t/passing-an-array-of-structures-through-ccall/5194
@@ -36,33 +36,14 @@ y_dimid = nc_def_dim(ncid, "y", sz[2])
 
 dimids = [x_dimid, y_dimid]
 
-typeid = nc_def_compound(ncid, sizeof(T), "sample_compound_type")
-
-for i = 1:fieldcount(T)
-    local dim_sizes
-    offset = fieldoffset(T,i)
-    fT = fieldtype(T,i)
-    if fT <: NTuple
-        elT = fT.types[1]
-        @assert all(fT.types .== elT)
-        nctype = ncType[elT]
-        dim_sizes = [length(fT.types)]
-        nc_insert_array_compound(
-            ncid,typeid,fieldname(T,i),
-            offset,nctype,dim_sizes)
-    else
-        nctype = ncType[fieldtype(T,i)]
-        nc_insert_compound(
-            ncid, typeid, fieldname(T,i),
-            offset, nctype)
-    end
-end
-
+type_name = "sample_compound_type"
+typeid = create_compound_type(ncid,T,type_name);
 
 varid = nc_def_var(ncid, "data", typeid, reverse(dimids))
 
 nc_put_var(ncid, varid, data)
 nc_close(ncid)
+
 
 #=
 run(`ncdump $filename`)
@@ -104,13 +85,14 @@ type_name,type_size,type_nfields = nc_inq_compound(ncid,xtype)
 @test type_size == sizeof(T)
 @test type_nfields == fieldcount(T)
 
-T2 = reconstruct_compound_type(ncid,xtype)
+usertypes = Dict()
+T2 = reconstruct_compound_type(ncid,xtype,usertypes)
 
 data2 = Array{T2,2}(undef,sz...)
 
 nc_get_var!(ncid, varid, data2)
 
-data2[1,1] == data[1,1]
+@test data2[1,1].i1 == data[1,1].i1
 
 
 for fn = fieldnames(eltype(data2))
@@ -119,9 +101,9 @@ end
 
 nc_close(ncid)
 
-#=
+
 run(`ncdump $filename`)
-=#
+
 
 using Downloads: download
 
@@ -137,3 +119,14 @@ array = ds["s"].var[:,:]
 
 close(ds)
 #run(`ncdump $fname`)
+
+
+fname = tempname()
+ds = NCDataset(fname,"c")
+defDim(ds,"x",2)
+defDim(ds,"y",3)
+ncv = defVar(ds,"data",s1,("x","y"))
+
+@test eltype(ncv) == s1
+
+#ncv.var[:,:] = data
