@@ -1,6 +1,6 @@
 using Test
 using NCDatasets
-using NCDatasets: nc_create, NC_NETCDF4, NC_CLOBBER, NC_NOWRITE, nc_def_dim, nc_def_compound, nc_insert_compound, nc_def_var, nc_put_var, nc_close, NC_INT, nc_unsafe_put_var, libnetcdf, check, ncType, nc_open, nc_inq_vartype, nc_inq_compound_nfields, nc_inq_compound_size, nc_inq_compound_name, nc_inq_compound_fieldoffset,nc_inq_compound_fieldndims,nc_inq_compound_fielddim_sizes, nc_inq_compound_fieldname, nc_inq_compound_fieldindex, nc_inq_compound_fieldtype, nc_inq_compound, nc_inq_varid, nc_get_var!, nc_insert_array_compound
+using NCDatasets: nc_create, NC_NETCDF4, NC_CLOBBER, NC_NOWRITE, nc_def_dim, nc_def_compound, nc_insert_compound, nc_def_var, nc_put_var, nc_close, NC_INT, nc_unsafe_put_var, libnetcdf, check, ncType, nc_open, nc_inq_vartype, nc_inq_compound_nfields, nc_inq_compound_size, nc_inq_compound_name, nc_inq_compound_fieldoffset,nc_inq_compound_fieldndims,nc_inq_compound_fielddim_sizes, nc_inq_compound_fieldname, nc_inq_compound_fieldindex, nc_inq_compound_fieldtype, nc_inq_compound, nc_inq_varid, nc_get_var!, nc_insert_array_compound, reconstruct_compound_type
 
 # mutable struct are not supported
 # https://discourse.julialang.org/t/passing-an-array-of-structures-through-ccall/5194
@@ -68,8 +68,6 @@ nc_close(ncid)
 run(`ncdump $filename`)
 =#
 
-module NCReconstructedTypes end
-
 ncid = nc_open(filename,NC_NOWRITE)
 
 varid = nc_inq_varid(ncid,"data")
@@ -106,57 +104,7 @@ type_name,type_size,type_nfields = nc_inq_compound(ncid,xtype)
 @test type_size == sizeof(T)
 @test type_nfields == fieldcount(T)
 
-
-
-
-nfields = nc_inq_compound_nfields(ncid,xtype)
-cnames = Symbol.(nc_inq_compound_fieldname.(ncid,xtype,0:(nfields-1)))
-
-
-types = []
-
-for fieldid = 0:(nfields-1)
-    local dim_sizes
-    fT = NCDatasets.jlType[nc_inq_compound_fieldtype(ncid,xtype,fieldid)]
-
-    fieldndims = nc_inq_compound_fieldndims(ncid,xtype,fieldid)
-
-    if fieldndims == 0
-        push!(types,fT)
-    else
-        dim_sizes = nc_inq_compound_fielddim_sizes(ncid,xtype,fieldid)
-        fT2 = NTuple{Int(dim_sizes[1]),fT}
-        push!(types,fT2)
-    end
-end
-
-
-# assume scalars
-for fieldid = 0:3
-    @assert nc_inq_compound_fieldndims(ncid,xtype,fieldid) == 0
-end
-
-
-using Random
-reconname = Symbol(string(nc_inq_compound_name(ncid,xtype),"_",randstring(12)))
-
-
-# from JLD2, MIT "Expat" License
-# https://github.com/JuliaIO/JLD2.jl/blob/abb9e5920bbe956a4d9fd2f92550cd7ea0a715aa/src/data/reconstructing_datatypes.jl#L493
-
-
-Core.eval(
-    NCReconstructedTypes,
-    Expr(:struct, false, reconname,
-         Expr(:block,
-              Any[ Expr(Symbol("::"), cnames[i], types[i]) for i = 1:length(types) ]...,
-              # suppress default constructors, plus a bogus `new()` call to make sure
-              # ninitialized is zero.
-              Expr(:if, false, Expr(:call, :new))
-              )))
-
-
-T2 = getfield(NCReconstructedTypes, reconname)
+T2 = reconstruct_compound_type(ncid,xtype)
 
 data2 = Array{T2,2}(undef,sz...)
 
