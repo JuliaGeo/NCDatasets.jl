@@ -173,7 +173,7 @@ function load_enum(ET,ncid,varid,len)
 end
 
 # Benchmark use case:
-# a file is opened and an NCDatasets.Variable is instanciated once and then
+# a file is opened and an NCDatasets.Variable is instantiated once and then
 # there are many read operation to the NCDatasets.Variable
 
 # to be done during the instantiation of NCDatasets.Variable
