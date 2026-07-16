@@ -102,7 +102,7 @@ varid =  nc_def_var(ncid,varname,xtype,dimids)
 nc_put_att(ncid, varid, "_FillValue", typeid, [Int8(127)])
 
 data = T[0, 2, 0, 1, 127]
-data = rand(values(members_dict),len)
+data = rand(collect(values(members_dict)),len)
 
 nc_put_var(ncid,varid,data)
 
