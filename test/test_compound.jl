@@ -7,7 +7,7 @@ using NCDatasets: usertype, usertype!
 # mutable struct are not supported
 # https://discourse.julialang.org/t/passing-an-array-of-structures-through-ccall/5194
 
-struct s1
+struct MyStruct
     i1::Cint
     i2::Cint
     f1::Cfloat
@@ -17,12 +17,12 @@ end
 
 sz = (2,3)
 
-data = Array{s1,2}(undef,sz)
+data = Array{MyStruct,2}(undef,sz)
 
 
 for j = 1:sz[2]
     for i = 1:sz[1]
-        data[i,j] = s1(i,j,1.2,2.3,(2,i,j))
+        data[i,j] = MyStruct(i,j,1.2,2.3,(2,i,j))
     end
 end
 
@@ -127,9 +127,9 @@ fname = tempname()
 ds = NCDataset(fname,"c")
 defDim(ds,"x",2)
 defDim(ds,"y",3)
-ncv = defVar(ds,"data",s1,("x","y"))
+ncv = defVar(ds,"data",MyStruct,("x","y"); typename = "nc_compound_t")
 
-@test eltype(ncv) == s1
+@test eltype(ncv) == MyStruct
 ncv[:,:] = data
 close(ds)
 
@@ -138,12 +138,12 @@ data_loaded = ds["data"][:,:]
 
 T = typeof(data_loaded[1,1])
 
-@test usertype(ds,:s1) == T
-@test sizeof(T) == sizeof(s1)
-@test fieldcount(T) == fieldcount(s1)
+@test usertype(ds,"nc_compound_t") == T
+@test sizeof(T) == sizeof(MyStruct)
+@test fieldcount(T) == fieldcount(MyStruct)
 for i = 1:fieldcount(T)
-    @test fieldoffset(T,i) == fieldoffset(s1,i)
-    @test fieldtype(T,i) == fieldtype(s1,i)
+    @test fieldoffset(T,i) == fieldoffset(MyStruct,i)
+    @test fieldtype(T,i) == fieldtype(MyStruct,i)
 end
 
 @test data_loaded[1,1].i1 == data[1,1].i1
@@ -151,10 +151,10 @@ end
 @test typeof(ds["data"][1,1]) == T
 
 
-usertype!(ds,:s1,s1)
+usertype!(ds,"nc_compound_t",MyStruct)
 
 data_loaded = ds["data"][:,:]
-@test eltype(data_loaded) == s1
+@test eltype(data_loaded) == MyStruct
 @test data_loaded == data
 
 #run(`ncdump $fname`)
