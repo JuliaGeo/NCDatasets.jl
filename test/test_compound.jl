@@ -112,7 +112,22 @@ using Downloads: download
 fname = download("https://raw.githubusercontent.com/Unidata/netcdf-c/refs/tags/v4.8.1/dap4_test/nctestfiles/test_struct_array.nc")
 ds = NCDataset(fname)
 
-array = ds["s"].var[:,:]
+array = ds["s"][:,:]
+typeof(array)
+# output
+# Matrix{c_t} (alias for Array{NCDatasets.ReconstructedTypes.c_t, 2})
+
+struct MyCompoundType
+    x::Int32
+    y::Int32
+end
+
+NCDatasets.usertype!(ds,"c_t",MyCompoundType)
+array = ds["s"][:,:]
+typeof(array)
+# output
+# Matrix{MyCompoundType} (alias for Array{MyCompoundType, 2})
+
 @test array[1,1].x == 1
 @test array[1,1].y == -1
 
@@ -120,6 +135,26 @@ array = ds["s"].var[:,:]
 @test array[1,2].y == 3
 
 close(ds)
+
+n = 5
+array2 = MyCompoundType.(1:n,n:-1:1)
+fname = tempname()
+ds = NCDataset(fname,"c")
+defDim(ds,"dim",n)
+ncv = defVar(ds,"data",MyCompoundType,("dim",); typename = "my_nc_compound_type")
+ncv[:] = array2
+close(ds)
+
+# or more compactly:
+
+NCDataset(fname,"c") do ds
+    # the julia type name is used per default in the netcdf file
+    # dimension "dim" is created automatically
+    ncv = defVar(ds,"data",array2,("dim",))
+end
+
+array2[1] = MyCompoundType(10,array2[1].y)
+
 #run(`ncdump $fname`)
 
 

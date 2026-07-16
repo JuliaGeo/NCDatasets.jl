@@ -60,3 +60,70 @@ NCDataset(comm::MPI.Comm,filename::AbstractString,mode::AbstractString)
 NCDatasets.paraccess
 ```
 
+# NetCDF compound types
+
+NetCDF 4 allows the users to define their own type, in particular, compound types which correspond to Julia structures.
+An array of such structures can be written to and loaded from a NetCDF file. For example:
+
+```julia
+fname = download("https://raw.githubusercontent.com/Unidata/netcdf-c/refs/tags/v4.8.1/dap4_test/nctestfiles/test_struct_array.nc")
+ds = NCDataset(fname)
+
+array = ds["s"][:,:]
+typeof(array)
+# output
+# Matrix{c_t} (alias for Array{NCDatasets.ReconstructedTypes.c_t, 2})
+
+struct MyCompoundType
+    x::Int32
+    y::Int32
+end
+
+NCDatasets.usertype!(ds,"c_t",MyCompoundType)
+array = ds["s"][:,:]
+typeof(array)
+# output
+# Matrix{MyCompoundType} (alias for Array{MyCompoundType, 2})
+
+```
+
+It is preferable in fact that the user defines the compound type as a julia struct and register it using the `NCDatasets.usertype!`.
+Users should not rely on the type name generated internally by `NCDatasets`. Note also that Julia treats two types as different even if they have
+the same memory layout.
+When defining these structures, avoid using the type `Int` as its size is platform-dependent. Vectors of fixed length can also be used in struct fields.
+They should be declared as `NTuple`s (see
+[Calling C and Fortran Code](https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/#Struct-Type-Correspondences) for the manual).
+
+Here is an example to write such a dataset:
+
+```julia
+n = 5
+array2 = MyCompoundType.(1:n,n:-1:1)
+fname = tempname()
+ds = NCDataset(fname,"c")
+defDim(ds,"dim",n)
+ncv = defVar(ds,"data",MyCompoundType,("dim",); typename = "my_nc_compound_type")
+ncv[:] = array2
+close(ds)
+
+# or more compactly:
+
+NCDataset(fname,"c") do ds
+    # the Julia type name is used by default in the netcdf file
+    # dimension "dim" is created automatically
+    ncv = defVar(ds,"data",array2,("dim",))
+end
+```
+
+An important restriction is that the `struct` must be immutable and contain only immutable fields. The memory layout of a `mutable struct` is not compatible with the layout expected by the C library. To update a single field in a struct, the user has to recreate the structure. For example to update the field `x` of the the first element to 10:
+
+```julia
+array2[1] = MyCompoundType(10,array2[1].y)
+```
+
+For large structures, it might be beneficial to use [Accessors](https://github.com/JuliaObjects/Accessors.jl).
+
+```julia
+using Accessors
+@set array2[1].x = 10
+```
