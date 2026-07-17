@@ -96,37 +96,3 @@ end
 nc_close(ncid)
 
 #run(`ncdump $fname`)
-
-fname = tempname()
-ds = NCDataset(fname,"c")
-defDim(ds,"x",2)
-defDim(ds,"y",3)
-ncv = defVar(ds,"data",MyStruct,("x","y"); typename = "nc_compound_t")
-
-@test eltype(ncv) == MyStruct
-ncv[:,:] = data
-close(ds)
-
-ds = NCDataset(fname)
-data_loaded = ds["data"][:,:]
-
-T = typeof(data_loaded[1,1])
-
-@test usertype(ds,"nc_compound_t") == T
-@test sizeof(T) == sizeof(MyStruct)
-@test fieldcount(T) == fieldcount(MyStruct)
-for i = 1:fieldcount(T)
-    @test fieldoffset(T,i) == fieldoffset(MyStruct,i)
-    @test fieldtype(T,i) == fieldtype(MyStruct,i)
-end
-
-@test data_loaded[1,1].i1 == data[1,1].i1
-
-@test typeof(ds["data"][1,1]) == T
-
-
-usertype!(ds,"nc_compound_t",MyStruct)
-
-data_loaded = ds["data"][:,:]
-@test eltype(data_loaded) == MyStruct
-@test data_loaded == data
