@@ -1,9 +1,47 @@
-function usertype!(ds::Dataset,typename,jltype)
+"""
+    NCDatasets.usertype!(ds::Dataset,typename::SymbolOrString,jltype::DataType)a
+
+Use the julia struct `jltype` for compound types called `typename` defined in then
+netCDF dataset `ds`.
+
+Example:
+
+```julia
+using NCDatasets
+struct MyComplex
+    r::Float32
+    i::Float32
+end
+
+# create some data
+n = 10
+data = MyComplex.(rand(Float32,n),rand(Float32,n))
+
+fname = tempname()
+NCDataset(fname,"c") do ds
+    defVar(ds,"data",data,("x",); typename = "nc_complex_t")
+end
+
+data = NCDataset(fname) do ds
+    # prevent NCDatasets to dynamically reconstruct the struct and use
+    # provided type "MyComplex" instead
+    NCDatasets.usertype!(ds,"nc_complex_t",MyComplex)
+    ds["data"][:]
+end
+
+eltype(data)
+# output
+#
+# MyComplex
+```
+"""
+function usertype!(ds::Dataset,typename::SymbolOrString,jltype::DataType)
     ds.usertypes[Symbol(typename)] = jltype
 end
 
+
 # TODO: reconstruct type if necessary
-function usertype(ds::Dataset,typename)
+function usertype(ds::Dataset,typename::SymbolOrString)
     ut = get(ds.usertypes,Symbol(typename),nothing)
     if ut == nothing
         pd = parentdataset(ds)
