@@ -72,7 +72,7 @@ ds = NCDataset(fname)
 array = ds["s"][:,:]
 typeof(array)
 # output
-# Matrix{c_t} (alias for Array{NCDatasets.ReconstructedTypes.c_t, 2})
+# Matrix{c_t} (alias for Array{NCDatasets.ReconstructedTypes_123.c_t, 2})
 
 struct MyCompoundType
     x::Int32
