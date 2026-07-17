@@ -115,8 +115,7 @@ function NCDataset(ncid::Integer,
     )
 
     if !iswritable
-        #FIXME
-        #initboundsmap!(ds)
+        initboundsmap!(ds)
     end
 
     finalizer(_finalize, ds)
