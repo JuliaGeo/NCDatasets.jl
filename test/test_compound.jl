@@ -88,7 +88,7 @@ type_name,type_size,type_nfields = nc_inq_compound(ncid,xtype)
 @test type_nfields == fieldcount(T)
 
 usertypes = Dict()
-T2 = reconstruct_compound_type(ncid,xtype,usertypes)
+T2 = reconstruct_compound_type(ncid,xtype,usertypes,NCDatasets.temp_module())
 
 data2 = Array{T2,2}(undef,sz...)
 
