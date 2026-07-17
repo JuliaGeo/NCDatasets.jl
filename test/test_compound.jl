@@ -133,3 +133,29 @@ ds1 = NCDataset(fname1);
 
 ds2 = NCDataset(fname2);
 @test ds2["data"][1].real == data2[1].real
+
+
+# Non-algined data
+
+struct NonAlignedType
+    float_field::Float32
+    int_field::Int32
+    byte_field::Int8
+end
+
+array_ref = [NonAlignedType(i,i,i) for i = 1:10]
+fname = tempname()
+
+NCDataset(fname,"c") do ds
+    ncv = defVar(ds,"data",array_ref,("n",))
+end
+
+# load data
+
+ds = NCDataset(fname)
+array = ds["data"][:]
+close(ds)
+
+#=
+run(`ncdump $fname`)
+=#
