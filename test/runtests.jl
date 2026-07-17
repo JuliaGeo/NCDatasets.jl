@@ -56,6 +56,7 @@ end
 
 @testset "Compound types" begin
     include("test_compound.jl")
+    include("test_compound_nested.jl")
 end
 
 @testset "Time and calendars" begin
