@@ -105,57 +105,53 @@ nc_close(ncid)
 
 #run(`ncdump $filename`)
 
-
-using Downloads: download
-
-fname = download("https://raw.githubusercontent.com/Unidata/netcdf-c/refs/tags/v4.8.1/dap4_test/nctestfiles/test_struct_array.nc")
-ds = NCDataset(fname)
-
-array = ds["s"][:,:]
-typeof(array)
-# output
-# Matrix{c_t} (alias for Array{NCDatasets.ReconstructedTypes.c_t, 2})
+# write file similar to
+# https://raw.githubusercontent.com/Unidata/netcdf-c/refs/tags/v4.8.1/dap4_test/nctestfiles/test_struct_array.nc
 
 struct MyCompoundType
     x::Int32
     y::Int32
 end
 
-NCDatasets.usertype!(ds,"c_t",MyCompoundType)
-array = ds["s"][:,:]
-typeof(array)
-# output
-# Matrix{MyCompoundType} (alias for Array{MyCompoundType, 2})
+dx = 4
+dy = 3
 
-@test array[1,1].x == 1
-@test array[1,1].y == -1
-
-@test array[1,2].x == -1
-@test array[1,2].y == 3
-
-close(ds)
-
-n = 5
-array2 = MyCompoundType.(1:n,n:-1:1)
+array_ref = [MyCompoundType.(i,j) for i = 1:dx, j = 1:dy]
 fname = tempname()
 ds = NCDataset(fname,"c")
-defDim(ds,"dim",n)
-ncv = defVar(ds,"data",MyCompoundType,("dim",); typename = "my_nc_compound_type")
-ncv[:] = array2
+defDim(ds,"dx",dx)
+defDim(ds,"dy",dy)
+ncv = defVar(ds,"s",MyCompoundType,("dx","dy"); typename = "c_t")
+ncv[:] = array_ref
 close(ds)
+
 
 # or more compactly:
 
 NCDataset(fname,"c") do ds
-    # the julia type name is used per default in the netcdf file
     # dimension "dim" is created automatically
-    ncv = defVar(ds,"data",array2,("dim",))
+    ncv = defVar(ds,"s",array_ref,("dx","dy"); typename = "c_t")
 end
 
-array2[1] = MyCompoundType(10,array2[1].y)
+
+ds = NCDataset(fname)
+array = ds["s"][:,:]
+
+@test occursin("c_t",string(typeof(array)))
+
+# output
+# Matrix{c_t} (alias for Array{NCDatasets.ReconstructedTypes.c_t, 2})
+
+
+NCDatasets.usertype!(ds,"c_t",MyCompoundType)
+array = ds["s"][:,:]
+
+@test eltype(array) == MyCompoundType
+@test array == array_ref
+
+close(ds)
 
 #run(`ncdump $fname`)
-
 
 fname = tempname()
 ds = NCDataset(fname,"c")
