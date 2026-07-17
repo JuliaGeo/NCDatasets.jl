@@ -138,10 +138,8 @@ ds = NCDataset(fname)
 array = ds["s"][:,:]
 
 @test occursin("c_t",string(typeof(array)))
-
 # output
-# Matrix{c_t} (alias for Array{NCDatasets.ReconstructedTypes.c_t, 2})
-
+# Matrix{c_t} (alias for Array{NCDatasets.ReconstructedTypes....c_t, 2})
 
 NCDatasets.usertype!(ds,"c_t",MyCompoundType)
 array = ds["s"][:,:]
