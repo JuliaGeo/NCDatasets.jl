@@ -6,7 +6,7 @@ This is minimal example how to read a NetCDF file.
 using NCDatasets
 # open the file and show its metadata (if called in the REPL without ending semicolon)
 ds = NCDataset("filename.nc","r")
-# load all data of the variable temperature
+# load all data of the 2D variable temperature
 v = ds["temperature"][:,:]
 # load the attribute units
 unit = v.attrib["units"]
