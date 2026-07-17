@@ -9,7 +9,18 @@ function usertype!(ds::Dataset,typename,jltype)
     ds.usertypes[Symbol(typename)] = jltype
 end
 
-usertype(ds::Dataset,typename) = get(ds.usertypes,Symbol(typename),nothing)
+# TODO: reconstruct type if necessary
+function usertype(ds::Dataset,typename)
+    ut = get(ds.usertypes,Symbol(typename),nothing)
+    if ut == nothing
+        pd = parentdataset(ds)
+        if pd !== nothing
+            return usertype(pd,typename)
+        end
+    end
+
+    return ut
+end
 
 function reconstruct_compound_type(ncid,xtype,usertypes)
     type_name,type_size,nfields = nc_inq_compound(ncid,xtype)
