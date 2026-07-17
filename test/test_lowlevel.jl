@@ -68,7 +68,8 @@ for sampledata in samples
     xtype2 = NCDatasets.nc_inq_vartype(ncid,varid)
     @test xtype == xtype
 
-    name2,jltype2,dimids2,natts2 = NCDatasets.nc_inq_var(ncid,varid)
+    usertypes = Dict()
+    name2,jltype2,dimids2,natts2 = NCDatasets.nc_inq_var(ncid,varid,usertypes)
     @test name2 == varname
     @test jltype2 == T
     @test dimids2 == reverse(dimids)
