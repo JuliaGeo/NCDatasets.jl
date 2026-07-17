@@ -15,7 +15,13 @@ function usertype(ds::Dataset,typename)
     return ut
 end
 
-function reconstruct_compound_type(ncid,xtype,usertypes)
+# Module for reconstructing user-defined types
+function temp_module()
+    modname = Symbol(string("ReconstructedTypes_",rand(UInt32)))
+    return eval(:(module $modname end))
+end
+
+function reconstruct_compound_type(ncid,xtype,usertypes,mod)
     type_name,type_size,nfields = nc_inq_compound(ncid,xtype)
 
     if haskey(usertypes,Symbol(type_name))
@@ -44,10 +50,6 @@ function reconstruct_compound_type(ncid,xtype,usertypes)
     # https://github.com/JuliaIO/JLD2.jl/blob/abb9e5920bbe956a4d9fd2f92550cd7ea0a715aa/src/data/reconstructing_datatypes.jl#L493
 
     @debug "generate type for $type_name"
-
-    # Module for reconstructing user-defined types
-    modname = Symbol(string("ReconstructedTypes_",rand(UInt32)))
-    mod = eval(:(module $modname end))
 
     Core.eval(
         mod,

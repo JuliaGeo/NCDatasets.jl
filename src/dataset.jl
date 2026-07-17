@@ -110,11 +110,13 @@ function NCDataset(ncid::Integer,
         Dict{String,String}(),
         maskingvalue,
         ReentrantLock(),
+        temp_module(),
         usertypes,
     )
 
     if !iswritable
-        initboundsmap!(ds)
+        #FIXME
+        #initboundsmap!(ds)
     end
 
     finalizer(_finalize, ds)
