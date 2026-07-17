@@ -33,7 +33,8 @@ function reconstruct_compound_type(ncid,xtype,usertypes,mod)
 
     types = []
     for fieldid = 0:(nfields-1)
-        fT = jlType[nc_inq_compound_fieldtype(ncid,xtype,fieldid)]
+        field_typeid = nc_inq_compound_fieldtype(ncid,xtype,fieldid)
+        fT = _jltype(ncid,field_typeid,usertypes,mod)
 
         fieldndims = nc_inq_compound_fieldndims(ncid,xtype,fieldid)
 
@@ -85,12 +86,79 @@ function create_compound_type(ncid,T,type_name)
                 ncid,typeid,fieldname(T,i),
                 offset,nctype,dim_sizes)
         else
-            nctype = ncType[fieldtype(T,i)]
+            nctype = get(ncType,fT,nothing)
+            if nctype == nothing
+                nctype = create_compound_type(ncid,fT,string(fT))
+            end
             nc_insert_compound(
                 ncid, typeid, fieldname(T,i),
                 offset, nctype)
         end
     end
 
+    return typeid
+end
+
+
+
+function create_compound_type2(ncid,T,type_name,cache,usertypes)
+    nctype = get(ncType,T,nothing)
+    if nctype !== nothing
+        return nctype
+    end
+
+#   nctype = get(cache,T,nothing)
+#   if nctype !== nothing
+#       return nctype
+#   end
+
+    for (name,userT) in usertypes
+        if userT == T
+            for id = nc_inq_typeids(ncid)
+                if name == Symbol(nc_inq_compound_name(ncid,id))
+                    return id
+                end
+            end
+        end
+    end
+
+    # make sure that the types of all fields are first created
+    # if they are created "on-the-fly" in the second loop, I get
+    # julia: nc4hdf.c:397: nc4_get_hdf_typeid: Zusicherung »typeid« nicht erfüllt.
+
+    for i = 1:fieldcount(T)
+        fT = fieldtype(T,i)
+        if fT <: NTuple
+            elT = fT.types[1]
+            @assert all(fT.types .== elT)
+            create_compound_type2(ncid,elT,string(elT),cache,usertypes)
+        else
+            create_compound_type2(ncid,fT,string(fT),cache,usertypes)
+        end
+    end
+
+    typeid = nc_def_compound(ncid, sizeof(T), type_name)
+
+    for i = 1:fieldcount(T)
+        offset = fieldoffset(T,i)
+        fT = fieldtype(T,i)
+        if fT <: NTuple
+            elT = fT.types[1]
+            nctype = create_compound_type2(ncid,elT,string(elT),cache,usertypes)
+            dim_sizes = [length(fT.types)]
+            nc_insert_array_compound(
+                ncid,typeid,fieldname(T,i),
+                offset,nctype,dim_sizes)
+        else
+            nctype = create_compound_type2(ncid,fT,string(fT),cache,usertypes)
+
+            nc_insert_compound(
+                ncid, typeid, fieldname(T,i),
+                offset, nctype)
+        end
+    end
+
+    cache[T] = typeid
+    usertypes[Symbol(type_name)] = T
     return typeid
 end
