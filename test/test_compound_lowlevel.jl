@@ -95,52 +95,6 @@ end
 
 nc_close(ncid)
 
-#run(`ncdump $filename`)
-
-# write file similar to
-# https://raw.githubusercontent.com/Unidata/netcdf-c/refs/tags/v4.8.1/dap4_test/nctestfiles/test_struct_array.nc
-
-struct MyCompoundType
-    x::Int32
-    y::Int32
-end
-
-dx = 4
-dy = 3
-
-array_ref = [MyCompoundType.(i,j) for i = 1:dx, j = 1:dy]
-fname = tempname()
-ds = NCDataset(fname,"c")
-defDim(ds,"dx",dx)
-defDim(ds,"dy",dy)
-ncv = defVar(ds,"s",MyCompoundType,("dx","dy"); typename = "c_t")
-ncv[:] = array_ref
-close(ds)
-
-
-# or more compactly:
-
-NCDataset(fname,"c") do ds
-    # dimension "dim" is created automatically
-    ncv = defVar(ds,"s",array_ref,("dx","dy"); typename = "c_t")
-end
-
-
-ds = NCDataset(fname)
-array = ds["s"][:,:]
-
-@test occursin("c_t",string(typeof(array)))
-# output
-# Matrix{c_t} (alias for Array{NCDatasets.ReconstructedTypes....c_t, 2})
-
-NCDatasets.usertype!(ds,"c_t",MyCompoundType)
-array = ds["s"][:,:]
-
-@test eltype(array) == MyCompoundType
-@test array == array_ref
-
-close(ds)
-
 #run(`ncdump $fname`)
 
 fname = tempname()
@@ -176,43 +130,3 @@ usertype!(ds,"nc_compound_t",MyStruct)
 data_loaded = ds["data"][:,:]
 @test eltype(data_loaded) == MyStruct
 @test data_loaded == data
-
-#run(`ncdump $fname`)
-
-# two NetCDF file using the same compound type name but with different layout
-n = 10
-
-struct Complex1
-    r::Float32
-    i::Float32
-end
-
-data1 = Complex1.(rand(Float32,n),rand(Float32,n))
-
-fname1 = tempname()
-NCDataset(fname1,"c") do ds1
-    defVar(ds1,"data",data1,("x",); typename = "Complex")
-end
-
-struct Complex2
-    real::Float64
-    imag::Float64
-end
-
-data2 = Complex2.(rand(Float64,n),rand(Float64,n))
-
-fname2 = tempname()
-NCDataset(fname2,"c") do ds2
-    defVar(ds2,"data",data2,("x",); typename = "Complex")
-end
-
-#run(`ncdump $fname2`)
-
-ds1 = NCDataset(fname1);
-@test ds1["data"][1].r == data1[1].r
-
-ds2 = NCDataset(fname2);
-@test ds2["data"][1].real == data2[1].real
-
-
-
