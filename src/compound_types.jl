@@ -72,15 +72,11 @@ end
 
 
 function create_compound_type(ncid,T,type_name,usertypes)
+    # plain type
     nctype = get(ncType,T,nothing)
     if nctype !== nothing
         return nctype
     end
-
-#   nctype = get(cache,T,nothing)
-#   if nctype !== nothing
-#       return nctype
-#   end
 
     for (name,userT) in usertypes
         if userT == T
@@ -130,4 +126,9 @@ function create_compound_type(ncid,T,type_name,usertypes)
 
     usertypes[Symbol(type_name)] = T
     return typeid
+end
+
+
+function defCompoundType(ds,T,type_name)
+    create_compound_type(ds.ncid,T,type_name,ds.usertypes)
 end
