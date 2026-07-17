@@ -1,10 +1,3 @@
-# Module for reconstructing user-defined types
-# The resulting type is directly captured as it can be overwritten by
-# compound type with the same from other files
-module ReconstructedTypes end
-
-const ReconstructedTypesLock = ReentrantLock()
-
 function usertype!(ds::Dataset,typename,jltype)
     ds.usertypes[Symbol(typename)] = jltype
 end
@@ -25,51 +18,52 @@ end
 function reconstruct_compound_type(ncid,xtype,usertypes)
     type_name,type_size,nfields = nc_inq_compound(ncid,xtype)
 
-    # multiple threads could try to reconstruct the same type
-    lock(ReconstructedTypesLock) do
-        if haskey(usertypes,Symbol(type_name))
-            @debug "get cashed type for $type_name"
-            return usertypes[Symbol(type_name)]
+    if haskey(usertypes,Symbol(type_name))
+        @debug "get cashed type for $type_name"
+        return usertypes[Symbol(type_name)]
+    end
+
+    cnames = Symbol.(nc_inq_compound_fieldname.(ncid,xtype,0:(nfields-1)))
+
+    types = []
+    for fieldid = 0:(nfields-1)
+        fT = jlType[nc_inq_compound_fieldtype(ncid,xtype,fieldid)]
+
+        fieldndims = nc_inq_compound_fieldndims(ncid,xtype,fieldid)
+
+        if fieldndims == 0
+            push!(types,fT)
+        else
+            dim_sizes = nc_inq_compound_fielddim_sizes(ncid,xtype,fieldid)
+            fT2 = NTuple{Int(dim_sizes[1]),fT}
+            push!(types,fT2)
         end
+    end
 
-        cnames = Symbol.(nc_inq_compound_fieldname.(ncid,xtype,0:(nfields-1)))
+    # from JLD2, MIT "Expat" License
+    # https://github.com/JuliaIO/JLD2.jl/blob/abb9e5920bbe956a4d9fd2f92550cd7ea0a715aa/src/data/reconstructing_datatypes.jl#L493
 
-        types = []
-        for fieldid = 0:(nfields-1)
-            fT = jlType[nc_inq_compound_fieldtype(ncid,xtype,fieldid)]
+    @debug "generate type for $type_name"
 
-            fieldndims = nc_inq_compound_fieldndims(ncid,xtype,fieldid)
+    # Module for reconstructing user-defined types
+    modname = Symbol(string("ReconstructedTypes_",rand(UInt32)))
+    mod = eval(:(module $modname end))
 
-            if fieldndims == 0
-                push!(types,fT)
-            else
-                dim_sizes = nc_inq_compound_fielddim_sizes(ncid,xtype,fieldid)
-                fT2 = NTuple{Int(dim_sizes[1]),fT}
-                push!(types,fT2)
-            end
-        end
-
-        # from JLD2, MIT "Expat" License
-        # https://github.com/JuliaIO/JLD2.jl/blob/abb9e5920bbe956a4d9fd2f92550cd7ea0a715aa/src/data/reconstructing_datatypes.jl#L493
-
-        @debug "generate type for $type_name"
-
-        Core.eval(
-            ReconstructedTypes,
-            Expr(:struct, false, Symbol(type_name),
-                 Expr(:block,
-                      Any[ Expr(Symbol("::"), cnames[i], types[i]) for i = 1:length(types) ]...,
-                      # suppress default constructors, plus a bogus `new()` call to make sure
-                      # ninitialized is zero.
-                      Expr(:if, false, Expr(:call, :new))
-                      )))
+    Core.eval(
+        mod,
+        Expr(:struct, false, Symbol(type_name),
+             Expr(:block,
+                  Any[ Expr(Symbol("::"), cnames[i], types[i]) for i = 1:length(types) ]...,
+                  # suppress default constructors, plus a bogus `new()` call to make sure
+                  # ninitialized is zero.
+                  Expr(:if, false, Expr(:call, :new))
+                  )))
 
 
-        invokelatest() do
-            T2 = getfield(ReconstructedTypes, Symbol(type_name))
-            usertypes[Symbol(type_name)] = T2
-            return T2
-        end
+    invokelatest() do
+        T2 = getfield(mod, Symbol(type_name))
+        usertypes[Symbol(type_name)] = T2
+        return T2
     end
 end
 
