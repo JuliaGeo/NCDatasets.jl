@@ -71,37 +71,7 @@ function reconstruct_compound_type(ncid,xtype,usertypes,mod)
 end
 
 
-function create_compound_type(ncid,T,type_name)
-    typeid = nc_def_compound(ncid, sizeof(T), type_name)
-
-    for i = 1:fieldcount(T)
-        offset = fieldoffset(T,i)
-        fT = fieldtype(T,i)
-        if fT <: NTuple
-            elT = fT.types[1]
-            @assert all(fT.types .== elT)
-            nctype = ncType[elT]
-            dim_sizes = [length(fT.types)]
-            nc_insert_array_compound(
-                ncid,typeid,fieldname(T,i),
-                offset,nctype,dim_sizes)
-        else
-            nctype = get(ncType,fT,nothing)
-            if nctype == nothing
-                nctype = create_compound_type(ncid,fT,string(fT))
-            end
-            nc_insert_compound(
-                ncid, typeid, fieldname(T,i),
-                offset, nctype)
-        end
-    end
-
-    return typeid
-end
-
-
-
-function create_compound_type2(ncid,T,type_name,cache,usertypes)
+function create_compound_type(ncid,T,type_name,usertypes)
     nctype = get(ncType,T,nothing)
     if nctype !== nothing
         return nctype
@@ -131,9 +101,9 @@ function create_compound_type2(ncid,T,type_name,cache,usertypes)
         if fT <: NTuple
             elT = fT.types[1]
             @assert all(fT.types .== elT)
-            create_compound_type2(ncid,elT,string(elT),cache,usertypes)
+            create_compound_type(ncid,elT,string(elT),usertypes)
         else
-            create_compound_type2(ncid,fT,string(fT),cache,usertypes)
+            create_compound_type(ncid,fT,string(fT),usertypes)
         end
     end
 
@@ -144,13 +114,13 @@ function create_compound_type2(ncid,T,type_name,cache,usertypes)
         fT = fieldtype(T,i)
         if fT <: NTuple
             elT = fT.types[1]
-            nctype = create_compound_type2(ncid,elT,string(elT),cache,usertypes)
+            nctype = create_compound_type(ncid,elT,string(elT),usertypes)
             dim_sizes = [length(fT.types)]
             nc_insert_array_compound(
                 ncid,typeid,fieldname(T,i),
                 offset,nctype,dim_sizes)
         else
-            nctype = create_compound_type2(ncid,fT,string(fT),cache,usertypes)
+            nctype = create_compound_type(ncid,fT,string(fT),usertypes)
 
             nc_insert_compound(
                 ncid, typeid, fieldname(T,i),
@@ -158,7 +128,6 @@ function create_compound_type2(ncid,T,type_name,cache,usertypes)
         end
     end
 
-    cache[T] = typeid
     usertypes[Symbol(type_name)] = T
     return typeid
 end

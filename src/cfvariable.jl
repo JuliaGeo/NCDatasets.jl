@@ -118,8 +118,7 @@ function defVar(ds::NCDataset,name::SymbolOrString,vtype::DataType,dimnames;
             elseif length(fieldnames(vtype)) > 0
                 @debug "assume type $vtype is a struct "
                 typename = (isnothing(typename) ? string(vtype) : typename)
-                ds.usertypes[Symbol(typename)] = vtype
-                create_compound_type(ds.ncid,vtype,typename)
+                create_compound_type(ds.ncid,vtype,typename,ds.usertypes)
             else
                 @warn "unsupported type: class=$(class)"
                 Nothing
