@@ -1552,7 +1552,7 @@ function _jltype(ncid,xtype,usertypes)
 end
 
 
-@with_lock function nc_inq_var(ncid::Integer,varid::Integer,usertypes)
+@with_lock function nc_inq_var(ncid::Integer,varid::Integer)
     ndims = nc_inq_varndims(ncid,varid)
 
     ndimsp = Ref(Cint(0))
@@ -1566,9 +1566,8 @@ end
     name = safe_string(cname)
 
     xtype = xtypep[]
-    jltype = _jltype(ncid,xtype,usertypes)
 
-    return name,jltype,dimids,nattsp[]
+    return name,xtype,dimids,nattsp[]
 end
 
 @with_lock function nc_inq_varid(ncid::Integer,name)
