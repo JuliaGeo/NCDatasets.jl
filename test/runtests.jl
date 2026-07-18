@@ -36,7 +36,6 @@ println("NetCDF version: ",NCDatasets.nc_inq_libvers())
     include("test_bounds.jl")
     include("test_cont_ragged_array.jl")
     include("test_chunk_cache.jl")
-    include("test_enum.jl")
     include("test_missing_value.jl")
     include("test_override_attrib.jl")
     include("test_memory.jl")
@@ -58,6 +57,11 @@ end
     include("test_compound_lowlevel.jl")
     include("test_compound.jl")
     include("test_compound_nested.jl")
+end
+
+@testset "Enum types" begin
+    include("test_enum_lowlevel.jl")
+    include("test_enum.jl")
 end
 
 @testset "Time and calendars" begin

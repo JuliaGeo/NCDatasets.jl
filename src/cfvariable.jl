@@ -113,6 +113,10 @@ function defVar(ds::NCDataset,name::SymbolOrString,vtype::DataType,dimnames;
             if vtype <: Vector
                 # variable-length type
                 typeid = nc_def_vlen(ds.ncid, typename, ncType[eltype(vtype)])
+            elseif vtype <: Enum
+                typename_enum = last(split(string(vtype),'.')) # strip module prefix
+                typename = (isnothing(typename) ? typename_enum : typename)
+                defEnumType(ds,vtype,typename)
             elseif haskey(ncType, vtype)
                 ncType[vtype]
             elseif length(fieldnames(vtype)) > 0

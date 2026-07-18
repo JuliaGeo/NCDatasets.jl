@@ -1540,6 +1540,8 @@ function _jltype(ncid,xtype,usertypes,mod)
                 Vector{jlType[base_nc_type]}
             elseif class == NC_COMPOUND
                 reconstruct_compound_type(ncid,xtype,usertypes,mod)
+            elseif class == NC_ENUM
+                reconstruct_enum_type(ncid,xtype,usertypes,mod)
             else
                 @warn "unsupported type: class=$(class)"
                 Nothing
