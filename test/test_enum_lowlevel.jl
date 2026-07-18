@@ -14,7 +14,7 @@ using CategoricalArrays
 # https://discourse.julialang.org/t/encapsulating-enum-access-via-dot-syntax/11785/2
 # https://github.com/fredrikekre/EnumX.jl
 
-baremodule module_cloud_class_t
+baremodule Clouds
 using Base: @enum
 @enum cloud_class_t::Int8 begin
     Clear = 0
@@ -137,7 +137,7 @@ end
 # read data
 
 
-data3 = Vector{module_cloud_class_t.cloud_class_t}(undef,len)
+data3 = Vector{Clouds.cloud_class_t}(undef,len)
 nc_get_var!(ncid,varid,data3)
 
 #@show data3

@@ -28,7 +28,7 @@ ds = NCDataset(fname,"c");
 defVar(ds,"data",data_ref,("x",));
 close(ds)
 
-run(`ncdump -h $fname`)
+#run(`ncdump -h $fname`)
 
 # read enum array
 
