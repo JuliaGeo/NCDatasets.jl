@@ -52,8 +52,11 @@ ds = NCDataset("file.nc")
 title = ds.attrib["title"]
 ```
 """
-attrib(ds::Union{Dataset,Variable},name::SymbolOrString) = nc_get_att(_ncid(ds),_varid(ds),name)
-
+function attrib(ds::Union{Dataset,Variable},name::SymbolOrString)
+    xtype,len = nc_inq_att(_ncid(ds),_varid(ds),name)
+    attribT = _jltype(_ncid(ds),xtype,_dataset(ds).usertypes,_dataset(ds).mod)
+    nc_get_att(_ncid(ds),_varid(ds),name; attribT)
+end
 
 
 """
@@ -83,7 +86,8 @@ close(ds)
 function defAttrib(ds::Union{Dataset,Variable},name::SymbolOrString,data)
     # make sure that the file is in define mode
     defmode(_dataset(ds)) do
-        return nc_put_att(_ncid(ds),_varid(ds),name,data)
+        typeid = nctypeid(_dataset(ds),(data isa AbstractVector ? eltype(data) : typeof(data)))
+        return nc_put_att(_ncid(ds),_varid(ds),name,data; typeid)
     end
 end
 

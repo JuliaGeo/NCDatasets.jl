@@ -34,7 +34,7 @@ function create_enum_type(ncid,T,type_name,usertypes)
     for (name,userT) in usertypes
         if userT == T
             for id = nc_inq_typeids(ncid)
-                if name == Symbol(nc_inq_enum_name(ncid,id))
+                if name == Symbol(nc_inq_enum(ncid,id)[1])
                     return id
                 end
             end

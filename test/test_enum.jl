@@ -25,10 +25,15 @@ data_ref = [Clouds.Clear,Clouds.Cumulonimbus,Clouds.Nimbostratus,Clouds.Cirrus]
 
 fname = tempname()
 ds = NCDataset(fname,"c");
-defVar(ds,"data",data_ref,("x",));
+ncv = defVar(ds,"data",data_ref,("x",));
+#ncv.attrib["_FillValue"] = Clouds.Missing
+ncv.attrib["foo"] = Clouds.Missing
+ds.attrib["attib_enum"] = Clouds.Clear
 close(ds)
 
-#run(`ncdump -h $fname`)
+#=
+run(`ncdump -h $fname`)
+=#
 
 # read enum array
 
@@ -53,5 +58,6 @@ data = ds["data"][:]
 @test eltype(data) == Clouds.cloud_class_t
 @test data == data_ref
 
+@test ds.attrib["attib_enum"] == Clouds.Clear
 close(ds)
 

@@ -109,25 +109,7 @@ function defVar(ds::NCDataset,name::SymbolOrString,vtype::DataType,dimnames;
     defmode(ds) do
         dimids = Cint[nc_inq_dimid(ds.ncid,dimname) for dimname in dimnames[end:-1:1]]
 
-        typeid =
-            if vtype <: Vector
-                # variable-length type
-                typeid = nc_def_vlen(ds.ncid, typename, ncType[eltype(vtype)])
-            elseif vtype <: Enum
-                typename_enum = last(split(string(vtype),'.')) # strip module prefix
-                typename = (isnothing(typename) ? typename_enum : typename)
-                defEnumType(ds,vtype,typename)
-            elseif haskey(ncType, vtype)
-                ncType[vtype]
-            elseif length(fieldnames(vtype)) > 0
-                @debug "assume type $vtype is a struct "
-                typename = (isnothing(typename) ? string(vtype) : typename)
-                defCompoundType(ds,vtype,typename)
-            else
-                @warn "unsupported type: class=$(class)"
-                Nothing
-            end
-
+        typeid = nctypeid(ds,vtype; typename)
         varid = nc_def_var(ds.ncid,name,typeid,dimids)
 
         if chunksizes !== nothing

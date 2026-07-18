@@ -27,6 +27,30 @@ const jlType = Dict(
 # Inverse mapping
 const ncType = Dict(value => key for (key, value) in jlType)
 
+function nctypeid(ds,vtype; typename = nothing)
+    if vtype <: Vector
+        # variable-length type
+        typeid = nc_def_vlen(ds.ncid, typename, ncType[eltype(vtype)])
+    elseif vtype <: Enum
+        typename_enum = last(split(string(vtype),'.')) # strip module prefix
+        typename = (isnothing(typename) ? typename_enum : typename)
+        typeid = defEnumType(ds,vtype,typename)
+    elseif haskey(ncType, vtype)
+        typeid = ncType[vtype]
+    elseif length(fieldnames(vtype)) > 0
+        @debug "assume type $vtype is a struct "
+        typename = (isnothing(typename) ? string(vtype) : typename)
+        typeid = defCompoundType(ds,vtype,typename)
+    else
+        @warn "unsupported type: class=$(class)"
+        typeid = Nothing
+    end
+
+    return typeid
+end
+
+
+
 iswritable(ds::NCDataset) = ds.iswritable
 maskingvalue(ds::NCDataset) = ds.maskingvalue
 
