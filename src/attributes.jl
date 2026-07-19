@@ -84,6 +84,10 @@ ds.attrib["title"] = ["my title"]
 close(ds)
 """
 function defAttrib(ds::Union{Dataset,Variable},name::SymbolOrString,data)
+    if !(data isa Union{String,Enum}) && (ndims(data) > 1)
+        error("Attributes must be a scalar or a vector (while writting attribute '$name' to file $(path(_dataset(ds))).")
+    end
+
     # make sure that the file is in define mode
     defmode(_dataset(ds)) do
         typeid = nctypeid(_dataset(ds),(data isa AbstractVector ? eltype(data) : typeof(data)))
@@ -91,6 +95,11 @@ function defAttrib(ds::Union{Dataset,Variable},name::SymbolOrString,data)
     end
 end
 
+function defAttrib(ds::Union{Dataset,Variable},name::SymbolOrString,data::Vector{Any})
+    T = promote_type(typeof.(data)...)
+    @debug "promoted type for attribute $T"
+    defAttrib(ds,name,T.(data))
+end
 
 """
     Base.haskey(a::Attributes,name::SymbolOrString)

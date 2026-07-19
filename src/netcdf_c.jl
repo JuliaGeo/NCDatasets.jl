@@ -605,12 +605,6 @@ function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Vect
     nc_put_att(ncid,varid,name,typeid,data)
 end
 
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Vector{Any};
-                    T = promote_type(typeof.(data)...), typeid = ncType[T])
-    @debug "promoted type for attribute $T"
-    nc_put_att(ncid,varid,name,typeid,T.(data))
-end
-
 # convert e.g. ranges to vectors
 function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::AbstractVector; typeid = ncType[eltype(data)])
     nc_put_att(ncid,varid,name,Vector(data); typeid)
@@ -675,7 +669,6 @@ end
 end
 
 @with_lock function nc_inq_enum(ncid::Integer,xtype::Integer)
-
     base_nc_typep = Ref(nc_type(0))
     base_sizep = Ref(Csize_t(0))
     num_membersp = Ref(Csize_t(0))
