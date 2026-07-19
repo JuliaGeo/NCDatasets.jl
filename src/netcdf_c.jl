@@ -1531,7 +1531,8 @@ function _jltype(ncid,xtype,usertypes,mod)
             name,size,base_nc_type,nfields,class = nc_inq_user_type(ncid,xtype)
             # assume here variable-length type
             if class == NC_VLEN
-                Vector{jlType[base_nc_type]}
+                T = _jltype(ncid,base_nc_type,usertypes,mod)
+                Vector{T}
             elseif class == NC_COMPOUND
                 reconstruct_compound_type(ncid,xtype,usertypes,mod)
             elseif class == NC_ENUM

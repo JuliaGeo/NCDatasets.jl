@@ -30,7 +30,8 @@ const ncType = Dict(value => key for (key, value) in jlType)
 function nctypeid(ds,vtype; typename = nothing)
     if vtype <: Vector
         # variable-length type
-        typeid = nc_def_vlen(ds.ncid, typename, ncType[eltype(vtype)])
+        eltypeid = nctypeid(ds,eltype(vtype); typename)
+        typeid = nc_def_vlen(ds.ncid, typename, eltypeid)
     elseif vtype <: Enum
         typename_enum = last(split(string(vtype),'.')) # strip module prefix
         typename = (isnothing(typename) ? typename_enum : typename)

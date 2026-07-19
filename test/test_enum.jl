@@ -83,3 +83,31 @@ data = ds["data"][:]
 @test ismissing(data[end])
 @test ds.attrib["attib_enum"] == Clouds.Clear
 close(ds)
+
+# vlen-array of enums
+
+dimlen = 10
+T = Clouds.cloud_class_t
+
+
+data = Vector{Vector{T}}(undef,dimlen)
+for i = 1:length(data)
+    data[i] = rand(instances(Clouds.cloud_class_t),i)
+end
+
+fname = tempname()
+ds = NCDataset(fname,"c",format=:netcdf4);
+ds.dim["casts"] = dimlen;
+vlentypename = "enum-vlen"
+NCDatasets.defEnumType(ds,T,"cloud_class_t")
+v = defVar(ds,varname,Vector{T},("casts",); typename = vlentypename)
+v.var[:] = data
+
+@test eltype(v.var) == Vector{T}
+data2 = v.var[:]
+@test data == data2
+close(ds)
+
+#=
+run(`ncdump -h $fname`)
+=#
