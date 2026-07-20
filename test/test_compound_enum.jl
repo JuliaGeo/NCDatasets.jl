@@ -19,26 +19,26 @@ filename = tempname()
     Overcast       = 3
 end
 
-struct Obs
+struct ObsWithEnum
     temperature::Float32
     humidity::Int32
     sky_condition::Cloud
 end
 
 
-data = [Obs(20 + i, 60 + i, reinterpret(Cloud,Int32(i % 4))) for i in 0:3]
+data = [ObsWithEnum(20 + i, 60 + i, reinterpret(Cloud,Int32(i % 4))) for i in 0:3]
 
 fname = tempname()
 ds = NCDataset(fname,"c");
 NCDatasets.defEnumType(ds,Cloud,"cloud_t");
-NCDatasets.defCompoundType(ds,Obs,"obs_t");
+NCDatasets.defCompoundType(ds,ObsWithEnum,"obs_t");
 defVar(ds,"weather_reports",data,("station",))
 close(ds)
 
 
 ds = NCDataset(fname,"r");
 NCDatasets.usertype!(ds,"cloud_t",Cloud);
-NCDatasets.usertype!(ds,"obs_t",Obs);
+NCDatasets.usertype!(ds,"obs_t",ObsWithEnum);
 data2 = ds["weather_reports"][:]
 @test data == data2
 
