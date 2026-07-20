@@ -28,7 +28,7 @@ const jlType = Dict(
 const ncType = Dict(value => key for (key, value) in jlType)
 
 function nctypeid(ds,vtype; typename = nothing)
-    return create_type(ds.ncid,vtype,typename,ds.usertypes)
+    return create_type(ds,vtype; type_name = typename)
 end
 
 

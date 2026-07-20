@@ -31,7 +31,7 @@ dimids = [x_dimid, y_dimid]
 
 type_name = "sample_compound_type"
 usertypes = Dict()
-typeid = create_compound_type(ncid,T,type_name,usertypes);
+typeid = create_compound_type((;ncid,usertypes),T; type_name);
 
 varid = nc_def_var(ncid, "data", typeid, reverse(dimids))
 

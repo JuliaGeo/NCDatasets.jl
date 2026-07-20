@@ -109,7 +109,8 @@ function reconstruct_compound_type(ncid,xtype,usertypes,mod)
 end
 
 
-function create_compound_type(ncid,T,type_name,usertypes)
+function create_compound_type(ds,T; type_name=nothing)
+    ncid = ds.ncid
 
     # make sure that the types of all fields are first created
     # if they are created "on-the-fly" in the second loop, I get
@@ -120,9 +121,9 @@ function create_compound_type(ncid,T,type_name,usertypes)
         if fT <: NTuple
             elT = fT.types[1]
             @assert all(fT.types .== elT)
-            create_type(ncid,elT,string(elT),usertypes)
+            create_type(ds,elT)
         else
-            create_type(ncid,fT,string(fT),usertypes)
+            create_type(ds,fT)
         end
     end
 
@@ -133,13 +134,13 @@ function create_compound_type(ncid,T,type_name,usertypes)
         fT = fieldtype(T,i)
         if fT <: NTuple
             elT = fT.types[1]
-            nctype = create_type(ncid,elT,string(elT),usertypes)
+            nctype = create_type(ds,elT)
             dim_sizes = [length(fT.types)]
             nc_insert_array_compound(
                 ncid,typeid,fieldname(T,i),
                 offset,nctype,dim_sizes)
         else
-            nctype = create_type(ncid,fT,string(fT),usertypes)
+            nctype = create_type(ds,fT)
 
             nc_insert_compound(
                 ncid, typeid, fieldname(T,i),
@@ -152,7 +153,10 @@ function create_compound_type(ncid,T,type_name,usertypes)
 end
 
 
-function create_type(ncid,T,type_name,usertypes)
+function create_type(ds,T; type_name = nothing)
+    ncid = ds.ncid
+    usertypes = ds.usertypes
+
     # plain type
     nctype = get(ncType,T,nothing)
     if nctype !== nothing
@@ -187,14 +191,14 @@ function create_type(ncid,T,type_name,usertypes)
     end
 
     if T <: Vector
-        eltypeid = create_type(ncid,eltype(T),string(eltype(T)),usertypes)
+        eltypeid = create_type(ds,eltype(T))
         typeid = nc_def_vlen(ncid, type_name, eltypeid)
         @debug "created vlen-array" type_name typeid
     elseif T <: Enum
-        typeid = create_enum_type(ncid,T,type_name,usertypes)
+        typeid = create_enum_type(ds,T; type_name)
     elseif length(fieldnames(T)) > 0
         @debug "assume type $T is a struct "
-        typeid = create_compound_type(ncid,T,type_name,usertypes)
+        typeid = create_compound_type(ds,T; type_name)
     else
         @warn "unsupported type: class=$(class)"
         typeid = Nothing
@@ -205,5 +209,5 @@ end
 
 
 function defCompoundType(ds,T,type_name)
-    create_type(ds.ncid,T,type_name,ds.usertypes)
+    create_type(ds,T; type_name)
 end

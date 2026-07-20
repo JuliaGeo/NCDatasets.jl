@@ -33,7 +33,8 @@ function reconstruct_enum_type(ncid,xtype,usertypes,mod)
 end
 
 
-function create_enum_type(ncid,T,type_name,usertypes)
+function create_enum_type(ds,T; type_name = nothing)
+    ncid = ds.ncid
     members = [Symbol(inst) => Integer(inst) for inst in instances(T)]
 
     base_type = typeof(first(members)[2])
@@ -50,5 +51,5 @@ function create_enum_type(ncid,T,type_name,usertypes)
 end
 
 function defEnumType(ds,T,type_name)
-    create_type(ds.ncid,T,type_name,ds.usertypes)
+    create_type(ds,T; type_name)
 end
