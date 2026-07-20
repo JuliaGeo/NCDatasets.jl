@@ -30,8 +30,8 @@ data = [ObsWithEnum(20 + i, 60 + i, reinterpret(Cloud,Int32(i % 4))) for i in 0:
 
 fname = tempname()
 ds = NCDataset(fname,"c");
-NCDatasets.defEnumType(ds,Cloud,"cloud_t");
-NCDatasets.defCompoundType(ds,ObsWithEnum,"obs_t");
+NCDatasets.defType(ds,Cloud,"cloud_t");
+NCDatasets.defType(ds,ObsWithEnum,"obs_t");
 defVar(ds,"weather_reports",data,("station",))
 close(ds)
 

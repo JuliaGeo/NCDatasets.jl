@@ -98,7 +98,7 @@ fname = tempname()
 ds = NCDataset(fname,"c",format=:netcdf4);
 ds.dim["casts"] = dimlen;
 vlentypename = "enum-vlen"
-#NCDatasets.defEnumType(ds,T,"cloud_class_t")
+#NCDatasets.defType(ds,T,"cloud_class_t")
 v = defVar(ds,"data",Vector{T},("casts",); typename = vlentypename)
 v.var[:] = data
 

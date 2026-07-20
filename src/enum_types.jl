@@ -49,7 +49,3 @@ function create_enum_type(ds,T; typename = nothing)
     @debug "created enum" typename typeid
     return typeid
 end
-
-function defEnumType(ds,T,typename)
-    nctypeid(ds,T; typename)
-end

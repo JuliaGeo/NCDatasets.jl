@@ -169,8 +169,10 @@ function nctypeid(ds,T; typename = nothing)
             for id = nc_inq_typeids(ncid)
                 _,_,_,_,class = nc_inq_user_type(ncid,id)
 
-                if class == NC_VLEN
-                    error("unexpected type")
+                if (class == NC_VLEN) && (T <: AbstractVector)
+                    if name == Symbol(first(nc_inq_vlen(ncid,id)))
+                        return id
+                    end
                 elseif class == NC_COMPOUND
                     if name == Symbol(nc_inq_compound_name(ncid,id))
                         return id
@@ -190,7 +192,7 @@ function nctypeid(ds,T; typename = nothing)
         typename = last(split(string(T),'.')) # strip module prefix
     end
 
-    if T <: Vector
+    if T <: AbstractVector
         eltypeid = nctypeid(ds,eltype(T))
         typeid = nc_def_vlen(ncid, typename, eltypeid)
         @debug "created vlen-array" typename typeid
@@ -208,6 +210,7 @@ function nctypeid(ds,T; typename = nothing)
 end
 
 
-function defCompoundType(ds,T,typename)
+function defType(ds,T,typename)
     nctypeid(ds,T; typename)
+    return nothing
 end
