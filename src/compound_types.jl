@@ -182,10 +182,22 @@ function create_type(ncid,T,type_name,usertypes)
         end
     end
 
-    if T <: Enum
+    if type_name == nothing
+        type_name = last(split(string(T),'.')) # strip module prefix
+    end
+
+    if T <: Vector
+        eltypeid = create_type(ncid,eltype(T),string(eltype(T)),usertypes)
+        typeid = nc_def_vlen(ncid, type_name, eltypeid)
+        @debug "created vlen-array" type_name typeid
+    elseif T <: Enum
         typeid = create_enum_type(ncid,T,type_name,usertypes)
-    else
+    elseif length(fieldnames(T)) > 0
+        @debug "assume type $T is a struct "
         typeid = create_compound_type(ncid,T,type_name,usertypes)
+    else
+        @warn "unsupported type: class=$(class)"
+        typeid = Nothing
     end
     usertypes[Symbol(type_name)] = T
     return typeid
