@@ -27,11 +27,6 @@ const jlType = Dict(
 # Inverse mapping
 const ncType = Dict(value => key for (key, value) in jlType)
 
-function nctypeid(ds,vtype; typename = nothing)
-    return create_type(ds,vtype; type_name = typename)
-end
-
-
 
 iswritable(ds::NCDataset) = ds.iswritable
 maskingvalue(ds::NCDataset) = ds.maskingvalue

@@ -60,11 +60,11 @@ function temp_module()
 end
 
 function reconstruct_compound_type(ncid,xtype,usertypes,mod)
-    type_name,type_size,nfields = nc_inq_compound(ncid,xtype)
+    typename,type_size,nfields = nc_inq_compound(ncid,xtype)
 
-    if haskey(usertypes,Symbol(type_name))
-        @debug "get cashed type for $type_name"
-        return usertypes[Symbol(type_name)]
+    if haskey(usertypes,Symbol(typename))
+        @debug "get cashed type for $typename"
+        return usertypes[Symbol(typename)]
     end
 
     cnames = Symbol.(nc_inq_compound_fieldname.(ncid,xtype,0:(nfields-1)))
@@ -88,11 +88,11 @@ function reconstruct_compound_type(ncid,xtype,usertypes,mod)
     # from JLD2, MIT "Expat" License
     # https://github.com/JuliaIO/JLD2.jl/blob/abb9e5920bbe956a4d9fd2f92550cd7ea0a715aa/src/data/reconstructing_datatypes.jl#L493
 
-    @debug "generate type for $type_name"
+    @debug "generate type for $typename"
 
     Core.eval(
         mod,
-        Expr(:struct, false, Symbol(type_name),
+        Expr(:struct, false, Symbol(typename),
              Expr(:block,
                   Any[ Expr(Symbol("::"), cnames[i], types[i]) for i = 1:length(types) ]...,
                   # suppress default constructors, plus a bogus `new()` call to make sure
@@ -102,14 +102,14 @@ function reconstruct_compound_type(ncid,xtype,usertypes,mod)
 
 
     invokelatest() do
-        T2 = getfield(mod, Symbol(type_name))
-        usertypes[Symbol(type_name)] = T2
+        T2 = getfield(mod, Symbol(typename))
+        usertypes[Symbol(typename)] = T2
         return T2
     end
 end
 
 
-function create_compound_type(ds,T; type_name=nothing)
+function create_compound_type(ds,T; typename=nothing)
     ncid = ds.ncid
 
     # make sure that the types of all fields are first created
@@ -121,26 +121,26 @@ function create_compound_type(ds,T; type_name=nothing)
         if fT <: NTuple
             elT = fT.types[1]
             @assert all(fT.types .== elT)
-            create_type(ds,elT)
+            nctypeid(ds,elT)
         else
-            create_type(ds,fT)
+            nctypeid(ds,fT)
         end
     end
 
-    typeid = nc_def_compound(ncid, sizeof(T), type_name)
+    typeid = nc_def_compound(ncid, sizeof(T), typename)
 
     for i = 1:fieldcount(T)
         offset = fieldoffset(T,i)
         fT = fieldtype(T,i)
         if fT <: NTuple
             elT = fT.types[1]
-            nctype = create_type(ds,elT)
+            nctype = nctypeid(ds,elT)
             dim_sizes = [length(fT.types)]
             nc_insert_array_compound(
                 ncid,typeid,fieldname(T,i),
                 offset,nctype,dim_sizes)
         else
-            nctype = create_type(ds,fT)
+            nctype = nctypeid(ds,fT)
 
             nc_insert_compound(
                 ncid, typeid, fieldname(T,i),
@@ -148,12 +148,12 @@ function create_compound_type(ds,T; type_name=nothing)
         end
     end
 
-    @debug "created compound" type_name typeid
+    @debug "created compound" typename typeid
     return typeid
 end
 
-
-function create_type(ds,T; type_name = nothing)
+# returns the netCDF typeid and create the type if necessary
+function nctypeid(ds,T; typename = nothing)
     ncid = ds.ncid
     usertypes = ds.usertypes
 
@@ -186,28 +186,28 @@ function create_type(ds,T; type_name = nothing)
         end
     end
 
-    if type_name == nothing
-        type_name = last(split(string(T),'.')) # strip module prefix
+    if typename == nothing
+        typename = last(split(string(T),'.')) # strip module prefix
     end
 
     if T <: Vector
-        eltypeid = create_type(ds,eltype(T))
-        typeid = nc_def_vlen(ncid, type_name, eltypeid)
-        @debug "created vlen-array" type_name typeid
+        eltypeid = nctypeid(ds,eltype(T))
+        typeid = nc_def_vlen(ncid, typename, eltypeid)
+        @debug "created vlen-array" typename typeid
     elseif T <: Enum
-        typeid = create_enum_type(ds,T; type_name)
+        typeid = create_enum_type(ds,T; typename)
     elseif length(fieldnames(T)) > 0
         @debug "assume type $T is a struct "
-        typeid = create_compound_type(ds,T; type_name)
+        typeid = create_compound_type(ds,T; typename)
     else
         @warn "unsupported type: class=$(class)"
         typeid = Nothing
     end
-    usertypes[Symbol(type_name)] = T
+    usertypes[Symbol(typename)] = T
     return typeid
 end
 
 
-function defCompoundType(ds,T,type_name)
-    create_type(ds,T; type_name)
+function defCompoundType(ds,T,typename)
+    nctypeid(ds,T; typename)
 end
