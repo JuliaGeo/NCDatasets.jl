@@ -127,3 +127,41 @@ For large structures, it might be beneficial to use [Accessors](https://github.c
 using Accessors
 @set array2[1].x = 10
 ```
+
+# NetCDF enum type
+
+NetCDF enum types are implemented as Julia enum types. This example shows how to create a enum type and write as an vector of enums to a NetCDF file:
+
+``` julia
+@enum TestEnum::Int8 good=1 bad=2 ugly=3
+
+data = [good, bad, good, ugly]
+fname = tempname()
+NCDataset(fname,"c") do ds
+    # the Julia type name is used by default in the netcdf file
+    # dimension "dim" is created automatically
+    ncv = defVar(ds,"data",data,("dim",))
+end
+
+```
+
+Loading the data:
+
+``` julia
+data2 = NCDataset(fname,"r") do ds
+    # The julia type TestEnum must be internally reconstructed unless
+    # it is provided via ds.usertype! (which is preferred)
+    NCDatasets.usertype!(ds,"TestEnum",TestEnum)
+    # the Julia type name is used by default in the netcdf file
+    # dimension "dim" is created automatically
+    ds["data"][:]
+end
+```
+
+The array of enums `data` can be converted to, for example, a `CategoricalArray` of strings using:
+
+```julia
+using CategoricalArrays
+enum_dict = Dict(inst => string(inst) for inst in instances(eltype(data)))
+ca = CategoricalArray([enum_dict[x] for x in data]; levels=collect(values(enum_dict)))
+```
