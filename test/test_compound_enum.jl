@@ -2,7 +2,6 @@ using NCDatasets
 using NCDatasets: nc_open, nc_close,NC_WRITE, NC_NOWRITE, nc_inq_varid,
     nc_get_var!,
     nc_put_var
-using NCDatasets.NetCDF_jll: ncgen, ncdump
 using Test
 
 
@@ -30,8 +29,8 @@ data = [ObsWithEnum(20 + i, 60 + i, reinterpret(Cloud,Int32(i % 4))) for i in 0:
 
 fname = tempname()
 ds = NCDataset(fname,"c");
-NCDatasets.defType(ds,Cloud,"cloud_t");
-NCDatasets.defType(ds,ObsWithEnum,"obs_t");
+NCDatasets.defType(ds,"cloud_t",Cloud);
+NCDatasets.defType(ds,"obs_t",ObsWithEnum);
 defVar(ds,"weather_reports",data,("station",))
 close(ds)
 

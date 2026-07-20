@@ -38,10 +38,30 @@ function ncgen(io::IO,fname; newfname = "filename.nc")
         end
     end
 
+    typeids = nc_inq_typeids(ds.ncid)
+    if length(typeids) > 0
+        print(io,"\n# Types\n\n")
+        for typeid = typeids
+            name,size,base_nc_type,nfields,class = nc_inq_user_type(ds.ncid,typeid)
+            if class == NC_ENUM
+                expr = enum_expr(ds.ncid,typeid)
+                println(io,expr)
+                println(io,"defType(ds,\"$name\",$name)\n");
+            end
+        end
+    end
+
     print(io,"\n# Declare variables\n\n")
 
     for (d,v) in ds
-        print(io,"nc$(escapevar(d)) = defVar(ds,\"$d\", $(eltype(v.var)), $(dimnames(v))")
+        typeid = nc_inq_vartype(ds.ncid,v.var.varid)
+        if typeid >= NCDatasets.NC_FIRSTUSERTYPEID
+            typename, = nc_inq_user_type(ds.ncid,typeid)
+        else
+            typename = eltype(v.var)
+        end
+
+        print(io,"nc$(escapevar(d)) = defVar(ds,\"$d\", $(typename), $(dimnames(v))")
         ncgen_setattrib(io,v.attrib)
         print(io,")\n\n")
     end
@@ -89,7 +109,9 @@ function ncgen_setattrib(io,attrib)
     print(io,", attrib = OrderedDict(\n")
 
     for (d,val) in attrib
-        litval = litteral(val)
+        litval = invokelatest() do
+            litteral(val)
+        end
         print(io,"    \"$d\"" * (" "^max(0,(25-length(d)))) * " => $litval,\n");
     end
     print(io,")")

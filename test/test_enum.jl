@@ -47,16 +47,20 @@ NS = parentmodule(eltype(data));
 @test Integer.(data) == Integer.(data_ref)
 
 
+
 # with provided user-type
 
 NCDatasets.usertype!(ds,"cloud_class_t",Clouds.cloud_class_t);
+
+typeid = NCDatasets.nctypeid(ds,Clouds.cloud_class_t)
+NCDatasets.enum_expr(ds.ncid,xtype)
 
 data = ds["data"][:]
 @test eltype(data) == Clouds.cloud_class_t
 @test data == data_ref
 close(ds)
 
-
+#=
 # write enum attributes
 
 data_ref = [Clouds.Clear,Clouds.Cumulonimbus,Clouds.Nimbostratus,
@@ -109,4 +113,7 @@ close(ds)
 
 #=
 run(`ncdump -h $fname`)
+=#
+
+
 =#

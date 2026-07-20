@@ -1,6 +1,9 @@
 using NCDatasets
 using Test
 
+
+@enum TestEnum::Int8 good=1 bad=2 ugly=3
+
 ncfile1 = tempname()
 ncfile2 = tempname()
 jlfile = tempname()
@@ -24,6 +27,9 @@ ds.attrib["backslash"] = "a backslash \\ stop";
 ds.attrib["doublequote"] = "a doublequote \" stop";
 
 ncmatrix = defVar(ds,"matrix", Float32,("lon","lat"))
+
+defVar(ds,"enum-vec",[good],("x",))
+ds.attrib["status"] = good
 
 
 close(ds)

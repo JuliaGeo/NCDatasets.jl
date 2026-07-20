@@ -59,27 +59,23 @@ function temp_module()
     return eval(:(module $modname end))
 end
 
-function reconstruct_compound_type(ncid,xtype,usertypes,mod)
-    typename,type_size,nfields = nc_inq_compound(ncid,xtype)
 
-    if haskey(usertypes,Symbol(typename))
-        @debug "get cashed type for $typename"
-        return usertypes[Symbol(typename)]
-    end
+function compound_expr(ncid,typeid,usertypes,mod)
+    typename,type_size,nfields = nc_inq_compound(ncid,typeid)
 
-    cnames = Symbol.(nc_inq_compound_fieldname.(ncid,xtype,0:(nfields-1)))
+    cnames = Symbol.(nc_inq_compound_fieldname.(ncid,typeid,0:(nfields-1)))
 
     types = []
     for fieldid = 0:(nfields-1)
-        field_typeid = nc_inq_compound_fieldtype(ncid,xtype,fieldid)
+        field_typeid = nc_inq_compound_fieldtype(ncid,typeid,fieldid)
         fT = _jltype(ncid,field_typeid,usertypes,mod)
 
-        fieldndims = nc_inq_compound_fieldndims(ncid,xtype,fieldid)
+        fieldndims = nc_inq_compound_fieldndims(ncid,typeid,fieldid)
 
         if fieldndims == 0
             push!(types,fT)
         else
-            dim_sizes = nc_inq_compound_fielddim_sizes(ncid,xtype,fieldid)
+            dim_sizes = nc_inq_compound_fielddim_sizes(ncid,typeid,fieldid)
             fT2 = NTuple{Int(dim_sizes[1]),fT}
             push!(types,fT2)
         end
@@ -90,16 +86,25 @@ function reconstruct_compound_type(ncid,xtype,usertypes,mod)
 
     @debug "generate type for $typename"
 
-    Core.eval(
-        mod,
-        Expr(:struct, false, Symbol(typename),
-             Expr(:block,
+    return Expr(:struct, false, Symbol(typename),
+                Expr(:block,
                   Any[ Expr(Symbol("::"), cnames[i], types[i]) for i = 1:length(types) ]...,
                   # suppress default constructors, plus a bogus `new()` call to make sure
                   # ninitialized is zero.
                   Expr(:if, false, Expr(:call, :new))
-                  )))
+                     ))
+end
 
+function reconstruct_compound_type(ncid,typeid,usertypes,mod)
+    typename,type_size,nfields = nc_inq_compound(ncid,typeid)
+
+    if haskey(usertypes,Symbol(typename))
+        @debug "get cashed type for $typename"
+        return usertypes[Symbol(typename)]
+    end
+
+    @debug "generate type for $typename"
+    Core.eval(mod,compound_expr(ncid,typeid,usertypes,mod))
 
     invokelatest() do
         T2 = getfield(mod, Symbol(typename))
@@ -210,7 +215,8 @@ function nctypeid(ds,T; typename = nothing)
 end
 
 
-function defType(ds,T::DataType,typename::SymbolOrString)
+function defType(ds,typename::SymbolOrString,T::DataType)
     nctypeid(ds,T; typename)
     return nothing
 end
+export defType

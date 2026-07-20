@@ -1,26 +1,31 @@
-function reconstruct_enum_type(ncid,xtype,usertypes,mod)
-    typename,base_nc_type,base_size,num_members = nc_inq_enum(ncid,xtype)
+function enum_expr(ncid,typeid)
+    typename,base_nc_type,base_size,num_members = nc_inq_enum(ncid,typeid)
+
+    T = base_nc_type
+
+    members = []
+    for idx = 0:num_members-1
+        member_name,value = nc_inq_enum_member(ncid,typeid,idx,T)
+        push!(members,Symbol(member_name) => value)
+    end
+
+    return Expr(:macrocall,
+                Symbol("@enum"),
+                :(),
+                :($(Symbol(typename))::$T),
+                [:($n = $v) for (n,v) in members]...
+                    )
+end
+
+function reconstruct_enum_type(ncid,typeid,usertypes,mod)
+    typename, = nc_inq_enum(ncid,typeid)
 
     if haskey(usertypes,Symbol(typename))
         @debug "get cashed type for $typename"
         return usertypes[Symbol(typename)]
     end
 
-    T = base_nc_type
-
-    members = []
-    for idx = 0:num_members-1
-        member_name,value = nc_inq_enum_member(ncid,xtype,idx,T)
-        push!(members,Symbol(member_name) => value)
-    end
-
-    Core.eval(mod,
-              Expr(:macrocall,
-                   Symbol("@enum"),
-                   :(),
-                   :($(Symbol(typename))::$T),
-                   [:($(Symbol(n)) = $v) for (n,v) in members]... # fixme
-                       ))
+    Core.eval(mod,enum_expr(ncid,typeid))
 
     invokelatest() do
         T2 = getfield(mod, Symbol(typename))
