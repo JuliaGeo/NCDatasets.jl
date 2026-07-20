@@ -110,21 +110,6 @@ end
 
 
 function create_compound_type(ncid,T,type_name,usertypes)
-    # plain type
-    nctype = get(ncType,T,nothing)
-    if nctype !== nothing
-        return nctype
-    end
-
-    for (name,userT) in usertypes
-        if userT == T
-            for id = nc_inq_typeids(ncid)
-                if name == Symbol(nc_inq_compound_name(ncid,id))
-                    return id
-                end
-            end
-        end
-    end
 
     # make sure that the types of all fields are first created
     # if they are created "on-the-fly" in the second loop, I get
@@ -135,9 +120,9 @@ function create_compound_type(ncid,T,type_name,usertypes)
         if fT <: NTuple
             elT = fT.types[1]
             @assert all(fT.types .== elT)
-            create_compound_type(ncid,elT,string(elT),usertypes)
+            create_type(ncid,elT,string(elT),usertypes)
         else
-            create_compound_type(ncid,fT,string(fT),usertypes)
+            create_type(ncid,fT,string(fT),usertypes)
         end
     end
 
@@ -148,13 +133,13 @@ function create_compound_type(ncid,T,type_name,usertypes)
         fT = fieldtype(T,i)
         if fT <: NTuple
             elT = fT.types[1]
-            nctype = create_compound_type(ncid,elT,string(elT),usertypes)
+            nctype = create_type(ncid,elT,string(elT),usertypes)
             dim_sizes = [length(fT.types)]
             nc_insert_array_compound(
                 ncid,typeid,fieldname(T,i),
                 offset,nctype,dim_sizes)
         else
-            nctype = create_compound_type(ncid,fT,string(fT),usertypes)
+            nctype = create_type(ncid,fT,string(fT),usertypes)
 
             nc_insert_compound(
                 ncid, typeid, fieldname(T,i),
@@ -162,11 +147,51 @@ function create_compound_type(ncid,T,type_name,usertypes)
         end
     end
 
+    @debug "created compound" type_name typeid
+    return typeid
+end
+
+
+function create_type(ncid,T,type_name,usertypes)
+    # plain type
+    nctype = get(ncType,T,nothing)
+    if nctype !== nothing
+        return nctype
+    end
+
+    # check if type is already defined in usertypes
+    for (name,userT) in usertypes
+        if userT == T
+            for id = nc_inq_typeids(ncid)
+                _,_,_,_,class = nc_inq_user_type(ncid,id)
+
+                if class == NC_VLEN
+                    error("unexpected type")
+                elseif class == NC_COMPOUND
+                    if name == Symbol(nc_inq_compound_name(ncid,id))
+                        return id
+                    end
+                elseif (class == NC_ENUM) && (T <: Enum)
+                    if name == Symbol(nc_inq_enum_name(ncid,id))
+                        return id
+                    end
+                else
+                    # ignore
+                end
+            end
+        end
+    end
+
+    if T <: Enum
+        typeid = create_enum_type(ncid,T,type_name,usertypes)
+    else
+        typeid = create_compound_type(ncid,T,type_name,usertypes)
+    end
     usertypes[Symbol(type_name)] = T
     return typeid
 end
 
 
 function defCompoundType(ds,T,type_name)
-    create_compound_type(ds.ncid,T,type_name,ds.usertypes)
+    create_type(ds.ncid,T,type_name,ds.usertypes)
 end

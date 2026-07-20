@@ -1,3 +1,6 @@
+
+nc_inq_enum_name(ncid,typeid) = nc_inq_enum(ncid,typeid)[1]
+
 function reconstruct_enum_type(ncid,xtype,usertypes,mod)
     type_name,base_nc_type,base_size,num_members = nc_inq_enum(ncid,xtype)
 
@@ -31,16 +34,6 @@ end
 
 
 function create_enum_type(ncid,T,type_name,usertypes)
-    for (name,userT) in usertypes
-        if userT == T
-            for id = nc_inq_typeids(ncid)
-                if name == Symbol(nc_inq_enum(ncid,id)[1])
-                    return id
-                end
-            end
-        end
-    end
-
     members = [Symbol(inst) => Integer(inst) for inst in instances(T)]
 
     base_type = typeof(first(members)[2])
@@ -52,11 +45,10 @@ function create_enum_type(ncid,T,type_name,usertypes)
         nc_insert_enum(ncid,typeid,member_name,member_value,base_type)
     end
 
-    usertypes[Symbol(type_name)] = T
-
+    @debug "created enum" type_name typeid
     return typeid
 end
 
 function defEnumType(ds,T,type_name)
-    create_enum_type(ds.ncid,T,type_name,ds.usertypes)
+    create_type(ds.ncid,T,type_name,ds.usertypes)
 end

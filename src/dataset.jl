@@ -30,18 +30,19 @@ const ncType = Dict(value => key for (key, value) in jlType)
 function nctypeid(ds,vtype; typename = nothing)
     if vtype <: Vector
         # variable-length type
-        eltypeid = nctypeid(ds,eltype(vtype); typename)
+        eltypeid = nctypeid(ds,eltype(vtype))
         typeid = nc_def_vlen(ds.ncid, typename, eltypeid)
+        @debug "created vlen-array" typename typeid
     elseif vtype <: Enum
         typename_enum = last(split(string(vtype),'.')) # strip module prefix
         typename = (isnothing(typename) ? typename_enum : typename)
-        typeid = defEnumType(ds,vtype,typename)
+        typeid = create_type(ds.ncid,vtype,typename,ds.usertypes)
     elseif haskey(ncType, vtype)
         typeid = ncType[vtype]
     elseif length(fieldnames(vtype)) > 0
         @debug "assume type $vtype is a struct "
         typename = (isnothing(typename) ? string(vtype) : typename)
-        typeid = defCompoundType(ds,vtype,typename)
+        typeid = create_type(ds.ncid,vtype,typename,ds.usertypes)
     else
         @warn "unsupported type: class=$(class)"
         typeid = Nothing

@@ -1,6 +1,5 @@
 using Test
 using NCDatasets
-using NCDatasets: create_enum_type
 
 module Clouds
 @enum cloud_class_t::Int8 begin
@@ -99,8 +98,8 @@ fname = tempname()
 ds = NCDataset(fname,"c",format=:netcdf4);
 ds.dim["casts"] = dimlen;
 vlentypename = "enum-vlen"
-NCDatasets.defEnumType(ds,T,"cloud_class_t")
-v = defVar(ds,varname,Vector{T},("casts",); typename = vlentypename)
+#NCDatasets.defEnumType(ds,T,"cloud_class_t")
+v = defVar(ds,"data",Vector{T},("casts",); typename = vlentypename)
 v.var[:] = data
 
 @test eltype(v.var) == Vector{T}

@@ -62,6 +62,7 @@ end
 @testset "Enum types" begin
     include("test_enum_lowlevel.jl")
     include("test_enum.jl")
+    include("test_compound_enum.jl")
 end
 
 @testset "Time and calendars" begin
