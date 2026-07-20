@@ -6,8 +6,6 @@ using NCDatasets: nc_type, check, libnetcdf, nc_inq_user_type,
     nc_inq_enum, nc_inq_enum_member, nc_inq_enum_ident, nc_def_enum, nc_get_var!
 
 using NCDatasets.NetCDF_jll: ncdump
-using BenchmarkTools
-using CategoricalArrays
 
 # scope enums by modules to avoid conflicts
 #
@@ -172,47 +170,16 @@ function load_enum(ET,ncid,varid,len)
     return data4
 end
 
-# Benchmark use case:
-# a file is opened and an NCDatasets.Variable is instantiated once and then
-# there are many read operation to the NCDatasets.Variable
-
 # to be done during the instantiation of NCDatasets.Variable
 modname = Symbol("mod_" * name2)
 mod = eval(:(module $modname end))
 ET = enum_type(mod,T,name2,members);
 
 # load data
-data4 = @btime load_enum(ET,ncid,varid,len);
+data4 = load_enum(ET,ncid,varid,len);
 
 
-data4a = load_enum(ET,ncid,varid,len);
-
-# based on PR
-# https://github.com/JuliaGeo/CommonDataModel.jl/pull/53
-
-function _sorted_labels(mapping::AbstractDict{R, V}) where {R, V}
-    sorted_codes = sort(collect(keys(mapping)))
-    return V[mapping[c] for c in sorted_codes]
-end
-
-
-
-# __let me know if this can be done more efficiently__
-function load_CategoricalArray(T,ncid,varid,len,levels,mapping)
-    raw = Vector{T}(undef,len);
-    nc_get_var!(ncid,varid,raw)
-    # creating a vector of strings (is there a better way?)
-    label_values = [mapping[c] for c in raw]
-    return CategoricalArray{String, 1, T}(label_values; levels)
-end
-
-# to be done during the instantiation of NCDatasets.Variable
-mapping = Dict((v => String(name) for (name,v) in members)...)
-levels =_sorted_labels(mapping)
-
-# load data
-data5 = @btime load_CategoricalArray(T,ncid,varid,len,levels,mapping);
-
+@test data3 == reinterpret(Clouds.cloud_class_t,data4)
 
 # Instrospect an array of enums
 
