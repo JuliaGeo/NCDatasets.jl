@@ -178,7 +178,7 @@ function nctypeid(ds,T; typename = nothing)
                         return id
                     end
                 elseif (class == NC_ENUM) && (T <: Enum)
-                    if name == Symbol(nc_inq_enum_name(ncid,id))
+                    if name == Symbol(first(nc_inq_enum(ncid,id)))
                         return id
                     end
                 else
@@ -210,7 +210,7 @@ function nctypeid(ds,T; typename = nothing)
 end
 
 
-function defType(ds,T,typename)
+function defType(ds,T::DataType,typename::SymbolOrString)
     nctypeid(ds,T; typename)
     return nothing
 end

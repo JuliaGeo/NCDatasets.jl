@@ -1,6 +1,3 @@
-
-nc_inq_enum_name(ncid,typeid) = nc_inq_enum(ncid,typeid)[1]
-
 function reconstruct_enum_type(ncid,xtype,usertypes,mod)
     typename,base_nc_type,base_size,num_members = nc_inq_enum(ncid,xtype)
 
