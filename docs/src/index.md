@@ -48,6 +48,7 @@ For more details please see the individual pages of the documentation.
 * [Load a netCDF file](@ref)
 * [Create a netCDF file](@ref)
 * [Edit an existing netCDF file](@ref)
+* [Compression (Deflate and Zstandard)](@ref)
 * [Create a netCDF file using the metadata of an existing netCDF file as template](@ref)
 * [Get one or several variables by specifying the value of an attribute](@ref)
 * [Load a file with unknown structure](@ref)
@@ -212,6 +213,72 @@ ds = NCDataset("/tmp/test.nc","a")
 ds.attrib["creator"] = "your name"
 close(ds);
 ```
+
+### Compression (Deflate and Zstandard)
+
+By default, NetCDF-4 variables are written without compression. To reduce file sizes on disk, `NCDatasets` supports two primary compression algorithms: standard **Deflate (GZIP)** compression and modern **Zstandard (zstd)** compression.
+
+Note that NetCDF-4 compression requires chunking to be enabled (which can be done automatically or by specifying `chunksizes`).
+
+#### Using Deflate (GZIP)
+
+Deflate is the standard compression algorithm in NetCDF-4/HDF5. To enable it when creating a variable, use the `deflatelevel` keyword argument in `defVar` (with levels from `1` to `9`, where `1` is the fastest and `9` is the highest compression). You can also optionally enable the byte-level `shuffle` filter to improve the compression ratio.
+
+```julia
+using NCDatasets
+NCDataset("/tmp/deflate_example.nc", "c") do ds
+    defDim(ds, "lon", 100)
+    defDim(ds, "lat", 100)
+
+    # Create variable compressed with Deflate (level 5) and shuffle enabled
+    v = defVar(ds, "temperature", Float32, ("lon", "lat");
+               chunksizes = (50, 50),
+               deflatelevel = 5,
+               shuffle = true)
+    v[:, :] = rand(Float32, 100, 100)
+end
+```
+
+#### Using Zstandard (zstd)
+
+Zstandard (zstd) provides much faster compression/decompression speeds and a better compression ratio than Deflate. It is supported in modern NetCDF-4 libraries. To enable it, use the `zstdlevel` keyword argument (with levels from `1` to `22`).
+
+```julia
+using NCDatasets
+NCDataset("/tmp/zstd_example.nc", "c") do ds
+    defDim(ds, "lon", 100)
+    defDim(ds, "lat", 100)
+
+    # Create variable compressed with Zstandard (level 5)
+    v = defVar(ds, "humidity", Float32, ("lon", "lat");
+               chunksizes = (50, 50),
+               zstdlevel = 5)
+    v[:, :] = rand(Float32, 100, 100)
+end
+```
+
+#### Querying and Modifying Compression Settings
+
+You can query the compression settings of an existing variable, or change them on an open writeable variable, using the high-level `deflate` and `zstd` functions:
+
+```julia
+# Open the file in append/write mode
+ds = NCDataset("/tmp/zstd_example.nc", "a")
+v = ds["humidity"]
+
+# Query Zstd settings
+has_zstd, level = zstd(v)
+println("Zstd enabled: $has_zstd, level: $level")
+
+# Change Zstd compression level on the fly
+zstd(v, 10)
+
+# Check Deflate settings
+isshuffled, isdeflated, deflate_level = deflate(v)
+println("Deflate enabled: $isdeflated")
+close(ds)
+```
+
 
 ### Create a netCDF file using the metadata of an existing netCDF file as template
 

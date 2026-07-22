@@ -304,6 +304,28 @@ deflate(v::Variable,shuffle,deflate,deflate_level) = nc_def_var_deflate(v.ds.nci
 deflate(v::Variable) = nc_inq_var_deflate(v.ds.ncid,v.varid)
 export deflate
 
+"""
+    zstd(v::Variable, level::Integer)
+
+Set the Zstandard (zstd) compression level for the variable `v`. The level is an integer
+typically from 1 (fastest/least compression) to 22 (slowest/most compression).
+"""
+zstd(v::Variable, level::Integer) = nc_def_var_zstandard(v.ds.ncid, v.varid, level)
+
+"""
+    has_zstd, level = zstd(v::Variable)
+
+Return a tuple of a boolean (indicating if zstd compression is enabled) and an integer
+(the zstd compression level) for the variable `v`.
+"""
+zstd(v::Variable) = nc_inq_var_zstandard(v.ds.ncid, v.varid)
+
+zstd(v::CFVariable, level::Integer) = zstd(v.var, level)
+zstd(v::CFVariable) = zstd(v.var)
+
+export zstd
+
+
 checksum(v::Variable,checksummethod) = nc_def_var_fletcher32(v.ds.ncid,v.varid,checksummethod)
 
 """
