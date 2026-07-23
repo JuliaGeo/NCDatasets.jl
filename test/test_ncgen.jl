@@ -35,7 +35,8 @@ ds.attrib["status"] = good
 close(ds)
 
 ncgen(ncfile1,jlfile; newfname = ncfile2)
-include(jlfile)
+
+run(`$(Base.julia_cmd()) $jlfile`)
 
 buf1 = IOBuffer()
 buf2 = IOBuffer()
