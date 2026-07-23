@@ -1525,18 +1525,18 @@ end
 
 
 # get matching julia type
-function _jltype(ncid,xtype,usertypes)
+function _jltype(ncid,xtype,typemap)
     jltype =
         if xtype >= NCDatasets.NC_FIRSTUSERTYPEID
             name,size,base_nc_type,nfields,class = nc_inq_user_type(ncid,xtype)
             # assume here variable-length type
             if class == NC_VLEN
-                T = _jltype(ncid,base_nc_type,usertypes)
+                T = _jltype(ncid,base_nc_type,typemap)
                 Vector{T}
             elseif class == NC_COMPOUND
-                reconstruct_compound_type(ncid,xtype,usertypes)
+                reconstruct_compound_type(ncid,xtype,typemap)
             elseif class == NC_ENUM
-                reconstruct_enum_type(ncid,xtype,usertypes)
+                reconstruct_enum_type(ncid,xtype,typemap)
             else
                 @warn "unsupported type: class=$(class)"
                 Nothing

@@ -92,7 +92,7 @@ function NCDataset(ncid::Integer,
                    isdefmode::Array{Bool,0};
                    parentdataset = nothing,
                    maskingvalue = missing,
-                   usertypes = Dict{Symbol,DataType}(),
+                   typemap = Dict{Symbol,DataType}(),
                    )
 
     function _finalize(ds)
@@ -111,7 +111,7 @@ function NCDataset(ncid::Integer,
         Dict{String,String}(),
         maskingvalue,
         ReentrantLock(),
-        usertypes,
+        typemap,
     )
 
     if !iswritable

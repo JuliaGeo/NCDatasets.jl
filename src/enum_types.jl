@@ -17,12 +17,12 @@ function enum_expr(ncid,typeid)
                     )
 end
 
-function reconstruct_enum_type(ncid,typeid,usertypes)
+function reconstruct_enum_type(ncid,typeid,typemap)
     typename, = nc_inq_enum(ncid,typeid)
 
-    if haskey(usertypes,Symbol(typename))
+    if haskey(typemap,Symbol(typename))
         @debug "get cashed type for $typename"
-        return usertypes[Symbol(typename)]
+        return typemap[Symbol(typename)]
     end
 
 

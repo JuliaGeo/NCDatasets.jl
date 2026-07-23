@@ -79,7 +79,7 @@ struct MyCompoundType
     y::Int32
 end
 
-NCDatasets.usertype!(ds,"c_t",MyCompoundType)
+NCDatasets.typemap!(ds,"c_t" => MyCompoundType)
 array = ds["s"][:,:]
 typeof(array)
 # output
@@ -87,7 +87,7 @@ typeof(array)
 
 ```
 
-It is preferable in fact that the user defines the compound type as a julia struct and register it using the `NCDatasets.usertype!`.
+It is preferable in fact that the user defines the compound type as a julia struct and register it using the `NCDatasets.typemap!`.
 Users should not rely on the type name generated internally by `NCDatasets`. Note also that Julia treats two types as different even if they have
 the same memory layout.
 When defining these structures, avoid using the type `Int` as its size is platform-dependent. Vectors of fixed length can also be used in struct fields.
@@ -150,8 +150,8 @@ Loading the data:
 ``` julia
 data2 = NCDataset(fname,"r") do ds
     # The julia type TestEnum must be internally reconstructed unless
-    # it is provided via ds.usertype! (which is preferred)
-    NCDatasets.usertype!(ds,"TestEnum",TestEnum)
+    # it is provided via ds.typemap! (which is preferred)
+    NCDatasets.typemap!(ds,"TestEnum" => TestEnum)
     # the Julia type name is used by default in the netcdf file
     # dimension "dim" is created automatically
     ds["data"][:]

@@ -1,6 +1,6 @@
 using Test
 using NCDatasets
-using NCDatasets: usertype, usertype!
+using NCDatasets: typemap, typemap!
 
 struct Position
     lon::Float32
@@ -30,7 +30,7 @@ ds = NCDataset(fname);
 data = ds["weather_reports"][:]
 @test data[1].temperature == 22.5
 
-usertype!(ds,"Obs",Obs)
+typemap!(ds,"Obs" => Obs)
 data = ds["weather_reports"][:]
 @test data == data_ref
 
@@ -53,7 +53,7 @@ close(ds)
 ds = NCDataset(fname);
 @test ds["data"][1].id == 42
 
-usertype!(ds,"ObsGrid",ObsGrid)
+typemap!(ds,"ObsGrid" => ObsGrid)
 @test ds["data"][:] == data_ref
 
 close(ds)
@@ -83,6 +83,6 @@ data = ds["data"][:]
 @test data[1].id == data_ref[1].id
 @test data[1].profile.position.lon == data_ref[1].profile.position.lon
 
-usertype!(ds,"Entry",Entry)
+typemap!(ds,"Entry" => Entry)
 data = ds["data"][:]
 @test data == data_ref

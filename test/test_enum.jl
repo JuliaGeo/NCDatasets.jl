@@ -66,7 +66,7 @@ run(`ncdump $fname`)
 # with provided user-type
 
 ds = NCDataset(fname);
-NCDatasets.usertype!(ds,"cloud_class_t",Clouds.cloud_class_t);
+NCDatasets.typemap!(ds,"cloud_class_t" => Clouds.cloud_class_t);
 data = ds["data"][:]
 @test eltype(data) == Clouds.cloud_class_t
 @test data == data_ref
@@ -90,7 +90,7 @@ close(ds)
 # read enum attributes
 
 ds = NCDataset(fname);
-NCDatasets.usertype!(ds,"cloud_class_t",Clouds.cloud_class_t);
+NCDatasets.typemap!(ds,"cloud_class_t" => Clouds.cloud_class_t);
 data = ds["data"][:]
 
 @test data[1] == Clouds.Clear

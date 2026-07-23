@@ -59,7 +59,7 @@ export renameVar
 
 function variable(ds::NCDataset,varid::Integer)
     dimids = nc_inq_vardimid(ds.ncid,varid)
-    nctype = _jltype(ds.ncid,nc_inq_vartype(ds.ncid,varid),ds.usertypes)
+    nctype = _jltype(ds.ncid,nc_inq_vartype(ds.ncid,varid),ds.typemap)
     ndims = length(dimids)
 
     # reverse dimids to have the dimension order in Fortran style

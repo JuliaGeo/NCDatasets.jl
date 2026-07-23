@@ -1,6 +1,6 @@
 using Test
 using NCDatasets
-using NCDatasets: usertype, usertype!
+using NCDatasets: typemap, typemap!
 
 
 # write file similar to
@@ -38,7 +38,7 @@ array = ds["s"][:,:]
 
 @test occursin("c_t",string(typeof(array)))
 
-NCDatasets.usertype!(ds,"c_t",MyCompoundType)
+NCDatasets.typemap!(ds,"c_t" => MyCompoundType)
 array = ds["s"][:,:]
 
 @test eltype(array) == MyCompoundType
@@ -76,7 +76,7 @@ data_loaded = ds["data"][:,:]
 
 T = typeof(data_loaded[1,1])
 
-@test usertype(ds,"nc_compound_t") == T
+@test typemap(ds,"nc_compound_t") == T
 @test sizeof(T) == sizeof(MyStruct2)
 
 @test propertynames(data_loaded[1]) == propertynames(data[1])
@@ -93,7 +93,7 @@ end
 @test typeof(ds["data"][1,1]) == T
 
 
-usertype!(ds,"nc_compound_t",MyStruct2)
+typemap!(ds,"nc_compound_t" => MyStruct2)
 
 data_loaded = ds["data"][:,:]
 @test eltype(data_loaded) == MyStruct2

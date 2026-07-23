@@ -1,7 +1,7 @@
 """
-    NCDatasets.usertype!(ds::Dataset,typename::SymbolOrString,jltype::DataType)a
+    NCDatasets.typemap!(ds::Dataset, name1 => julia_type1,...)
 
-Use the julia struct `jltype` for compound types called `typename` defined in then
+Use the julia struct/enum `julia_type` for compound/enum types called `name` defined in then
 netCDF dataset `ds`.
 
 Example:
@@ -25,7 +25,7 @@ end
 data = NCDataset(fname) do ds
     # prevent NCDatasets to dynamically reconstruct the struct and use
     # provided type "MyComplex" instead
-    NCDatasets.usertype!(ds,"nc_complex_t",MyComplex)
+    NCDatasets.typemap!(ds,"nc_complex_t" => MyComplex)
     ds["data"][:]
 end
 
@@ -35,25 +35,27 @@ eltype(data)
 # MyComplex
 ```
 """
-function usertype!(ds::Dataset,typename::SymbolOrString,jltype::DataType)
-    ds.usertypes[Symbol(typename)] = jltype
+function typemap!(ds::Dataset,args::Pair{<:SymbolOrString,DataType}...)
+    for (typename,jltype) in args
+        ds.typemap[Symbol(typename)] = jltype
+    end
 end
 
 
 # TODO: reconstruct type if necessary
-function usertype(ds::Dataset,typename::SymbolOrString)
-    ut = get(ds.usertypes,Symbol(typename),nothing)
+function typemap(ds::Dataset,typename::SymbolOrString)
+    ut = get(ds.typemap,Symbol(typename),nothing)
     if ut == nothing
         pd = parentdataset(ds)
         if pd !== nothing
-            return usertype(pd,typename)
+            return typemap(pd,typename)
         end
     end
 
     return ut
 end
 
-function compound_expr(ncid,typeid,usertypes)
+function compound_expr(ncid,typeid,typemap)
     typename,type_size,nfields = nc_inq_compound(ncid,typeid)
 
     cnames = Symbol.(nc_inq_compound_fieldname.(ncid,typeid,0:(nfields-1)))
@@ -61,7 +63,7 @@ function compound_expr(ncid,typeid,usertypes)
     types = []
     for fieldid = 0:(nfields-1)
         field_typeid = nc_inq_compound_fieldtype(ncid,typeid,fieldid)
-        fT = _jltype(ncid,field_typeid,usertypes)
+        fT = _jltype(ncid,field_typeid,typemap)
 
         fieldndims = nc_inq_compound_fieldndims(ncid,typeid,fieldid)
 
@@ -88,12 +90,12 @@ function compound_expr(ncid,typeid,usertypes)
                      ))
 end
 
-function reconstruct_compound_type(ncid,typeid,usertypes)
+function reconstruct_compound_type(ncid,typeid,typemap)
     typename,type_size,nfields = nc_inq_compound(ncid,typeid)
 
-    if haskey(usertypes,Symbol(typename))
+    if haskey(typemap,Symbol(typename))
         @debug "get cashed type for $typename"
-        return usertypes[Symbol(typename)]
+        return typemap[Symbol(typename)]
     end
 
     cnames = Symbol.(nc_inq_compound_fieldname.(ncid,typeid,0:(nfields-1)))
@@ -101,7 +103,7 @@ function reconstruct_compound_type(ncid,typeid,usertypes)
     types = []
     for fieldid = 0:(nfields-1)
         field_typeid = nc_inq_compound_fieldtype(ncid,typeid,fieldid)
-        fT = _jltype(ncid,field_typeid,usertypes)
+        fT = _jltype(ncid,field_typeid,typemap)
 
         fieldndims = nc_inq_compound_fieldndims(ncid,typeid,fieldid)
 
@@ -115,7 +117,7 @@ function reconstruct_compound_type(ncid,typeid,usertypes)
     end
 
     T2 = NCStruct{Symbol(typename),NamedTuple{(cnames...,),Tuple{types...}}}
-    usertypes[Symbol(typename)] = T2
+    typemap[Symbol(typename)] = T2
     return T2
 end
 
@@ -170,7 +172,7 @@ end
 # returns the netCDF typeid and create the type if necessary
 function nctypeid(ds,T; typename = nothing)
     ncid = ds.ncid
-    usertypes = ds.usertypes
+    typemap = ds.typemap
 
     # plain type
     nctype = get(ncType,T,nothing)
@@ -178,8 +180,8 @@ function nctypeid(ds,T; typename = nothing)
         return nctype
     end
 
-    # check if type is already defined in usertypes
-    for (name,userT) in usertypes
+    # check if type is already defined in typemap
+    for (name,userT) in typemap
         if userT == T
             for id = nc_inq_typeids(ncid)
                 _,_,_,_,class = nc_inq_user_type(ncid,id)
@@ -220,7 +222,7 @@ function nctypeid(ds,T; typename = nothing)
         @warn "unsupported type: class=$(class)"
         typeid = Nothing
     end
-    usertypes[Symbol(typename)] = T
+    typemap[Symbol(typename)] = T
     return typeid
 end
 

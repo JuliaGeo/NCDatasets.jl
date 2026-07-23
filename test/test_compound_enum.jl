@@ -33,8 +33,7 @@ close(ds)
 
 
 ds = NCDataset(fname,"r");
-NCDatasets.usertype!(ds,"cloud_t",Cloud);
-NCDatasets.usertype!(ds,"obs_t",ObsWithEnum);
+NCDatasets.typemap!(ds,"cloud_t" => Cloud, "obs_t" => ObsWithEnum);
 data2 = ds["weather_reports"][:]
 @test data == data2
 
