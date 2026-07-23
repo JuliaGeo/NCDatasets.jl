@@ -84,7 +84,7 @@ ds.attrib["title"] = ["my title"]
 close(ds)
 """
 function defAttrib(ds::Union{Dataset,Variable},name::SymbolOrString,data)
-    if !(data isa Union{String,Enum}) && (ndims(data) > 1)
+    if !(data isa Union{String,Enum,NCEnum}) && (ndims(data) > 1)
         error("Attributes must be a scalar or a vector (while writting attribute '$name' to file $(path(_dataset(ds))).")
     end
 

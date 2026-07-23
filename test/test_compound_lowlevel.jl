@@ -89,7 +89,7 @@ nc_get_var!(ncid, varid, data2)
 @test data2[1,1].i1 == data[1,1].i1
 
 
-for fn = fieldnames(eltype(data2))
+for fn = propertynames(first(data2))
     @test getproperty.(data,fn) == getproperty.(data2,fn)
 end
 

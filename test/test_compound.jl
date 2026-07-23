@@ -37,8 +37,6 @@ ds = NCDataset(fname)
 array = ds["s"][:,:]
 
 @test occursin("c_t",string(typeof(array)))
-# output
-# Matrix{c_t} (alias for Array{NCDatasets.ReconstructedTypes....c_t, 2})
 
 NCDatasets.usertype!(ds,"c_t",MyCompoundType)
 array = ds["s"][:,:]
@@ -80,12 +78,16 @@ T = typeof(data_loaded[1,1])
 
 @test usertype(ds,"nc_compound_t") == T
 @test sizeof(T) == sizeof(MyStruct)
+
+@test propertynames(data_loaded[1]) == propertynames(data[1])
+
+#=
 @test fieldcount(T) == fieldcount(MyStruct)
 for i = 1:fieldcount(T)
     @test fieldoffset(T,i) == fieldoffset(MyStruct,i)
     @test fieldtype(T,i) == fieldtype(MyStruct,i)
 end
-
+=#
 @test data_loaded[1,1].i1 == data[1,1].i1
 
 @test typeof(ds["data"][1,1]) == T

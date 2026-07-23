@@ -1,7 +1,4 @@
 using NCDatasets
-using NCDatasets: nc_open, nc_close,NC_WRITE, NC_NOWRITE, nc_inq_varid,
-    nc_get_var!,
-    nc_put_var
 using Test
 
 
@@ -41,6 +38,27 @@ NCDatasets.usertype!(ds,"obs_t",ObsWithEnum);
 data2 = ds["weather_reports"][:]
 @test data == data2
 
+
+# reconstructed type
+
+ds = NCDataset(fname,"r");
+data2 = ds["weather_reports"][:]
+
+@test getproperty.(data,:temperature) == getproperty.(data2,:temperature)
+@test Integer.(getproperty.(data,:sky_condition)) == Integer.(getproperty.(data2,:sky_condition))
+@test data == reinterpret(ObsWithEnum,data2)
+
 #=
 run(`ncdump -h $fname`)
+=#
+
+# copy reconstructed variable
+
+fname2 = tempname(suffix=".nc")
+ds = NCDataset(fname2,"c");
+defVar(ds,"weather_reports",data2,("station",))
+close(ds)
+
+#=
+run(`ncdump -h $fname2`)
 =#

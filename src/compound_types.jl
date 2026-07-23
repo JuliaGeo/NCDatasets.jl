@@ -103,16 +103,28 @@ function reconstruct_compound_type(ncid,typeid,usertypes,mod)
         return usertypes[Symbol(typename)]
     end
 
-    @debug "generate type for $typename"
-    Core.eval(mod,compound_expr(ncid,typeid,usertypes,mod))
+    cnames = Symbol.(nc_inq_compound_fieldname.(ncid,typeid,0:(nfields-1)))
 
-    invokelatest() do
-        T2 = getfield(mod, Symbol(typename))
-        usertypes[Symbol(typename)] = T2
-        return T2
+    types = []
+    for fieldid = 0:(nfields-1)
+        field_typeid = nc_inq_compound_fieldtype(ncid,typeid,fieldid)
+        fT = _jltype(ncid,field_typeid,usertypes,mod)
+
+        fieldndims = nc_inq_compound_fieldndims(ncid,typeid,fieldid)
+
+        if fieldndims == 0
+            push!(types,fT)
+        else
+            dim_sizes = nc_inq_compound_fielddim_sizes(ncid,typeid,fieldid)
+            fT2 = NTuple{Int(dim_sizes[1]),fT}
+            push!(types,fT2)
+        end
     end
-end
 
+    T2 = NCStruct{Symbol(typename),NamedTuple{(cnames...,),Tuple{types...}}}
+    usertypes[Symbol(typename)] = T2
+    return T2
+end
 
 function create_compound_type(ds,T; typename=nothing)
     ncid = ds.ncid
@@ -157,6 +169,11 @@ function create_compound_type(ds,T; typename=nothing)
     return typeid
 end
 
+function create_compound_type(ds,::Type{NCStruct{Tname,TNT}}; typename=Tname) where {Tname,TNT}
+    create_compound_type(ds,TNT; typename)
+end
+
+
 # returns the netCDF typeid and create the type if necessary
 function nctypeid(ds,T; typename = nothing)
     ncid = ds.ncid
@@ -182,7 +199,7 @@ function nctypeid(ds,T; typename = nothing)
                     if name == Symbol(nc_inq_compound_name(ncid,id))
                         return id
                     end
-                elseif (class == NC_ENUM) && (T <: Enum)
+                elseif (class == NC_ENUM) && (T <: Union{NCEnum,Enum})
                     if name == Symbol(first(nc_inq_enum(ncid,id)))
                         return id
                     end
@@ -194,16 +211,16 @@ function nctypeid(ds,T; typename = nothing)
     end
 
     if typename == nothing
-        typename = last(split(string(T),'.')) # strip module prefix
+        typename = _typename(T)
     end
 
     if T <: AbstractVector
         eltypeid = nctypeid(ds,eltype(T))
         typeid = nc_def_vlen(ncid, typename, eltypeid)
         @debug "created vlen-array" typename typeid
-    elseif T <: Enum
+    elseif T <: Union{Enum,NCEnum}
         typeid = create_enum_type(ds,T; typename)
-    elseif length(fieldnames(T)) > 0
+    elseif (length(fieldnames(T)) > 0) || (T <: NCStruct)
         @debug "assume type $T is a struct "
         typeid = create_compound_type(ds,T; typename)
     else
@@ -220,3 +237,30 @@ function defType(ds,typename::SymbolOrString,T::DataType)
     return nothing
 end
 export defType
+
+import Base: getproperty, propertynames, NamedTuple
+
+NamedTuple(x::NCStruct) = getfield(x,:fields)
+
+function show(io::IO, x::NCStruct{typename,TNT}) where {typename,TNT}
+    if get(io, :typeinfo, Any) <: NCStruct
+        print(io, NamedTuple(x))
+    else
+        Base.show_default(io, x)
+    end
+end
+
+function Base.getproperty(x::NCStruct,fieldname::Symbol)
+    return NamedTuple(x)[fieldname]
+end
+
+function Base.propertynames(x::NCStruct)
+    return propertynames(NamedTuple(x))
+end
+
+
+function _typename(::Type{<:NCStruct{typename}}) where {typename}
+    typename
+end
+
+_typename(::Type{T}) where T = last(split(string(T),'.')) # strip module prefix

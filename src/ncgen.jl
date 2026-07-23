@@ -24,6 +24,21 @@ end
 function ncgen(io::IO,fname; newfname = "filename.nc")
     ds = NCDataset(fname)
     unlimited_dims = unlimited(ds.dim)
+
+    typeids = nc_inq_typeids(ds.ncid)
+    if length(typeids) > 0
+        print(io,"\n# Type declaration\n\n")
+        for typeid = typeids
+            name,size,base_nc_type,nfields,class = nc_inq_user_type(ds.ncid,typeid)
+            if class == NC_ENUM
+                expr = enum_expr(ds.ncid,typeid)
+                println(io,expr)
+            end
+        end
+        println(io)
+    end
+
+
     print(io,"using NCDatasets, DataStructures\n")
     print(io,"ds = NCDataset(\"$(escape(newfname))\",\"c\"")
     ncgen_setattrib(io,ds.attrib)
@@ -38,14 +53,11 @@ function ncgen(io::IO,fname; newfname = "filename.nc")
         end
     end
 
-    typeids = nc_inq_typeids(ds.ncid)
     if length(typeids) > 0
         print(io,"\n# Types\n\n")
         for typeid = typeids
             name,size,base_nc_type,nfields,class = nc_inq_user_type(ds.ncid,typeid)
             if class == NC_ENUM
-                expr = enum_expr(ds.ncid,typeid)
-                println(io,expr)
                 println(io,"defType(ds,\"$name\",$name)\n");
             end
         end
@@ -99,6 +111,7 @@ export ncgen
 litteral(val::String) = "\"$(escape(val))\""
 litteral(val::Float64) = val
 litteral(val::Number) = "$(eltype(val))($(val))"
+litteral(val::NCEnum) = "$(Symbol(val))"
 litteral(val) = "$(val)" # for arrays
 
 function ncgen_setattrib(io,attrib)
@@ -109,9 +122,7 @@ function ncgen_setattrib(io,attrib)
     print(io,", attrib = OrderedDict(\n")
 
     for (d,val) in attrib
-        litval = invokelatest() do
-            litteral(val)
-        end
+        litval = litteral(val)
         print(io,"    \"$d\"" * (" "^max(0,(25-length(d)))) * " => $litval,\n");
     end
     print(io,")")
