@@ -53,14 +53,7 @@ function usertype(ds::Dataset,typename::SymbolOrString)
     return ut
 end
 
-# Module for reconstructing user-defined types
-function temp_module()
-    modname = Symbol(string("ReconstructedTypes_",rand(UInt32)))
-    return eval(:(module $modname end))
-end
-
-
-function compound_expr(ncid,typeid,usertypes,mod)
+function compound_expr(ncid,typeid,usertypes)
     typename,type_size,nfields = nc_inq_compound(ncid,typeid)
 
     cnames = Symbol.(nc_inq_compound_fieldname.(ncid,typeid,0:(nfields-1)))
@@ -68,7 +61,7 @@ function compound_expr(ncid,typeid,usertypes,mod)
     types = []
     for fieldid = 0:(nfields-1)
         field_typeid = nc_inq_compound_fieldtype(ncid,typeid,fieldid)
-        fT = _jltype(ncid,field_typeid,usertypes,mod)
+        fT = _jltype(ncid,field_typeid,usertypes)
 
         fieldndims = nc_inq_compound_fieldndims(ncid,typeid,fieldid)
 
@@ -95,7 +88,7 @@ function compound_expr(ncid,typeid,usertypes,mod)
                      ))
 end
 
-function reconstruct_compound_type(ncid,typeid,usertypes,mod)
+function reconstruct_compound_type(ncid,typeid,usertypes)
     typename,type_size,nfields = nc_inq_compound(ncid,typeid)
 
     if haskey(usertypes,Symbol(typename))
@@ -108,7 +101,7 @@ function reconstruct_compound_type(ncid,typeid,usertypes,mod)
     types = []
     for fieldid = 0:(nfields-1)
         field_typeid = nc_inq_compound_fieldtype(ncid,typeid,fieldid)
-        fT = _jltype(ncid,field_typeid,usertypes,mod)
+        fT = _jltype(ncid,field_typeid,usertypes)
 
         fieldndims = nc_inq_compound_fieldndims(ncid,typeid,fieldid)
 

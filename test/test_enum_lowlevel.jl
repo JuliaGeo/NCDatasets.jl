@@ -179,7 +179,7 @@ ET = enum_type(mod,T,name2,members);
 data4 = load_enum(ET,ncid,varid,len);
 
 
-ET2 = NCDatasets.reconstruct_enum_type(ncid,typeid,Dict(),nothing)
+ET2 = NCDatasets.reconstruct_enum_type(ncid,typeid,Dict())
 
 data4b = load_enum(ET2,ncid,varid,len);
 

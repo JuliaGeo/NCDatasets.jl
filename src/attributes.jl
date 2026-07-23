@@ -54,7 +54,7 @@ title = ds.attrib["title"]
 """
 function attrib(ds::Union{Dataset,Variable},name::SymbolOrString)
     xtype,len = nc_inq_att(_ncid(ds),_varid(ds),name)
-    attribT = _jltype(_ncid(ds),xtype,_dataset(ds).usertypes,_dataset(ds).mod)
+    attribT = _jltype(_ncid(ds),xtype,_dataset(ds).usertypes)
     nc_get_att(_ncid(ds),_varid(ds),name; attribT)
 end
 

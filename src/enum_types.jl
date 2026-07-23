@@ -17,7 +17,7 @@ function enum_expr(ncid,typeid)
                     )
 end
 
-function reconstruct_enum_type(ncid,typeid,usertypes,mod)
+function reconstruct_enum_type(ncid,typeid,usertypes)
     typename, = nc_inq_enum(ncid,typeid)
 
     if haskey(usertypes,Symbol(typename))

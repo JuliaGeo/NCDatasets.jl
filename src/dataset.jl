@@ -111,7 +111,6 @@ function NCDataset(ncid::Integer,
         Dict{String,String}(),
         maskingvalue,
         ReentrantLock(),
-        temp_module(),
         usertypes,
     )
 
