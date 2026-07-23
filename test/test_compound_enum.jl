@@ -54,7 +54,7 @@ run(`ncdump -h $fname`)
 
 # copy reconstructed variable
 
-fname2 = tempname(suffix=".nc")
+fname2 = tempname()
 ds = NCDataset(fname2,"c");
 defVar(ds,"weather_reports",data2,("station",))
 close(ds)

@@ -48,7 +48,7 @@ close(ds)
 
 # copy reconstructed variable
 
-fname2 = tempname(suffix=".nc")
+fname2 = tempname()
 ds = NCDataset(fname2,"c");
 defVar(ds,"data",data,("x",))
 close(ds)
