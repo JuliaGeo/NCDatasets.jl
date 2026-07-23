@@ -49,7 +49,7 @@ close(ds)
 #run(`ncdump $fname`)
 
 
-struct MyStruct
+struct MyStruct2
     i1::Cint
     i2::Cint
     f1::Cfloat
@@ -59,15 +59,15 @@ end
 
 
 sz = (2,3)
-data = [MyStruct(i,j,1.2,2.3,(2,i,j)) for i = 1:sz[1], j = 1:sz[2]]
+data = [MyStruct2(i,j,1.2,2.3,(2,i,j)) for i = 1:sz[1], j = 1:sz[2]]
 
 fname = tempname()
 ds = NCDataset(fname,"c")
 defDim(ds,"x",2)
 defDim(ds,"y",3)
-ncv = defVar(ds,"data",MyStruct,("x","y"); typename = "nc_compound_t")
+ncv = defVar(ds,"data",MyStruct2,("x","y"); typename = "nc_compound_t")
 
-@test eltype(ncv) == MyStruct
+@test eltype(ncv) == MyStruct2
 ncv[:,:] = data
 close(ds)
 
@@ -77,15 +77,15 @@ data_loaded = ds["data"][:,:]
 T = typeof(data_loaded[1,1])
 
 @test usertype(ds,"nc_compound_t") == T
-@test sizeof(T) == sizeof(MyStruct)
+@test sizeof(T) == sizeof(MyStruct2)
 
 @test propertynames(data_loaded[1]) == propertynames(data[1])
 
 #=
-@test fieldcount(T) == fieldcount(MyStruct)
+@test fieldcount(T) == fieldcount(MyStruct2)
 for i = 1:fieldcount(T)
-    @test fieldoffset(T,i) == fieldoffset(MyStruct,i)
-    @test fieldtype(T,i) == fieldtype(MyStruct,i)
+    @test fieldoffset(T,i) == fieldoffset(MyStruct2,i)
+    @test fieldtype(T,i) == fieldtype(MyStruct2,i)
 end
 =#
 @test data_loaded[1,1].i1 == data[1,1].i1
@@ -93,10 +93,10 @@ end
 @test typeof(ds["data"][1,1]) == T
 
 
-usertype!(ds,"nc_compound_t",MyStruct)
+usertype!(ds,"nc_compound_t",MyStruct2)
 
 data_loaded = ds["data"][:,:]
-@test eltype(data_loaded) == MyStruct
+@test eltype(data_loaded) == MyStruct2
 @test data_loaded == data
 
 #run(`ncdump $fname`)

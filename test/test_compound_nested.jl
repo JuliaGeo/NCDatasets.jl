@@ -61,11 +61,6 @@ close(ds)
 
 # deeply nested
 
-struct Position
-    lon::Float32
-    lat::Float32
-end
-
 struct Profile
     position::Position
     temperature::NTuple{3,Float32}
