@@ -65,8 +65,7 @@ run(`ncdump $fname`)
 
 # with provided user-type
 
-ds = NCDataset(fname);
-NCDatasets.typemap!(ds,"cloud_class_t" => Clouds.cloud_class_t);
+ds = NCDataset(fname, typemap = ["cloud_class_t" => Clouds.cloud_class_t])
 data = ds["data"][:]
 @test eltype(data) == Clouds.cloud_class_t
 @test data == data_ref

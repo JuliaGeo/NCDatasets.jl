@@ -250,7 +250,8 @@ function NCDataset(filename::AbstractString,
                    persist::Bool = false,
                    memory::Union{Vector{UInt8},Nothing} = nothing,
                    maskingvalue = missing,
-                   attrib = [])
+                   attrib = [],
+                   typemap = [])
 
     ncid = -1
     isdefmode = fill(false)
@@ -272,10 +273,10 @@ function NCDataset(filename::AbstractString,
         isdefmode[] = true
     end
 
+    typemap = Dict(Symbol(k) => v for (k,v) in typemap)
+
     iswritable = mode != "r"
-    ds = NCDataset(
-        ncid,iswritable,isdefmode,
-        maskingvalue = maskingvalue)
+    ds = NCDataset(ncid,iswritable,isdefmode; maskingvalue, typemap)
 
     # set global attributes
     for (attname,attval) in attrib

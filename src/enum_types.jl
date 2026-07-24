@@ -74,12 +74,15 @@ function enums(v::Variable{Union{Missing,T}}) where T <: Enum
 end
 
 
-function show(io::IO, x::T) where {T <: NCEnum}
-    if get(io, :typeinfo, Any) <: NCEnum
-        print(io, x.data)
-    else
-        Base.show_default(io, x)
+function show(io::IO, x::NCEnum{typename,T,names,values}) where {typename,T,names,values}
+    n = string(x.data)
+    for (name,value) in zip(names,values)
+        if value == x.data
+            n = string(name)
+        end
     end
+
+    print(io, n, "::",typename," = ",x.data)
 end
 
 

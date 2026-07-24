@@ -70,24 +70,39 @@ fname = download("https://raw.githubusercontent.com/Unidata/netcdf-c/refs/tags/v
 ds = NCDataset(fname)
 
 array = ds["s"][:,:]
-typeof(array)
+
+propertynames(array[1,1])
 # output
-# Matrix{c_t} (alias for Array{NCDatasets.ReconstructedTypes_123.c_t, 2})
+#
+# (:x, :y)
+
+
+# access individual elements
+array[1,1].x
+# output
+#
+# 1
+
+
+# access all fields x
+getproperty.(array,:x)
+
 
 struct MyCompoundType
     x::Int32
     y::Int32
 end
 
-NCDatasets.typemap!(ds,"c_t" => MyCompoundType)
+ds = NCDataset(fname, typemap = Dict("c_t" => MyCompoundType))
 array = ds["s"][:,:]
 typeof(array)
 # output
+#
 # Matrix{MyCompoundType} (alias for Array{MyCompoundType, 2})
 
 ```
 
-It is preferable in fact that the user defines the compound type as a julia struct and register it using the `NCDatasets.typemap!`.
+It is preferable in fact that the user defines the compound type as a julia struct and register it using the `typemap` argument.
 Users should not rely on the type name generated internally by `NCDatasets`. Note also that Julia treats two types as different even if they have
 the same memory layout.
 When defining these structures, avoid using the type `Int` as its size is platform-dependent. Vectors of fixed length can also be used in struct fields.
@@ -145,15 +160,12 @@ end
 
 ```
 
+The julia type `TestEnum` must be internally reconstructed unless
+it is provided via the `typemap` parameter (which is preferred).
 Loading the data:
 
 ``` julia
-data2 = NCDataset(fname,"r") do ds
-    # The julia type TestEnum must be internally reconstructed unless
-    # it is provided via ds.typemap! (which is preferred)
-    NCDatasets.typemap!(ds,"TestEnum" => TestEnum)
-    # the Julia type name is used by default in the netcdf file
-    # dimension "dim" is created automatically
+data2 = NCDataset(fname,"r", typemap = Dict("TestEnum" => TestEnum)) do ds
     ds["data"][:]
 end
 ```
