@@ -92,7 +92,7 @@ defVar
 ```@docs
 chunking
 deflate
-zstd
+zstandard
 checksum
 quantize
 ```

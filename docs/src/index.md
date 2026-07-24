@@ -259,7 +259,7 @@ end
 
 #### Querying and Modifying Compression Settings
 
-You can query the compression settings of an existing variable, or change them on an open writeable variable, using the high-level `deflate` and `zstd` functions:
+You can query the compression settings of an existing variable, or change them on an open writeable variable, using the high-level `deflate` and `NCDatasets.zstandard` functions:
 
 ```julia
 # Open the file in append/write mode
@@ -267,11 +267,11 @@ ds = NCDataset("/tmp/zstd_example.nc", "a")
 v = ds["humidity"]
 
 # Query Zstd settings
-has_zstd, level = zstd(v)
+has_zstd, level = NCDatasets.zstandard(v)
 println("Zstd enabled: $has_zstd, level: $level")
 
 # Change Zstd compression level on the fly
-zstd(v, 10)
+NCDatasets.zstandard(v, 10)
 
 # Check Deflate settings
 isshuffled, isdeflated, deflate_level = deflate(v)

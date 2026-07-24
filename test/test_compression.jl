@@ -102,13 +102,13 @@ NCDataset(filename_zstd, "c") do ds
         v = defVar(ds, "temp", Float32, ("lon",), zstdlevel = 5)
 
         # Check query
-        has_zstd, zstd_level = zstd(v)
+        has_zstd, zstd_level = NCDatasets.zstandard(v)
         @test has_zstd == true
         @test zstd_level == 5
 
         # Test setting a new level
-        zstd(v, 3)
-        has_zstd, zstd_level = zstd(v)
+        NCDatasets.zstandard(v, 3)
+        has_zstd, zstd_level = NCDatasets.zstandard(v)
         @test has_zstd == true
         @test zstd_level == 3
     else
