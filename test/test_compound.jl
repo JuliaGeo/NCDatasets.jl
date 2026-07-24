@@ -161,3 +161,26 @@ close(ds)
 #=
 run(`ncdump $fname`)
 =#
+
+# vlen-array of structs
+
+dimlen = 10
+T = MyCompoundType
+
+data = Vector{Vector{T}}(undef,dimlen)
+for i = 1:length(data)
+    data[i] = [MyCompoundType.(j,j) for j = 1:i]
+end
+
+fname = tempname()
+ds = NCDataset(fname,"c",format=:netcdf4);
+ds.dim["casts"] = dimlen;
+vlentypename = "struct-vlen"
+#NCDatasets.defType(ds,T,"cloud_class_t")
+v = defVar(ds,"data",Vector{T},("casts",); typename = vlentypename)
+v.var[:] = data
+
+@test eltype(v) == Vector{T}
+data2 = v[:]
+@test data == data2
+close(ds)
