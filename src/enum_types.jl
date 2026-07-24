@@ -60,17 +60,23 @@ function create_enum_type(ds,T; typename = nothing)
 end
 
 
-function enums(v::Variable{ET}) where ET <: NCEnum{typename,T,names,values} where {typename,T,names,values}
-    (; (name => ET(value) for (name,value) in zip(names,values))...)
+function enums(::Type{T}) where T <: Union{Enum,NCEnum}
+    return (; (Symbol(i) => i for i in instances(T))...)
 end
 
-function enums(v::Variable{T}) where T <: Enum
-    return parentmodule(T)
+"""
+    nt = NCDatasets.enums(v::Variable{T}) where T <: Union{Enum,NCEnum}
+
+
+Returns a named tuple with all valid enum for the NetCDF variable `v` mapping the
+name and the corresponding enum instance.
+"""
+function enums(v::Variable{T}) where T <: Union{Enum,NCEnum}
+    return enums(T)
 end
 
-
-function enums(v::Variable{Union{Missing,T}}) where T <: Enum
-    return parentmodule(T)
+function enums(v::Variable{Union{Missing,T}}) where T <: Union{Enum,NCEnum}
+    return enums(T)
 end
 
 

@@ -67,6 +67,8 @@ run(`ncdump $fname`)
 
 ds = NCDataset(fname, typemap = ["cloud_class_t" => Clouds.cloud_class_t])
 data = ds["data"][:]
+NS = NCDatasets.enums(ds["data"].var);
+@test data[1] == NS.Clear
 @test eltype(data) == Clouds.cloud_class_t
 @test data == data_ref
 close(ds)
