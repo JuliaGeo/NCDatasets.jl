@@ -1,7 +1,7 @@
 """
     NCDatasets.typemap!(ds::Dataset, name1 => julia_type1,...)
 
-Use the julia struct/enum `julia_type` for compound/enum types called `name` defined in then
+Use the julia struct/enum `julia_type` for compound/enum types called `name` defined in the
 netCDF dataset `ds`.
 
 Example:

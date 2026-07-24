@@ -178,3 +178,9 @@ using CategoricalArrays
 enum_dict = Dict(inst => string(inst) for inst in instances(eltype(data)))
 ca = CategoricalArray([enum_dict[x] for x in data]; levels=collect(values(enum_dict)))
 ```
+
+
+```@docs
+NCDatasets.enums
+NCDatasets.typemap!
+```

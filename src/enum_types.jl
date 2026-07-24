@@ -68,7 +68,7 @@ end
     nt = NCDatasets.enums(v::Variable{T}) where T <: Union{Enum,NCEnum}
 
 
-Returns a named tuple with all valid enum for the NetCDF variable `v` mapping the
+Returns a named tuple with all valid enums for the NetCDF variable `v` mapping the
 name and the corresponding enum instance.
 """
 function enums(v::Variable{T}) where T <: Union{Enum,NCEnum}
