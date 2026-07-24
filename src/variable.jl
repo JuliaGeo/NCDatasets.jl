@@ -316,7 +316,7 @@ checksum(v::Variable) = nc_inq_var_fletcher32(v.ds.ncid,v.varid)
 export checksum
 
 """
-    quantize(v::Variable, mode, nsd)
+    NCDatasets.quantize(v::Variable, mode, nsd)
 
 Set the quantization mode (`:noquantize, :BitGroom, :GranularBitRound, :BitRound`)
 and the least significant digits (`nsd`)
@@ -325,7 +325,7 @@ for the variable `v`.
 quantize(v::Variable,mode,nsd) = nc_def_var_quantize(v.ds.ncid, v.varid, mode, nsd)
 
 """
-    mode, nsd = quantize(v::Variable)
+    mode, nsd = NCDatasets.quantize(v::Variable)
 
 Queries the quantization mode (`:noquantize, :BitGroom, :GranularBitRound, :BitRound`)
 and the least significant digits (`nsd`) for the variable `v`.

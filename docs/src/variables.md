@@ -93,7 +93,7 @@ defVar
 chunking
 deflate
 checksum
-quantize
+NCDatasets.quantize
 ```
 
 
