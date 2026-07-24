@@ -75,14 +75,19 @@ end
 
 
 function show(io::IO, x::NCEnum{typename,T,names,values}) where {typename,T,names,values}
-    n = string(x.data)
+    n = ""
     for (name,value) in zip(names,values)
         if value == x.data
             n = string(name)
         end
     end
 
-    print(io, n, "::",typename," = ",x.data)
+    if n == ""
+        printstyled(io,"invalid",color=:red,bold=true)
+    else
+        print(io, n)
+    end
+    print(io, "::",typename," = ",x.data)
 end
 
 
