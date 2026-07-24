@@ -196,10 +196,10 @@ function defVar(dest::AbstractDataset,srcvar::AbstractNCVariable; kwargs...)
         deflate(cfdestvar,isshuffled,isdeflated,deflate_level)
     end
 
-    if hasmethod(zstd,Tuple{typeof(var)})
-        has_zstd, zstd_level = zstd(var)
+    if hasmethod(zstandard,Tuple{typeof(var)})
+        has_zstd, zstd_level = zstandard(var)
         if has_zstd
-            zstd(cfdestvar,zstd_level)
+            zstandard(cfdestvar,zstd_level)
         end
     end
 

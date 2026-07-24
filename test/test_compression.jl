@@ -111,6 +111,17 @@ NCDataset(filename_zstd, "c") do ds
         has_zstd, zstd_level = NCDatasets.zstandard(v)
         @test has_zstd == true
         @test zstd_level == 3
+
+        # Test copying dataset / variable preserves zstandard compression
+        filename_copy = tempname()
+        NCDataset(filename_copy, "c") do ds_copy
+            defVar(ds_copy, ds["temp"])
+            v_copy = ds_copy["temp"]
+            has_zstd_copy, zstd_level_copy = NCDatasets.zstandard(v_copy)
+            @test has_zstd_copy == true
+            @test zstd_level_copy == 3
+        end
+        rm(filename_copy, force=true)
     else
         @info "Zstandard (zstd) filter is not available in the compiled libnetcdf. Skipping Zstd test."
     end
