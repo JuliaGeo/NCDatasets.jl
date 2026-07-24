@@ -1,6 +1,6 @@
 using Test
 using NCDatasets
-using NCDatasets: usertype, usertype!
+using NCDatasets: typemap, typemap!
 
 
 # write file similar to
@@ -37,10 +37,8 @@ ds = NCDataset(fname)
 array = ds["s"][:,:]
 
 @test occursin("c_t",string(typeof(array)))
-# output
-# Matrix{c_t} (alias for Array{NCDatasets.ReconstructedTypes....c_t, 2})
 
-NCDatasets.usertype!(ds,"c_t",MyCompoundType)
+NCDatasets.typemap!(ds,"c_t" => MyCompoundType)
 array = ds["s"][:,:]
 
 @test eltype(array) == MyCompoundType
@@ -51,7 +49,7 @@ close(ds)
 #run(`ncdump $fname`)
 
 
-struct MyStruct
+struct MyStruct2
     i1::Cint
     i2::Cint
     f1::Cfloat
@@ -61,15 +59,15 @@ end
 
 
 sz = (2,3)
-data = [MyStruct(i,j,1.2,2.3,(2,i,j)) for i = 1:sz[1], j = 1:sz[2]]
+data = [MyStruct2(i,j,1.2,2.3,(2,i,j)) for i = 1:sz[1], j = 1:sz[2]]
 
 fname = tempname()
 ds = NCDataset(fname,"c")
 defDim(ds,"x",2)
 defDim(ds,"y",3)
-ncv = defVar(ds,"data",MyStruct,("x","y"); typename = "nc_compound_t")
+ncv = defVar(ds,"data",MyStruct2,("x","y"); typename = "nc_compound_t")
 
-@test eltype(ncv) == MyStruct
+@test eltype(ncv) == MyStruct2
 ncv[:,:] = data
 close(ds)
 
@@ -78,23 +76,27 @@ data_loaded = ds["data"][:,:]
 
 T = typeof(data_loaded[1,1])
 
-@test usertype(ds,"nc_compound_t") == T
-@test sizeof(T) == sizeof(MyStruct)
-@test fieldcount(T) == fieldcount(MyStruct)
-for i = 1:fieldcount(T)
-    @test fieldoffset(T,i) == fieldoffset(MyStruct,i)
-    @test fieldtype(T,i) == fieldtype(MyStruct,i)
-end
+@test typemap(ds,"nc_compound_t") == T
+@test sizeof(T) == sizeof(MyStruct2)
 
+@test propertynames(data_loaded[1]) == propertynames(data[1])
+
+#=
+@test fieldcount(T) == fieldcount(MyStruct2)
+for i = 1:fieldcount(T)
+    @test fieldoffset(T,i) == fieldoffset(MyStruct2,i)
+    @test fieldtype(T,i) == fieldtype(MyStruct2,i)
+end
+=#
 @test data_loaded[1,1].i1 == data[1,1].i1
 
 @test typeof(ds["data"][1,1]) == T
 
 
-usertype!(ds,"nc_compound_t",MyStruct)
+typemap!(ds,"nc_compound_t" => MyStruct2)
 
 data_loaded = ds["data"][:,:]
-@test eltype(data_loaded) == MyStruct
+@test eltype(data_loaded) == MyStruct2
 @test data_loaded == data
 
 #run(`ncdump $fname`)
@@ -159,3 +161,26 @@ close(ds)
 #=
 run(`ncdump $fname`)
 =#
+
+# vlen-array of structs
+
+dimlen = 10
+T = MyCompoundType
+
+data = Vector{Vector{T}}(undef,dimlen)
+for i = 1:length(data)
+    data[i] = [MyCompoundType.(j,j) for j = 1:i]
+end
+
+fname = tempname()
+ds = NCDataset(fname,"c",format=:netcdf4);
+ds.dim["casts"] = dimlen;
+vlentypename = "struct-vlen"
+#NCDatasets.defType(ds,T,"cloud_class_t")
+v = defVar(ds,"data",Vector{T},("casts",); typename = vlentypename)
+v.var[:] = data
+
+@test eltype(v) == Vector{T}
+data2 = v[:]
+@test data == data2
+close(ds)

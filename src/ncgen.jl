@@ -24,6 +24,24 @@ end
 function ncgen(io::IO,fname; newfname = "filename.nc")
     ds = NCDataset(fname)
     unlimited_dims = unlimited(ds.dim)
+
+    typeids = nc_inq_typeids(ds.ncid)
+    if length(typeids) > 0
+        print(io,"\n# Type declaration\n\n")
+        for typeid = typeids
+            name,size,base_nc_type,nfields,class = nc_inq_user_type(ds.ncid,typeid)
+            if class == NC_ENUM
+                expr = enum_expr(ds.ncid,typeid)
+                println(io,expr)
+            elseif class == NC_COMPOUND
+                expr = compound_expr(ds.ncid,typeid,ds.typemap)
+                println(io,expr)
+            end
+        end
+        println(io)
+    end
+
+
     print(io,"using NCDatasets, DataStructures\n")
     print(io,"ds = NCDataset(\"$(escape(newfname))\",\"c\"")
     ncgen_setattrib(io,ds.attrib)
@@ -38,10 +56,27 @@ function ncgen(io::IO,fname; newfname = "filename.nc")
         end
     end
 
+    if length(typeids) > 0
+        print(io,"\n# Types\n\n")
+        for typeid = typeids
+            name,size,base_nc_type,nfields,class = nc_inq_user_type(ds.ncid,typeid)
+            if class == NC_ENUM
+                println(io,"defType(ds,\"$name\",$name)\n");
+            end
+        end
+    end
+
     print(io,"\n# Declare variables\n\n")
 
     for (d,v) in ds
-        print(io,"nc$(escapevar(d)) = defVar(ds,\"$d\", $(eltype(v.var)), $(dimnames(v))")
+        typeid = nc_inq_vartype(ds.ncid,v.var.varid)
+        if typeid >= NCDatasets.NC_FIRSTUSERTYPEID
+            typename, = nc_inq_user_type(ds.ncid,typeid)
+        else
+            typename = eltype(v.var)
+        end
+
+        print(io,"nc$(escapevar(d)) = defVar(ds,\"$d\", $(typename), $(dimnames(v))")
         ncgen_setattrib(io,v.attrib)
         print(io,")\n\n")
     end
@@ -79,6 +114,7 @@ export ncgen
 litteral(val::String) = "\"$(escape(val))\""
 litteral(val::Float64) = val
 litteral(val::Number) = "$(eltype(val))($(val))"
+litteral(val::NCEnum) = "$(Symbol(val))"
 litteral(val) = "$(val)" # for arrays
 
 function ncgen_setattrib(io,attrib)

@@ -1,6 +1,4 @@
 [deps]
-BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
-CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
 CommonDataModel = "1fbeeb36-5f17-413c-809b-666fb144f157"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"

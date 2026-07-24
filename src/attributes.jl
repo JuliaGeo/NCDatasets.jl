@@ -52,8 +52,11 @@ ds = NCDataset("file.nc")
 title = ds.attrib["title"]
 ```
 """
-attrib(ds::Union{Dataset,Variable},name::SymbolOrString) = nc_get_att(_ncid(ds),_varid(ds),name)
-
+function attrib(ds::Union{Dataset,Variable},name::SymbolOrString)
+    xtype,len = nc_inq_att(_ncid(ds),_varid(ds),name)
+    attribT = _jltype(_ncid(ds),xtype,_dataset(ds).typemap)
+    nc_get_att(_ncid(ds),_varid(ds),name; attribT)
+end
 
 
 """
@@ -81,12 +84,22 @@ ds.attrib["title"] = ["my title"]
 close(ds)
 """
 function defAttrib(ds::Union{Dataset,Variable},name::SymbolOrString,data)
+    if !(data isa Union{String,Enum,NCEnum}) && (ndims(data) > 1)
+        error("Attributes must be a scalar or a vector (while writting attribute '$name' to file $(path(_dataset(ds))).")
+    end
+
     # make sure that the file is in define mode
     defmode(_dataset(ds)) do
-        return nc_put_att(_ncid(ds),_varid(ds),name,data)
+        typeid = nctypeid(_dataset(ds),(data isa AbstractVector ? eltype(data) : typeof(data)))
+        return nc_put_att(_ncid(ds),_varid(ds),name,data; typeid)
     end
 end
 
+function defAttrib(ds::Union{Dataset,Variable},name::SymbolOrString,data::Vector{Any})
+    T = promote_type(typeof.(data)...)
+    @debug "promoted type for attribute $T"
+    defAttrib(ds,name,T.(data))
+end
 
 """
     Base.haskey(a::Attributes,name::SymbolOrString)

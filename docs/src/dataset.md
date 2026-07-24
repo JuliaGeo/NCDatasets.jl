@@ -31,7 +31,7 @@ Otherwise, we attempt to use standard structures from the Julia standard library
 A NetCDF group is a dataset (with variables, attributes, dimensions and sub-groups) and
 can be arbitrarily nested.
 A group is created with `defGroup` and accessed via the `group` property of
-a `NCDataset`.
+a `NCDataset`. Groups can be nested in arbitrary depth.
 
 ```julia
 # create the variable "temperature" inside the group "forecast"

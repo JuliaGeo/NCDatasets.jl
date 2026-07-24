@@ -3,7 +3,7 @@ using NCDatasets
 using NCDatasets: nc_create, NC_NETCDF4, NC_CLOBBER, NC_NOWRITE, nc_def_dim, nc_def_compound, nc_insert_compound, nc_def_var, nc_put_var, nc_close, NC_INT, nc_unsafe_put_var, libnetcdf, check, ncType, nc_open, nc_inq_vartype, nc_inq_compound_nfields, nc_inq_compound_size, nc_inq_compound_name, nc_inq_compound_fieldoffset,nc_inq_compound_fieldndims,nc_inq_compound_fielddim_sizes, nc_inq_compound_fieldname, nc_inq_compound_fieldindex, nc_inq_compound_fieldtype, nc_inq_compound, nc_inq_varid, nc_get_var!, nc_insert_array_compound, reconstruct_compound_type, create_compound_type
 
 
-using NCDatasets: usertype, usertype!
+using NCDatasets: typemap, typemap!
 # mutable struct are not supported
 # https://discourse.julialang.org/t/passing-an-array-of-structures-through-ccall/5194
 
@@ -29,9 +29,8 @@ y_dimid = nc_def_dim(ncid, "y", sz[2])
 
 dimids = [x_dimid, y_dimid]
 
-type_name = "sample_compound_type"
-usertypes = Dict()
-typeid = create_compound_type(ncid,T,type_name,usertypes);
+typename = "sample_compound_type"
+typeid = create_compound_type((;ncid,typemap = Dict()),T; typename);
 
 varid = nc_def_var(ncid, "data", typeid, reverse(dimids))
 
@@ -79,8 +78,7 @@ type_name,type_size,type_nfields = nc_inq_compound(ncid,xtype)
 @test type_size == sizeof(T)
 @test type_nfields == fieldcount(T)
 
-usertypes = Dict()
-T2 = reconstruct_compound_type(ncid,xtype,usertypes,NCDatasets.temp_module())
+T2 = reconstruct_compound_type(ncid,xtype,Dict())
 
 data2 = Array{T2,2}(undef,sz...)
 
@@ -89,7 +87,7 @@ nc_get_var!(ncid, varid, data2)
 @test data2[1,1].i1 == data[1,1].i1
 
 
-for fn = fieldnames(eltype(data2))
+for fn = propertynames(first(data2))
     @test getproperty.(data,fn) == getproperty.(data2,fn)
 end
 

@@ -27,6 +27,7 @@ const jlType = Dict(
 # Inverse mapping
 const ncType = Dict(value => key for (key, value) in jlType)
 
+
 iswritable(ds::NCDataset) = ds.iswritable
 maskingvalue(ds::NCDataset) = ds.maskingvalue
 
@@ -91,7 +92,7 @@ function NCDataset(ncid::Integer,
                    isdefmode::Array{Bool,0};
                    parentdataset = nothing,
                    maskingvalue = missing,
-                   usertypes = Dict{Symbol,DataType}(),
+                   typemap = Dict{Symbol,DataType}(),
                    )
 
     function _finalize(ds)
@@ -110,8 +111,7 @@ function NCDataset(ncid::Integer,
         Dict{String,String}(),
         maskingvalue,
         ReentrantLock(),
-        temp_module(),
-        usertypes,
+        typemap,
     )
 
     if !iswritable
@@ -173,13 +173,15 @@ end
 ############################################################
 
 """
-    NCDataset(filename::AbstractString, mode = "r";
-              format::Symbol = :netcdf4,
-              share::Bool = false,
-              diskless::Bool = false,
-              persist::Bool = false,
-              memory::Union{Vector{UInt8},Nothing} = nothing,
-              attrib = [])
+    ds = NCDataset(filename::AbstractString, mode = "r";
+                   format::Symbol = :netcdf4,
+                   share::Bool = false,
+                   diskless::Bool = false,
+                   persist::Bool = false,
+                   memory::Union{Vector{UInt8},Nothing} = nothing,
+                   attrib = [],
+                   typemap = Dict{String,DataType}()
+)
 
 Load, create or overwrite a NetCDF file at `filename`, depending on `mode`
 
@@ -190,20 +192,6 @@ Load, create or overwrite a NetCDF file at `filename`, depending on `mode`
 * `"a"` : open `filename` into append mode (i.e. existing data in the netCDF
   file is not overwritten and a variable can be added).
 
-
-If `share` is true, the `NC_SHARE` flag is set allowing to have multiple
-processes to read the file and one writer process (netcdf classic files only).
-Likewise setting `diskless` or `persist` to `true` will enable the flags
-`NC_DISKLESS` or `NC_PERSIST` flag.
-More information is available in the [NetCDF C-API](https://www.unidata.ucar.edu/software/netcdf/docs/).
-
-Notice that this does not close the dataset, use `close` on the
-result (or see below the `do`-block).
-
-The optional parameter `attrib` is an iterable of attribute name and attribute
-value pairs, for example a `Dict`, `DataStructures.OrderedDict` or simply a
-vector of pairs (see example below).
-
 # Supported `format` values:
 
 * `:netcdf4` (default): HDF5-based NetCDF format.
@@ -213,13 +201,27 @@ vector of pairs (see example below).
 * `:netcdf5_64bit_data`: improved netCDF format supporting 64-bit integer data types.
 
 
-Files can also be open and automatically closed with a `do` block.
+Note that a dataset must be closed explicitely with `close(ds)` or implicitely using a `do`-block:
 
 ```julia
 NCDataset("file.nc") do ds
     data = ds["temperature"][:,:]
 end
 ```
+
+# Extended help
+
+
+If `share` is true, the `NC_SHARE` flag is set allowing to have multiple
+processes to read the file and one writer process (netcdf classic files only).
+Likewise setting `diskless` or `persist` to `true` will enable the flags
+`NC_DISKLESS` or `NC_PERSIST` flag.
+More information is available in the [NetCDF C-API](https://www.unidata.ucar.edu/software/netcdf/docs/).
+
+
+The optional parameter `attrib` is an iterable of attribute name and attribute
+value pairs, for example a `Dict`, `DataStructures.OrderedDict` or simply a
+vector of pairs (see example below).
 
 Here is an attribute example:
 ```julia
@@ -228,6 +230,11 @@ NCDataset("file.nc", "c", attrib = OrderedDict("title" => "my first netCDF file"
    defVar(ds,"temp",[10.,20.,30.],("time",))
 end;
 ```
+
+
+The parameter `typemap` (`Dict{String,DataType}`) provides a way to link NetCDF user-defined types with the corresponding julia types for NetCDF 4 compound types (structs) and enum.
+This feature is currently experimental.
+
 
 The NetCDF dataset can also be a `memory` as a vector of bytes. A non-empty string
 a `filename` is still required, for example:
@@ -250,7 +257,8 @@ function NCDataset(filename::AbstractString,
                    persist::Bool = false,
                    memory::Union{Vector{UInt8},Nothing} = nothing,
                    maskingvalue = missing,
-                   attrib = [])
+                   attrib = [],
+                   typemap = Dict{String,DataType}())
 
     ncid = -1
     isdefmode = fill(false)
@@ -272,10 +280,10 @@ function NCDataset(filename::AbstractString,
         isdefmode[] = true
     end
 
+    typemap = Dict(Symbol(k) => v for (k,v) in typemap)
+
     iswritable = mode != "r"
-    ds = NCDataset(
-        ncid,iswritable,isdefmode,
-        maskingvalue = maskingvalue)
+    ds = NCDataset(ncid,iswritable,isdefmode; maskingvalue, typemap)
 
     # set global attributes
     for (attname,attval) in attrib

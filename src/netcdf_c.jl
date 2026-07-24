@@ -560,7 +560,7 @@ end
                 ncid,varid,name,typeid,length(data),data))
 end
 
-@with_lock function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::AbstractString)
+@with_lock function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::AbstractString; typeid = 0)
     if Symbol(name) == :_FillValue
         nc_put_att_string(ncid,varid,"_FillValue",[data])
     else
@@ -569,12 +569,12 @@ end
     end
 end
 
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Vector{Char})
+function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Vector{Char}; typeid = 0)
     nc_put_att(ncid,varid,name,join(data))
 end
 
 # NetCDF does not necessarily support 64 bit integer attributes
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Int64)
+function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Int64; typeid = 0)
     if Symbol(name) == :_FillValue
         nc_put_att(ncid,varid,name,ncType[Int64],[data])
     else
@@ -585,43 +585,37 @@ end
 nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Vector{Int64}) =
     nc_put_att(ncid,varid,name,Int32.(data))
 
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Number)
-    nc_put_att(ncid,varid,name,ncType[typeof(data)],[data])
+function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Union{Number,Enum}; typeid = ncType[typeof(data)])
+    nc_put_att(ncid,varid,name,typeid,[data])
 end
 
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Char)
+function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Char; typeid = ncType[typeof(data)])
     # UInt8('α')
     # ERROR: InexactError: trunc(UInt8, 945)
-    nc_put_att(ncid,varid,name,ncType[typeof(data)],[UInt8(data)])
+    nc_put_att(ncid,varid,name,typeid,[UInt8(data)])
 end
 
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Vector{T}) where T <: AbstractString
+function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Vector{T}; typeid = ncType[String]) where T <: AbstractString
     GC.@preserve data begin
-        nc_put_att(ncid,varid,name,ncType[String],pointer.(data))
+        nc_put_att(ncid,varid,name,typeid,pointer.(data))
     end
 end
 
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Vector{T}) where {T}
-    nc_put_att(ncid,varid,name,ncType[T],data)
-end
-
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Vector{Any})
-    T = promote_type(typeof.(data)...)
-    @debug "promoted type for attribute $T"
-    nc_put_att(ncid,varid,name,ncType[T],T.(data))
+function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::Vector{T}; typeid = ncType[T]) where {T}
+    nc_put_att(ncid,varid,name,typeid,data)
 end
 
 # convert e.g. ranges to vectors
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::AbstractVector)
-    nc_put_att(ncid,varid,name,Vector(data))
+function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data::AbstractVector; typeid = ncType[eltype(data)])
+    nc_put_att(ncid,varid,name,Vector(data); typeid)
 end
 
-function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data)
+function nc_put_att(ncid::Integer,varid::Integer,name::SymbolOrString,data; typeid = 0)
     error("attributes can only be scalars or vectors")
 end
 
 
-@with_lock function nc_get_att(ncid::Integer,varid::Integer,name)
+@with_lock function nc_get_att(ncid::Integer,varid::Integer,name; attribT = nothing)
     xtype,len = nc_inq_att(ncid,varid,name)
 
     if xtype == NC_CHAR
@@ -653,7 +647,8 @@ end
             return str
         end
     else
-        val = Vector{jlType[xtype]}(undef,len)
+        T = (isnothing(attribT) ? jlType[xtype] : attribT)
+        val = Vector{T}(undef,len)
         check(ccall((:nc_get_att,libnetcdf),Cint,(Cint,Cint,Cstring,Ptr{Nothing}),ncid,varid,name,val))
 
         if len == 1
@@ -674,7 +669,6 @@ end
 end
 
 @with_lock function nc_inq_enum(ncid::Integer,xtype::Integer)
-
     base_nc_typep = Ref(nc_type(0))
     base_sizep = Ref(Csize_t(0))
     num_membersp = Ref(Csize_t(0))
@@ -1531,15 +1525,18 @@ end
 
 
 # get matching julia type
-function _jltype(ncid,xtype,usertypes,mod)
+function _jltype(ncid,xtype,typemap)
     jltype =
         if xtype >= NCDatasets.NC_FIRSTUSERTYPEID
             name,size,base_nc_type,nfields,class = nc_inq_user_type(ncid,xtype)
             # assume here variable-length type
             if class == NC_VLEN
-                Vector{jlType[base_nc_type]}
+                T = _jltype(ncid,base_nc_type,typemap)
+                Vector{T}
             elseif class == NC_COMPOUND
-                reconstruct_compound_type(ncid,xtype,usertypes,mod)
+                reconstruct_compound_type(ncid,xtype,typemap)
+            elseif class == NC_ENUM
+                reconstruct_enum_type(ncid,xtype,typemap)
             else
                 @warn "unsupported type: class=$(class)"
                 Nothing

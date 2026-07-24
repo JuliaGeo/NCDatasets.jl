@@ -38,8 +38,16 @@ mutable struct NCDataset{TDS,Tmaskingvalue} <: AbstractNCDataset where TDS <: Un
     _boundsmap::Dict{String,String}
     maskingvalue::Tmaskingvalue
     lock::ReentrantLock
-    mod::Module
-    usertypes::Dict{Symbol,DataType}
+    typemap::Dict{Symbol,DataType}
 end
 
 const Dataset = NCDataset
+
+# user-defined types when reconstructed
+struct NCStruct{typename,TNamedTuple}
+    fields::TNamedTuple
+end
+
+struct NCEnum{typename,T,names,values}
+    data::T
+end

@@ -1,7 +1,7 @@
 """
-    NCDatasets.usertype!(ds::Dataset,typename::SymbolOrString,jltype::DataType)a
+    NCDatasets.typemap!(ds::Dataset, name1 => julia_type1,...)
 
-Use the julia struct `jltype` for compound types called `typename` defined in then
+Use the julia struct/enum `julia_type` for compound/enum types called `name` defined in the
 netCDF dataset `ds`.
 
 Example:
@@ -25,7 +25,7 @@ end
 data = NCDataset(fname) do ds
     # prevent NCDatasets to dynamically reconstruct the struct and use
     # provided type "MyComplex" instead
-    NCDatasets.usertype!(ds,"nc_complex_t",MyComplex)
+    NCDatasets.typemap!(ds,"nc_complex_t" => MyComplex)
     ds["data"][:]
 end
 
@@ -35,51 +35,42 @@ eltype(data)
 # MyComplex
 ```
 """
-function usertype!(ds::Dataset,typename::SymbolOrString,jltype::DataType)
-    ds.usertypes[Symbol(typename)] = jltype
+function typemap!(ds::Dataset,args::Pair{<:SymbolOrString,DataType}...)
+    for (typename,jltype) in args
+        ds.typemap[Symbol(typename)] = jltype
+    end
 end
 
 
 # TODO: reconstruct type if necessary
-function usertype(ds::Dataset,typename::SymbolOrString)
-    ut = get(ds.usertypes,Symbol(typename),nothing)
+function typemap(ds::Dataset,typename::SymbolOrString)
+    ut = get(ds.typemap,Symbol(typename),nothing)
     if ut == nothing
         pd = parentdataset(ds)
         if pd !== nothing
-            return usertype(pd,typename)
+            return typemap(pd,typename)
         end
     end
 
     return ut
 end
 
-# Module for reconstructing user-defined types
-function temp_module()
-    modname = Symbol(string("ReconstructedTypes_",rand(UInt32)))
-    return eval(:(module $modname end))
-end
+function compound_expr(ncid,typeid,typemap)
+    typename,type_size,nfields = nc_inq_compound(ncid,typeid)
 
-function reconstruct_compound_type(ncid,xtype,usertypes,mod)
-    type_name,type_size,nfields = nc_inq_compound(ncid,xtype)
-
-    if haskey(usertypes,Symbol(type_name))
-        @debug "get cashed type for $type_name"
-        return usertypes[Symbol(type_name)]
-    end
-
-    cnames = Symbol.(nc_inq_compound_fieldname.(ncid,xtype,0:(nfields-1)))
+    cnames = Symbol.(nc_inq_compound_fieldname.(ncid,typeid,0:(nfields-1)))
 
     types = []
     for fieldid = 0:(nfields-1)
-        field_typeid = nc_inq_compound_fieldtype(ncid,xtype,fieldid)
-        fT = _jltype(ncid,field_typeid,usertypes,mod)
+        field_typeid = nc_inq_compound_fieldtype(ncid,typeid,fieldid)
+        fT = _jltype(ncid,field_typeid,typemap)
 
-        fieldndims = nc_inq_compound_fieldndims(ncid,xtype,fieldid)
+        fieldndims = nc_inq_compound_fieldndims(ncid,typeid,fieldid)
 
         if fieldndims == 0
             push!(types,fT)
         else
-            dim_sizes = nc_inq_compound_fielddim_sizes(ncid,xtype,fieldid)
+            dim_sizes = nc_inq_compound_fielddim_sizes(ncid,typeid,fieldid)
             fT2 = NTuple{Int(dim_sizes[1]),fT}
             push!(types,fT2)
         end
@@ -88,43 +79,47 @@ function reconstruct_compound_type(ncid,xtype,usertypes,mod)
     # from JLD2, MIT "Expat" License
     # https://github.com/JuliaIO/JLD2.jl/blob/abb9e5920bbe956a4d9fd2f92550cd7ea0a715aa/src/data/reconstructing_datatypes.jl#L493
 
-    @debug "generate type for $type_name"
+    @debug "generate type for $typename"
 
-    Core.eval(
-        mod,
-        Expr(:struct, false, Symbol(type_name),
-             Expr(:block,
-                  Any[ Expr(Symbol("::"), cnames[i], types[i]) for i = 1:length(types) ]...,
-                  # suppress default constructors, plus a bogus `new()` call to make sure
-                  # ninitialized is zero.
-                  Expr(:if, false, Expr(:call, :new))
-                  )))
-
-
-    invokelatest() do
-        T2 = getfield(mod, Symbol(type_name))
-        usertypes[Symbol(type_name)] = T2
-        return T2
-    end
+    return Expr(:struct, false, Symbol(typename),
+                Expr(:block,
+                  [ Expr(Symbol("::"), cnames[i], types[i]) for i = 1:length(types) ]...,
+                     ))
 end
 
+function reconstruct_compound_type(ncid,typeid,typemap)
+    typename,type_size,nfields = nc_inq_compound(ncid,typeid)
 
-function create_compound_type(ncid,T,type_name,usertypes)
-    # plain type
-    nctype = get(ncType,T,nothing)
-    if nctype !== nothing
-        return nctype
+    if haskey(typemap,Symbol(typename))
+        @debug "get cashed type for $typename"
+        return typemap[Symbol(typename)]
     end
 
-    for (name,userT) in usertypes
-        if userT == T
-            for id = nc_inq_typeids(ncid)
-                if name == Symbol(nc_inq_compound_name(ncid,id))
-                    return id
-                end
-            end
+    cnames = Symbol.(nc_inq_compound_fieldname.(ncid,typeid,0:(nfields-1)))
+
+    types = []
+    for fieldid = 0:(nfields-1)
+        field_typeid = nc_inq_compound_fieldtype(ncid,typeid,fieldid)
+        fT = _jltype(ncid,field_typeid,typemap)
+
+        fieldndims = nc_inq_compound_fieldndims(ncid,typeid,fieldid)
+
+        if fieldndims == 0
+            push!(types,fT)
+        else
+            dim_sizes = nc_inq_compound_fielddim_sizes(ncid,typeid,fieldid)
+            fT2 = NTuple{Int(dim_sizes[1]),fT}
+            push!(types,fT2)
         end
     end
+
+    T2 = NCStruct{Symbol(typename),NamedTuple{(cnames...,),Tuple{types...}}}
+    typemap[Symbol(typename)] = T2
+    return T2
+end
+
+function create_compound_type(ds,T; typename=nothing)
+    ncid = ds.ncid
 
     # make sure that the types of all fields are first created
     # if they are created "on-the-fly" in the second loop, I get
@@ -135,26 +130,26 @@ function create_compound_type(ncid,T,type_name,usertypes)
         if fT <: NTuple
             elT = fT.types[1]
             @assert all(fT.types .== elT)
-            create_compound_type(ncid,elT,string(elT),usertypes)
+            nctypeid(ds,elT)
         else
-            create_compound_type(ncid,fT,string(fT),usertypes)
+            nctypeid(ds,fT)
         end
     end
 
-    typeid = nc_def_compound(ncid, sizeof(T), type_name)
+    typeid = nc_def_compound(ncid, sizeof(T), typename)
 
     for i = 1:fieldcount(T)
         offset = fieldoffset(T,i)
         fT = fieldtype(T,i)
         if fT <: NTuple
             elT = fT.types[1]
-            nctype = create_compound_type(ncid,elT,string(elT),usertypes)
+            nctype = nctypeid(ds,elT)
             dim_sizes = [length(fT.types)]
             nc_insert_array_compound(
                 ncid,typeid,fieldname(T,i),
                 offset,nctype,dim_sizes)
         else
-            nctype = create_compound_type(ncid,fT,string(fT),usertypes)
+            nctype = nctypeid(ds,fT)
 
             nc_insert_compound(
                 ncid, typeid, fieldname(T,i),
@@ -162,11 +157,110 @@ function create_compound_type(ncid,T,type_name,usertypes)
         end
     end
 
-    usertypes[Symbol(type_name)] = T
+    @debug "created compound" typename typeid
+    return typeid
+end
+
+function create_compound_type(ds,::Type{NCStruct{Tname,TNT}}; typename=Tname) where {Tname,TNT}
+    create_compound_type(ds,TNT; typename)
+end
+
+
+# returns the netCDF typeid and create the type if necessary
+function nctypeid(ds,T; typename = nothing)
+    ncid = ds.ncid
+    typemap = ds.typemap
+
+    # plain type
+    nctype = get(ncType,T,nothing)
+    if nctype !== nothing
+        return nctype
+    end
+
+    # check if type is already defined in typemap
+    for (name,userT) in typemap
+        if userT == T
+            for id = nc_inq_typeids(ncid)
+                _,_,_,_,class = nc_inq_user_type(ncid,id)
+
+                if (class == NC_VLEN) && (T <: AbstractVector)
+                    if name == Symbol(first(nc_inq_vlen(ncid,id)))
+                        return id
+                    end
+                elseif class == NC_COMPOUND
+                    if name == Symbol(nc_inq_compound_name(ncid,id))
+                        return id
+                    end
+                elseif (class == NC_ENUM) && (T <: Union{NCEnum,Enum})
+                    if name == Symbol(first(nc_inq_enum(ncid,id)))
+                        return id
+                    end
+                else
+                    # ignore
+                end
+            end
+        end
+    end
+
+    if typename == nothing
+        typename = _typename(T)
+    end
+
+    if T <: AbstractVector
+        eltypeid = nctypeid(ds,eltype(T))
+        typeid = nc_def_vlen(ncid, typename, eltypeid)
+        @debug "created vlen-array" typename typeid
+    elseif T <: Union{Enum,NCEnum}
+        typeid = create_enum_type(ds,T; typename)
+    elseif (length(fieldnames(T)) > 0) || (T <: NCStruct)
+        @debug "assume type $T is a struct "
+        typeid = create_compound_type(ds,T; typename)
+    else
+        @warn "unsupported type: class=$(class)"
+        typeid = Nothing
+    end
+    typemap[Symbol(typename)] = T
     return typeid
 end
 
 
-function defCompoundType(ds,T,type_name)
-    create_compound_type(ds.ncid,T,type_name,ds.usertypes)
+function defType(ds,typename::SymbolOrString,T::DataType)
+    nctypeid(ds,T; typename)
+    return nothing
 end
+export defType
+
+
+# scalars
+function defVar(ds::NCDataset,name,data::T; kwargs...) where T <: Union{Enum,NCEnum,NCStruct}
+    v = defVar(ds,name,T,(); kwargs...)
+    v[] = data
+    return v
+end
+
+import Base: getproperty, propertynames, NamedTuple
+
+NamedTuple(x::NCStruct) = getfield(x,:fields)
+
+function show(io::IO, x::NCStruct{typename,TNT}) where {typename,TNT}
+    if get(io, :typeinfo, Any) <: NCStruct
+        print(io, NamedTuple(x))
+    else
+        Base.show_default(io, x)
+    end
+end
+
+function Base.getproperty(x::NCStruct,fieldname::Symbol)
+    return NamedTuple(x)[fieldname]
+end
+
+function Base.propertynames(x::NCStruct)
+    return propertynames(NamedTuple(x))
+end
+
+
+function _typename(::Type{<:NCStruct{typename}}) where {typename}
+    typename
+end
+
+_typename(::Type{T}) where T = last(split(string(T),'.')) # strip module prefix
