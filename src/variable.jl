@@ -401,7 +401,8 @@ end
 readblock!(v::Variable, aout) = _read_data_from_nc!(v::Variable, aout)
 
 function _read_data_from_nc!(v::Variable, aout, indexes::Integer...)
-    aout .= nc_get_var1(eltype(v),v.ds.ncid,v.varid,[i-1 for i in reverse(indexes)])
+    # structs do not have a length. Broadcasting fails for arrays of structs
+    aout[] = nc_get_var1(eltype(v),v.ds.ncid,v.varid,[i-1 for i in reverse(indexes)])
 end
 
 function _read_data_from_nc!(v::Variable{T,N}, aout, indexes::TR...) where {T,N} where TR <: Union{StepRange{<:Integer,<:Integer},UnitRange{<:Integer}}
@@ -424,7 +425,8 @@ function writeblock!(v::Variable, data, indexes::AbstractRange...)
 end
 
 function _write_data_to_nc(v::Variable{T,N},data,indexes::Integer...) where {T,N}
-    nc_put_var1(v.ds.ncid,v.varid,[i-1 for i in reverse(indexes)],T(data[1]))
+    Tdata1 = (T == eltype(data) ? data[1] : T(data[1]))
+    nc_put_var1(v.ds.ncid,v.varid,[i-1 for i in reverse(indexes)],Tdata1)
 end
 
 _write_data_to_nc(v::Variable, data) = _write_data_to_nc(v, data, 1)

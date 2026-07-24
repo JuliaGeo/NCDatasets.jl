@@ -233,6 +233,14 @@ function defType(ds,typename::SymbolOrString,T::DataType)
 end
 export defType
 
+
+# scalars
+function defVar(ds::NCDataset,name,data::T; kwargs...) where T <: Union{Enum,NCEnum,NCStruct}
+    v = defVar(ds,name,T,(); kwargs...)
+    v[] = data
+    return v
+end
+
 import Base: getproperty, propertynames, NamedTuple
 
 NamedTuple(x::NCStruct) = getfield(x,:fields)

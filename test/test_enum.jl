@@ -134,3 +134,22 @@ close(ds)
 run(`ncdump -h $fname`)
 =#
 
+
+
+# enum scalar
+fname = tempname()
+ds = NCDataset(fname,"c");
+defVar(ds,"data",data_ref[1]);
+close(ds)
+
+ds = NCDataset(fname,"r", typemap = ["cloud_class_t" => Clouds.cloud_class_t])
+@test ds["data"][] == data_ref[1]
+close(ds)
+
+ds = NCDataset(fname,"r")
+@test ds["data"][] == data_ref[1]
+close(ds)
+
+
+#fname = tempname();ds = NCDataset(fname,"c");ncv = defVar(ds,"data",1f0,());close(ds);run(`ncdump -h $fname`)
+
