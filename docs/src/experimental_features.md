@@ -60,9 +60,16 @@ NCDataset(comm::MPI.Comm,filename::AbstractString,mode::AbstractString)
 NCDatasets.paraccess
 ```
 
-# NetCDF compound types
+# NetCDF 4 user-defined types
+
+NCDatasets.jl supports variable-length arrays, compound types (`struct` in julia) and enums.
+Variable-length arrays can be composed of primitive types, compound types or enums.
+Opaque variables are currently not supported.
+
+## NetCDF compound types
 
 NetCDF 4 allows the users to define their own type, in particular, compound types which correspond to Julia structures.
+Compound types can be composed of primitive types, other compound types or enums or vectors of fixed sizes of these types.
 An array of such structures can be written to and loaded from a NetCDF file. For example:
 
 ```julia
@@ -131,6 +138,7 @@ NCDataset(fname,"c") do ds
 end
 ```
 
+Nested struct/compound types (and possibly containing enums) are supported.
 An important restriction is that the `struct` must be immutable and contain only immutable fields. The memory layout of a `mutable struct` is not compatible with the layout expected by the C library. To update a single field in a struct, the user has to recreate the structure. For example to update the field `x` of the the first element to 10:
 
 ```julia
@@ -144,7 +152,7 @@ using Accessors
 @set array2[1].x = 10
 ```
 
-# NetCDF enum type
+## NetCDF enum type
 
 NetCDF enum types are implemented as Julia enum types. This example shows how to create a enum type and write as an vector of enums to a NetCDF file:
 
