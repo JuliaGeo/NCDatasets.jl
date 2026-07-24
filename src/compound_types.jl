@@ -83,10 +83,7 @@ function compound_expr(ncid,typeid,typemap)
 
     return Expr(:struct, false, Symbol(typename),
                 Expr(:block,
-                  Any[ Expr(Symbol("::"), cnames[i], types[i]) for i = 1:length(types) ]...,
-                  # suppress default constructors, plus a bogus `new()` call to make sure
-                  # ninitialized is zero.
-                  Expr(:if, false, Expr(:call, :new))
+                  [ Expr(Symbol("::"), cnames[i], types[i]) for i = 1:length(types) ]...,
                      ))
 end
 

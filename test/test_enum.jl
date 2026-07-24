@@ -147,4 +147,3 @@ close(ds)
 ds = NCDataset(fname,"r")
 @test reinterpret(Clouds.cloud_class_t, ds["data"][]) == data_ref[1]
 close(ds)
-

@@ -108,6 +108,7 @@ the same memory layout.
 When defining these structures, avoid using the type `Int` as its size is platform-dependent. Vectors of fixed length can also be used in struct fields.
 They should be declared as `NTuple`s (see
 [Calling C and Fortran Code](https://docs.julialang.org/en/v1/manual/calling-c-and-fortran-code/#Struct-Type-Correspondences) for the manual).
+The corresponding julia type definitions of NetCDF compound types and enums can be automatically generated using the `ncgen` function.
 
 Here is an example to write such a dataset:
 

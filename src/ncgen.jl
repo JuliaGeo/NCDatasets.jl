@@ -33,6 +33,9 @@ function ncgen(io::IO,fname; newfname = "filename.nc")
             if class == NC_ENUM
                 expr = enum_expr(ds.ncid,typeid)
                 println(io,expr)
+            elseif class == NC_COMPOUND
+                expr = compound_expr(ds.ncid,typeid,ds.typemap)
+                println(io,expr)
             end
         end
         println(io)

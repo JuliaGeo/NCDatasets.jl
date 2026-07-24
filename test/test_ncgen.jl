@@ -3,6 +3,12 @@ using Test
 
 
 @enum TestEnum::Int8 good=1 bad=2 ugly=3
+struct MyComplex
+    r::Float64
+    i::Float64
+end
+
+
 
 ncfile1 = tempname()
 ncfile2 = tempname()
@@ -31,6 +37,8 @@ ncmatrix = defVar(ds,"matrix", Float32,("lon","lat"))
 defVar(ds,"enum-vec",[good],("x",))
 ds.attrib["status"] = good
 
+ncv = defVar(ds,"struct",MyComplex,())
+ncv[] = MyComplex(1,1)
 
 close(ds)
 
