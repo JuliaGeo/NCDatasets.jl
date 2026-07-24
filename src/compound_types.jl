@@ -212,6 +212,8 @@ function nctypeid(ds,T; typename = nothing)
         @debug "created vlen-array" typename typeid
     elseif T <: Union{Enum,NCEnum}
         typeid = create_enum_type(ds,T; typename)
+    elseif T <: NTuple{len,UInt8} where len
+        typeid = create_opaque_type(ds,T; typename)
     elseif (length(fieldnames(T)) > 0) || (T <: NCStruct)
         @debug "assume type $T is a struct "
         typeid = create_compound_type(ds,T; typename)
@@ -232,7 +234,7 @@ export defType
 
 
 # scalars
-function defVar(ds::NCDataset,name,data::T; kwargs...) where T <: Union{Enum,NCEnum,NCStruct}
+function defVar(ds::NCDataset,name,data::T; kwargs...) where T <: Union{Enum,NCEnum,NCStruct,NTuple{len,UInt8}} where len
     v = defVar(ds,name,T,(); kwargs...)
     v[] = data
     return v

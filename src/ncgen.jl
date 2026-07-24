@@ -36,6 +36,9 @@ function ncgen(io::IO,fname; newfname = "filename.nc")
             elseif class == NC_COMPOUND
                 expr = compound_expr(ds.ncid,typeid,ds.typemap)
                 println(io,expr)
+            elseif class == NC_OPAQUE
+                expr = opaque_expr(ds.ncid,typeid)
+                println(io,expr)
             end
         end
         println(io)

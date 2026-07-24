@@ -62,9 +62,9 @@ NCDatasets.paraccess
 
 # NetCDF 4 user-defined types
 
-NCDatasets.jl supports variable-length arrays, compound types (`struct` in julia) and enums.
+NCDatasets.jl supports variable-length arrays, compound types (`struct` in julia), enums and opaque types.
 Variable-length arrays can be composed of primitive types, compound types or enums.
-Opaque variables are currently not supported.
+Variable-length arrays is not considered as an experimental feature.
 
 ## NetCDF compound types
 
@@ -191,4 +191,26 @@ ca = CategoricalArray([enum_dict[x] for x in data]; levels=collect(values(enum_d
 ```@docs
 NCDatasets.enums
 NCDatasets.typemap!
+```
+
+## NetCDF opaque type
+
+Opaque types are representing raw binary data of a fixed size in bytes. They are represented as the julia type `NTuple{len,UInt8}` where `len` is the size of the data structure.
+This example create an array of 10 opaques types with 2 bytes. The user-defined type is called `"my_opaque_test"` in the NetCDF file.
+
+```julia
+data_ref = [(UInt8(i),UInt8(i+1)) for i = 1:10]
+fname = tempname()
+
+NCDataset(fname,"c") do ds
+    defVar(ds,"data",data_ref,("dim",),typename = "my_opaque_test")
+end
+```
+
+The data is read in the usual way:
+
+```julia
+ds = NCDataset(fname)
+data = ds["data"][:]
+close(ds)
 ```

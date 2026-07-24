@@ -662,7 +662,7 @@ end
 # Enum
 
 @with_lock function nc_def_enum(ncid::Integer,base_typeid::Integer,name)
-    typeidp = Ref(NCDatasets.nc_type(0))
+    typeidp = Ref(nc_type(0))
     check(ccall((:nc_def_enum,libnetcdf),Cint,(Cint,nc_type,Cstring,Ptr{nc_type}),ncid,base_typeid,name,typeidp))
 
     return typeidp[]
@@ -710,13 +710,20 @@ end
     return identifier
 end
 
-# @with_lock function nc_def_opaque(ncid::Integer,size::Integer,name,xtypep)
-#     check(ccall((:nc_def_opaque,libnetcdf),Cint,(Cint,Cint,Cstring,Ptr{nc_type}),ncid,size,name,xtypep))
-# end
+@with_lock function nc_def_opaque(ncid::Integer,size::Integer,name)
+    typeidp = Ref(nc_type(0))
 
-# @with_lock function nc_inq_opaque(ncid::Integer,xtype::Integer,name,sizep)
-#     check(ccall((:nc_inq_opaque,libnetcdf),Cint,(Cint,nc_type,Cstring,Ptr{Cint}),ncid,xtype,name,sizep))
-# end
+    check(ccall((:nc_def_opaque,libnetcdf),Cint,(Cint,Cint,Cstring,Ptr{nc_type}),ncid,size,name,typeidp))
+    return typeidp[]
+end
+
+@with_lock function nc_inq_opaque(ncid::Integer,xtype::Integer)
+    sizep = Ref(Cint(0))
+    name = zeros(UInt8,NC_MAX_NAME+1)
+
+    check(ccall((:nc_inq_opaque,libnetcdf),Cint,(Cint,nc_type,Ptr{UInt8},Ptr{Cint}),ncid,xtype,name,sizep))
+    return safe_string(name),sizep[]
+end
 
 # can the NetCDF variable varid receive the data?
 function _nc_shape_check(ncid,varid,data,start,count,stride)
@@ -1537,6 +1544,8 @@ function _jltype(ncid,xtype,typemap)
                 reconstruct_compound_type(ncid,xtype,typemap)
             elseif class == NC_ENUM
                 reconstruct_enum_type(ncid,xtype,typemap)
+            elseif class == NC_OPAQUE
+                reconstruct_opaque_type(ncid,xtype,typemap)
             else
                 @warn "unsupported type: class=$(class)"
                 Nothing
