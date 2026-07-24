@@ -195,8 +195,8 @@ NCDatasets.typemap!
 
 ## NetCDF opaque type
 
-Opaque types are representing raw binary data of a fixed size in bytes. They are represented as the julia type `NTuple{len,UInt8}` where `len` is the size of the data structure.
-This example create an array of 10 opaques types with 2 bytes. The user-defined type is called `"my_opaque_test"` in the NetCDF file.
+Opaque types represent raw binary data of a fixed size in bytes. They are represented as the Julia type `NTuple{len,UInt8}` where `len` is the size of the opaque object in bytes.
+This example creates an array of 10 elements of a 2-byte opaque type. The user-defined type is called `"my_opaque_test"` in the NetCDF file.
 
 ```julia
 data_ref = [(UInt8(i),UInt8(i+1)) for i = 1:10]

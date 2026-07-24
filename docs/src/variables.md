@@ -93,6 +93,7 @@ defVar
 chunking
 deflate
 checksum
+quantize
 ```
 
 

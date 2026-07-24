@@ -202,6 +202,11 @@ const NC_FILL_INT64  = Int64(-9223372036854775806)
 const NC_FILL_UINT64 = UInt64(18446744073709551614)
 const NC_FILL_STRING = ""
 
+const NC_NOQUANTIZE = 0
+const NC_QUANTIZE_BITGROOM = 1
+const NC_QUANTIZE_GRANULARBR = 2
+const NC_QUANTIZE_BITROUND = 3
+
 const nc_type = Cint
 
 # global lock to serialize call the NetCDF-c
@@ -231,6 +236,15 @@ const NCChecksumSymbols = Dict{Cint,Symbol}(
 # Inverse mapping
 const NCChecksumConstants = Dict(value => key for (key, value) in NCChecksumSymbols)
 
+
+const NCQuantizeSymbols = Dict{Cint,Symbol}(
+    NC_NOQUANTIZE =>          :noquantize,
+    NC_QUANTIZE_BITGROOM =>   :BitGroom,
+    NC_QUANTIZE_GRANULARBR => :GranularBitRround,
+    NC_QUANTIZE_BITROUND =>   :BitRound
+)
+# Inverse mapping
+const NCQuantizeConstants = Dict(value => key for (key, value) in NCQuantizeSymbols)
 
 
 function convert(::Type{Array{nc_vlen_t{T},N}},data::Array{Vector{T},N}) where {T,N}
@@ -1137,6 +1151,18 @@ end
     check(ccall((:nc_inq_var_fletcher32,libnetcdf),Cint,(Cint,Cint,Ptr{Cint}),ncid,varid,fletcher32p))
     return NCChecksumSymbols[fletcher32p[]]
 end
+
+@with_lock function nc_def_var_quantize(ncid, varid, quantize_mode, nsd)
+    check(ccall((:nc_def_var_quantize, libnetcdf), Cint, (Cint, Cint, Cint, Cint), ncid, varid, NCQuantizeConstants[quantize_mode], nsd))
+end
+
+@with_lock function nc_inq_var_quantize(ncid, varid)
+    quantize_modep = Ref(Cint(0))
+    nsdp = Ref(Cint(0))
+    check(ccall((:nc_inq_var_quantize, libnetcdf), Cint, (Cint, Cint, Ptr{Cint}, Ptr{Cint}), ncid, varid, quantize_modep, nsdp))
+    return NCQuantizeSymbols[quantize_modep[]], nsdp[]
+end
+
 
 @with_lock function nc_def_var_chunking(ncid::Integer,varid::Integer,storage,chunksizes)
     check(ccall((:nc_def_var_chunking,libnetcdf),Cint,(Cint,Cint,Cint,Ptr{Csize_t}),ncid,varid,NCConstants[storage],collect(chunksizes)))
