@@ -240,7 +240,7 @@ const NCChecksumConstants = Dict(value => key for (key, value) in NCChecksumSymb
 const NCQuantizeSymbols = Dict{Cint,Symbol}(
     NC_NOQUANTIZE =>          :noquantize,
     NC_QUANTIZE_BITGROOM =>   :BitGroom,
-    NC_QUANTIZE_GRANULARBR => :GranularBitRround,
+    NC_QUANTIZE_GRANULARBR => :GranularBitRound,
     NC_QUANTIZE_BITROUND =>   :BitRound
 )
 # Inverse mapping
