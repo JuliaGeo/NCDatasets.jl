@@ -304,6 +304,52 @@ deflate(v::Variable,shuffle,deflate,deflate_level) = nc_def_var_deflate(v.ds.nci
 deflate(v::Variable) = nc_inq_var_deflate(v.ds.ncid,v.varid)
 export deflate
 
+function _check_zstd_available(ds)
+    nc_inq_filter_avail(ds.ncid,H5Z_FILTER_ZSTD) && return nothing
+    error("""The Zstandard HDF5 filter (id $(Int(H5Z_FILTER_ZSTD))) is not available.
+It must be registered with the HDF5 library before use, which the package H5Zzstd
+does when loaded:
+
+    using NCDatasets, H5Zzstd
+
+(With HDF5.jl 0.18 or later, `using HDF5, CodecZstd` also works.)
+Alternatively, set the environment variable HDF5_PLUGIN_PATH to a directory
+containing a zstd HDF5 plugin before starting Julia.
+Note that NetCDF-3 files do not support any filter.""")
+end
+
+"""
+    zstandard(v::Variable,level::Integer)
+
+Compress the data chunks (see `chunking`) of the variable `v` with
+[Zstandard](https://facebook.github.io/zstd/) at compression `level`
+(1 fastest, 22 smallest; negative levels are faster still). The compression
+can only be set before any data is written to `v`.
+
+The Zstandard HDF5 filter must be available, typically by loading the package
+`H5Zzstd`; see the section [Compression](@ref) of the documentation.
+"""
+function zstandard(v::Variable,level::Integer)
+    _check_zstd_available(v.ds)
+    # keep the bit pattern so that negative levels round-trip
+    nc_def_var_filter(v.ds.ncid,v.varid,H5Z_FILTER_ZSTD,Cuint[Cint(level) % Cuint])
+end
+
+"""
+    iszstd,level = zstandard(v::Variable)
+
+Return whether the variable `v` is compressed with Zstandard and, if so,
+the compression `level` (0 otherwise).
+"""
+function zstandard(v::Variable)
+    params = nc_inq_var_filter_info(v.ds.ncid,v.varid,H5Z_FILTER_ZSTD)
+    params === nothing && return (false,0)
+    return (true,Int(params[1] % Cint))
+end
+
+zstandard(v::CFVariable,level::Integer) = zstandard(v.var,level)
+zstandard(v::CFVariable) = zstandard(v.var)
+
 checksum(v::Variable,checksummethod) = nc_def_var_fletcher32(v.ds.ncid,v.varid,checksummethod)
 
 """
