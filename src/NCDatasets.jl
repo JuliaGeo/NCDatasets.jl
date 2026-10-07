@@ -88,6 +88,6 @@ export coord
 export bounds
 export @CF_str
 
-VERSION >= v"1.11.0-DEV.469" && eval(Meta.parse("public @select, select, enums, typemap!"))
+VERSION >= v"1.11.0-DEV.469" && eval(Meta.parse("public @select, select, enums, typemap!, zstandard, quantize"))
 
 end # module
