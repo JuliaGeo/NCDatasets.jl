@@ -25,6 +25,7 @@ using DataStructures: OrderedDict
 using Dates
 using NetCDF_jll
 using NetworkOptions
+using PrecompileTools: @setup_workload, @compile_workload
 using Printf
 using CommonDataModel
 using CommonDataModel: dims, attribs, groups
