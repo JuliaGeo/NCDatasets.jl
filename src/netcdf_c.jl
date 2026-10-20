@@ -169,7 +169,12 @@ const NC_ENOTBUILT = -128
 const NC_EDISKLESS = -129
 const NC_ECANTEXTEND = -130
 const NC_EMPI = -131
+const NC_EFILTER = -132
+const NC_ENOFILTER = -136
 const NC4_LAST_ERROR = -131
+
+# HDF5 filter identifiers (https://github.com/HDFGroup/hdf5_plugins/blob/master/docs/RegisteredFilterPlugins.md)
+const H5Z_FILTER_ZSTD = Cuint(32015)
 const DIM_WITHOUT_VARIABLE = "This is a netCDF dimension but not a netCDF variable."
 const NC_HAVE_NEW_CHUNKING_API = 1
 const NC_EURL = NC_EDAPURL
@@ -1118,6 +1123,26 @@ end
     check(ccall((:nc_inq_var_zstandard,libnetcdf),Cint,(Cint,Cint,Ptr{Cint},Ptr{Cint}),ncid,varid,hasfilterp,levelp))
 
     return hasfilterp[] == 1, levelp[]
+end
+
+@with_lock function nc_def_var_filter(ncid::Integer,varid::Integer,id::Integer,params::Vector{Cuint})
+    check(ccall((:nc_def_var_filter,libnetcdf),Cint,(Cint,Cint,Cuint,Csize_t,Ptr{Cuint}),
+                ncid,varid,id,length(params),params))
+end
+
+# returns the parameters of the filter `id` or nothing if the filter is not
+# set for the variable (or if the file cannot have filters, e.g. NetCDF-3)
+@with_lock function nc_inq_var_filter_info(ncid::Integer,varid::Integer,id::Integer)
+    nparamsp = Ref(Csize_t(0))
+    ret = ccall((:nc_inq_var_filter_info,libnetcdf),Cint,(Cint,Cint,Cuint,Ptr{Csize_t},Ptr{Cuint}),
+                ncid,varid,id,nparamsp,C_NULL)
+    (ret == NC_ENOFILTER || ret == NC_ENOTNC4) && return nothing
+    check(ret)
+
+    params = Vector{Cuint}(undef,nparamsp[])
+    check(ccall((:nc_inq_var_filter_info,libnetcdf),Cint,(Cint,Cint,Cuint,Ptr{Csize_t},Ptr{Cuint}),
+                ncid,varid,id,nparamsp,params))
+    return params
 end
 
 @with_lock function nc_inq_var_deflate(ncid::Integer,varid::Integer)

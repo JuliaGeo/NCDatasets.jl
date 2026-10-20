@@ -29,12 +29,13 @@ mixed Julian/Gregorian calendar.
    It will be stored in the _FillValue attribute. `NCDatasets` does not use implicitely the default NetCDF fill values when reading data.
 * `chunksizes`: Vector integers setting the chunk size. The total size of a chunk must be less than 4 GiB.
 * `deflatelevel`: Compression level: 0 (default) means no compression and 9 means maximum compression. Each chunk will be compressed individually.
+* `zstdlevel`: Zstandard compression level (1 fastest, 22 smallest). Each chunk will be compressed individually. The Zstandard HDF5 filter must be available, typically by loading the package `H5Zzstd` (see the section Compression of the documentation).
 * `shuffle`: If true, the shuffle filter is activated which can improve the compression ratio.
 * `checksum`: The checksum method can be `:fletcher32` or `:nochecksum` (checksumming is disabled, which is the default)
 * `attrib`: An iterable of attribute name and attribute value pairs, for example a `Dict`, `DataStructures.OrderedDict` or simply a vector of pairs (see example below)
 * `typename` (string): The name of the NetCDF type required for [vlen arrays](https://web.archive.org/save/https://www.unidata.ucar.edu/software/netcdf/netcdf-4/newdocs/netcdf-c/nc_005fdef_005fvlen.html)
 
-`chunksizes`, `deflatelevel`, `shuffle` and `checksum` can only be
+`chunksizes`, `deflatelevel`, `zstdlevel`, `shuffle` and `checksum` can only be
 set on NetCDF 4 files. Compression of strings and variable-length arrays is not
 supported by the underlying NetCDF library.
 
@@ -100,6 +101,7 @@ function defVar(ds::NCDataset,name::SymbolOrString,vtype::DataType,dimnames;
                 chunksizes = nothing,
                 shuffle = false,
                 deflatelevel = nothing,
+                zstdlevel = nothing,
                 checksum = nothing,
                 fillvalue = nothing,
                 nofill = false,
@@ -125,6 +127,12 @@ function defVar(ds::NCDataset,name::SymbolOrString,vtype::DataType,dimnames;
             nc_def_var_deflate(ds.ncid,varid,shuffle,deflate,deflatelevel)
         end
 
+        if zstdlevel !== nothing
+            # this will fail on NetCDF-3 files
+            _check_zstd_available(ds)
+            nc_def_var_filter(ds.ncid,varid,H5Z_FILTER_ZSTD,Cuint[Cint(zstdlevel) % Cuint])
+        end
+
         if checksum !== nothing
             nc_def_var_fletcher32(ds.ncid,varid,checksum)
         end
@@ -146,7 +154,11 @@ function defVar(ds::NCDataset,name::SymbolOrString,vtype::DataType,dimnames;
 end
 
 
-function defVar(dest::AbstractDataset,srcvar::AbstractNCVariable; kwargs...)
+# also for CFVariable wrapping a NetCDF variable so that the storage
+# parameters unknown to CommonDataModel (e.g. Zstandard) are copied too
+function defVar(dest::AbstractDataset,
+                srcvar::Union{AbstractNCVariable,CFVariable{<:Any,<:Any,<:AbstractNCVariable}};
+                kwargs...)
     _ignore_checksum = false
     if haskey(kwargs,:checksum)
         _ignore_checksum = kwargs[:checksum] === nothing
@@ -187,6 +199,14 @@ function defVar(dest::AbstractDataset,srcvar::AbstractNCVariable; kwargs...)
         isshuffled,isdeflated,deflate_level = deflate(var)
         @debug "compression" isshuffled isdeflated deflate_level
         deflate(cfdestvar,isshuffled,isdeflated,deflate_level)
+    end
+
+    if hasmethod(zstandard,Tuple{typeof(var)})
+        iszstd,zstd_level = zstandard(var)
+        @debug "zstandard" iszstd zstd_level
+        if iszstd
+            zstandard(cfdestvar,zstd_level)
+        end
     end
 
     if hasmethod(checksum,Tuple{typeof(var)}) && !_ignore_checksum

@@ -92,6 +92,7 @@ defVar
 ```@docs
 chunking
 deflate
+NCDatasets.zstandard
 checksum
 NCDatasets.quantize
 ```

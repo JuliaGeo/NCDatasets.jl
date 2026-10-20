@@ -48,6 +48,7 @@ For more details please see the individual pages of the documentation.
 * [Load a netCDF file](@ref)
 * [Create a netCDF file](@ref)
 * [Edit an existing netCDF file](@ref)
+* [Compression](@ref)
 * [Create a netCDF file using the metadata of an existing netCDF file as template](@ref)
 * [Get one or several variables by specifying the value of an attribute](@ref)
 * [Load a file with unknown structure](@ref)
@@ -212,6 +213,93 @@ ds = NCDataset("/tmp/test.nc","a")
 ds.attrib["creator"] = "your name"
 close(ds);
 ```
+
+### Compression
+
+By default, variables are written uncompressed. In NetCDF-4 files, the data
+chunks of a variable can be compressed with any of the many HDF5 compression
+filters; `NCDatasets` provides a high-level interface for two of them: the
+traditional deflate (zlib/gzip) algorithm and the faster
+[Zstandard](https://facebook.github.io/zstd/) (zstd) algorithm.
+Compression requires chunked storage (which `NCDatasets` enables
+automatically) and can only be set before any data is written to the variable.
+
+#### Deflate
+
+Deflate is built into every NetCDF-4 library. It is enabled with the
+`deflatelevel` keyword argument of `defVar` (1 is the fastest and 9 gives the
+smallest files). The `shuffle` filter (byte interlacing) often improves the
+compression ratio of numerical data.
+
+```julia
+using NCDatasets
+
+NCDataset("/tmp/deflate_example.nc", "c") do ds
+    defDim(ds, "lon", 100)
+    defDim(ds, "lat", 100)
+
+    v = defVar(ds, "temperature", Float32, ("lon", "lat");
+               chunksizes = (50, 50),
+               deflatelevel = 5,
+               shuffle = true)
+    v[:, :] = rand(Float32, 100, 100)
+end
+```
+
+#### Zstandard
+
+Zstandard is typically much faster than deflate at a similar compression ratio.
+It is not built into the NetCDF library but is provided as an HDF5 *filter*, which
+must be registered with the HDF5 library before it can be used for reading or
+writing. The Julia package [H5Zzstd](https://github.com/JuliaIO/HDF5.jl/tree/master/filters/H5Zzstd)
+does this when loaded (with HDF5.jl 0.18 or later, `using HDF5, CodecZstd`
+does the same). Zstandard compression is then enabled with the `zstdlevel`
+keyword argument of `defVar` (1 is the fastest, 22 gives the smallest files):
+
+```julia
+using NCDatasets
+using H5Zzstd  # makes the Zstandard filter available to NCDatasets
+
+NCDataset("/tmp/zstd_example.nc", "c") do ds
+    defDim(ds, "lon", 100)
+    defDim(ds, "lat", 100)
+
+    v = defVar(ds, "humidity", Float32, ("lon", "lat");
+               chunksizes = (50, 50),
+               zstdlevel = 5)
+    v[:, :] = rand(Float32, 100, 100)
+end
+```
+
+If `H5Zzstd` is not loaded, `defVar` raises an error explaining how to make the
+filter available. Reading a Zstandard-compressed variable also requires the
+filter, so `using H5Zzstd` is needed in every Julia session reading such files.
+Other software (e.g. `ncdump` or the Python packages `netCDF4` and `xarray`) can
+read these files only if a Zstandard HDF5 plugin is available to them, for
+example through the environment variable `HDF5_PLUGIN_PATH` or the Python
+package `hdf5plugin`.
+
+#### Querying the compression settings
+
+The compression settings of a variable can be queried with `deflate` and
+`NCDatasets.zstandard`:
+
+```julia
+using NCDatasets, H5Zzstd
+
+NCDataset("/tmp/zstd_example.nc") do ds
+    v = ds["humidity"]
+
+    iszstd, level = NCDatasets.zstandard(v)
+    println("Zstandard: $iszstd, level: $level")
+
+    isshuffled, isdeflated, deflate_level = deflate(v)
+    println("Deflate: $isdeflated, level: $deflate_level")
+end
+```
+
+The settings are preserved when a variable is copied to another file with
+`defVar(ds_destination, v)`.
 
 ### Create a netCDF file using the metadata of an existing netCDF file as template
 

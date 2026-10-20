@@ -92,3 +92,91 @@ mode,nsd = quantize(v.var)
 v[:,:] = data
 @test v[:,:] ≈ data rtol=1e-5
 close(ds)
+
+
+# Zstandard compression
+# The filter is provided by H5Zzstd, which registers it with the HDF5 library
+# shared by libnetcdf when loaded.
+using H5Zzstd
+using NCDatasets: zstandard
+
+sz = (100,100)
+data = Float32.(repeat(1:sz[1],1,sz[2]))
+
+fname_zstd = tempname()
+NCDataset(fname_zstd,"c") do ds
+    @test NCDatasets.nc_inq_filter_avail(ds.ncid,NCDatasets.H5Z_FILTER_ZSTD)
+
+    defDim(ds,"lon",sz[1])
+    defDim(ds,"lat",sz[2])
+
+    v = defVar(ds,"temp",Float32,("lon","lat"); chunksizes = (50,50), zstdlevel = 5)
+    iszstd,level = zstandard(v)
+    @test iszstd
+    @test level == 5
+
+    # set after defVar
+    v2 = defVar(ds,"temp2",Float32,("lon","lat"); chunksizes = (50,50))
+    zstandard(v2,1)
+    iszstd,level = zstandard(v2)
+    @test iszstd
+    @test level == 1
+
+    # not compressed
+    v3 = defVar(ds,"temp3",Float32,("lon","lat"))
+    iszstd,level = zstandard(v3)
+    @test !iszstd
+
+    v[:,:] = data
+    v2[:,:] = data
+    v3[:,:] = data
+end
+
+# the compressible data must actually be compressed: same file without compression
+fname_raw = tempname()
+NCDataset(fname_raw,"c") do ds
+    defDim(ds,"lon",sz[1])
+    defDim(ds,"lat",sz[2])
+    for vname in ("temp","temp2")
+        v = defVar(ds,vname,Float32,("lon","lat"); chunksizes = (50,50))
+        v[:,:] = data
+    end
+    v3 = defVar(ds,"temp3",Float32,("lon","lat"))
+    v3[:,:] = data
+end
+@test filesize(fname_zstd) < filesize(fname_raw)
+
+# read back and copy (compression settings must be preserved)
+fname_copy = tempname()
+NCDataset(fname_zstd) do ds
+    @test ds["temp"][:,:] == data
+    @test ds["temp2"][:,:] == data
+    @test zstandard(ds["temp"]) == (true,5)
+    @test zstandard(ds["temp2"]) == (true,1)
+
+    NCDataset(fname_copy,"c") do ds_copy
+        defVar(ds_copy,ds["temp"])
+        defVar(ds_copy,ds["temp3"])
+    end
+end
+NCDataset(fname_copy) do ds_copy
+    @test zstandard(ds_copy["temp"]) == (true,5)
+    @test zstandard(ds_copy["temp3"]) == (false,0)
+    @test ds_copy["temp"][:,:] == data
+end
+
+# no filter can be set on NetCDF-3 files
+fname_nc3 = tempname()
+NCDataset(fname_nc3,"c",format = :netcdf3_64bit_offset) do ds
+    defDim(ds,"lon",sz[1])
+    @test !NCDatasets.nc_inq_filter_avail(ds.ncid,NCDatasets.H5Z_FILTER_ZSTD)
+    @test_throws ErrorException defVar(ds,"temp",Float32,("lon",); zstdlevel = 5)
+    # copying a NetCDF-3 variable must not fail when querying its (absent) filters
+    v = defVar(ds,"temp3",Float32,("lon",))
+    @test zstandard(v) == (false,0)
+end
+
+rm(fname_zstd)
+rm(fname_raw)
+rm(fname_copy)
+rm(fname_nc3)
