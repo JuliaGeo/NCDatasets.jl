@@ -92,3 +92,39 @@ mode,nsd = quantize(v.var)
 v[:,:] = data
 @test v[:,:] ≈ data rtol=1e-5
 close(ds)
+
+# Test Zstandard (zstd) compression
+filename_zstd = tempname()
+NCDataset(filename_zstd, "c") do ds
+    # Zstandard filter ID is 32015
+    if NCDatasets.nc_inq_filter_avail(ds.ncid, 32015)
+        defDim(ds, "lon", 10)
+        v = defVar(ds, "temp", Float32, ("lon",), zstdlevel = 5)
+
+        # Check query
+        has_zstd, zstd_level = NCDatasets.zstandard(v)
+        @test has_zstd == true
+        @test zstd_level == 5
+
+        # Test setting a new level
+        NCDatasets.zstandard(v, 3)
+        has_zstd, zstd_level = NCDatasets.zstandard(v)
+        @test has_zstd == true
+        @test zstd_level == 3
+
+        # Test copying dataset / variable preserves zstandard compression
+        filename_copy = tempname()
+        NCDataset(filename_copy, "c") do ds_copy
+            defVar(ds_copy, ds["temp"])
+            v_copy = ds_copy["temp"]
+            has_zstd_copy, zstd_level_copy = NCDatasets.zstandard(v_copy)
+            @test has_zstd_copy == true
+            @test zstd_level_copy == 3
+        end
+        rm(filename_copy, force=true)
+    else
+        @info "Zstandard (zstd) filter is not available in the compiled libnetcdf. Skipping Zstd test."
+    end
+end
+rm(filename_zstd, force=true)
+rm(filename, force=true)
