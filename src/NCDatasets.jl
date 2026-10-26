@@ -23,9 +23,11 @@ import Base: Array, close, collect, convert, delete!, display, filter, getindex,
 using CFTime
 using DataStructures: OrderedDict
 using Dates
+using Libdl
 using NetCDF_jll
 using NetworkOptions
 using PrecompileTools: @setup_workload, @compile_workload
+using Preferences: load_preference
 using Printf
 using CommonDataModel
 using CommonDataModel: dims, attribs, groups
@@ -64,6 +66,7 @@ include("types.jl")
 include("errorhandling.jl")
 include("lock.jl")
 include("netcdf_c.jl")
+include("plugins.jl")
 include("compound_types.jl")
 include("enum_types.jl")
 include("opaque_types.jl")
@@ -77,6 +80,10 @@ include("defer.jl")
 include("multifile.jl")
 include("ncgen.jl")
 include("precompile.jl")
+
+@static if VERSION >= v"1.11"
+    eval(Meta.parse("public load_plugins!, register_plugin_dir!, enabled_plugins, plugin_dirs"))
+end
 
 export CatArrays
 export CFTime

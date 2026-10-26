@@ -1097,6 +1097,11 @@ end
 #     check(ccall((:nc_get_varm,libnetcdf),Cint,(Cint,Cint,Ptr{Cint},Ptr{Cint},Ptr{Cint},Ptr{Cint},Ptr{Nothing}),ncid,varid,startp,countp,stridep,imapp,ip))
 # end
 
+# Known issue (netcdf-c 4.10, `ensure_working` in libnczarr/zfilter.c): defining a
+# filter on a variable of an NCZarr store (`mode=nczarr` URL) crashes the process
+# (segmentation fault) if the filter plugin (e.g. NCH5deflate_jll) is loaded but the
+# NCZarr codec library (NCZhdf5filters_jll) is not. Load NCPlugins.jl, which loads
+# both, to avoid this. See docs/src/plugins.md.
 @with_lock function nc_def_var_deflate(ncid::Integer,varid::Integer,shuffle::Bool,deflate::Integer,deflate_level::Integer)
     ishuffle = (shuffle ? 1 : 0)
     check(ccall((:nc_def_var_deflate,libnetcdf),Cint,(Cint,Cint,Cint,Cint,Cint),ncid,varid,shuffle,deflate,deflate_level))
@@ -1142,6 +1147,11 @@ end
 #     check(ccall((:nc_inq_var_szip,libnetcdf),Cint,(Cint,Cint,Ptr{Cint},Ptr{Cint}),ncid,varid,options_maskp,pixels_per_blockp))
 # end
 
+# Known issue (netcdf-c 4.10, `ensure_working` in libnczarr/zfilter.c): defining a
+# filter on a variable of an NCZarr store (`mode=nczarr` URL) crashes the process
+# (segmentation fault) if the filter plugin (e.g. NCH5fletcher32_jll) is loaded but the
+# NCZarr codec library (NCZhdf5filters_jll) is not. Load NCPlugins.jl, which loads
+# both, to avoid this. See docs/src/plugins.md.
 @with_lock function nc_def_var_fletcher32(ncid::Integer,varid::Integer,fletcher32)
     check(ccall((:nc_def_var_fletcher32,libnetcdf),Cint,(Cint,Cint,Cint),ncid,varid,NCChecksumConstants[fletcher32]))
 end

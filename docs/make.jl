@@ -34,6 +34,7 @@ makedocs(
         "Variables" => "variables.md",
         "Attributes" => "attributes.md",
         "Performance tips" => "performance.md",
+        "Filter plugins" => "plugins.md",
         "Other features" => "other.md",
         "Experimental features" => "experimental_features.md",
         "Known issues" => "issues.md",

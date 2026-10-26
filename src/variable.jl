@@ -102,7 +102,9 @@ end
         checkbuffer(prod(count),data)
     end
 
-    nc_get_vars!(ncvar.ds.ncid,ncvar.varid,start,count,stride,data)
+    with_filter_hint(ncvar.ds.ncid,ncvar.varid) do
+        nc_get_vars!(ncvar.ds.ncid,ncvar.varid,start,count,stride,data)
+    end
 end
 
 """
@@ -153,7 +155,9 @@ end
         checkbuffer(prod(count),data)
     end
 
-    nc_get_vara!(ncvar.ds.ncid,ncvar.varid,start,count,data)
+    with_filter_hint(ncvar.ds.ncid,ncvar.varid) do
+        nc_get_vara!(ncvar.ds.ncid,ncvar.varid,start,count,data)
+    end
 end
 
 
@@ -410,7 +414,9 @@ export nomissing
 
 function readblock!(v::Variable, aout, indexes::AbstractRange...)
     datamode(v.ds) do
-        _read_data_from_nc!(v, aout, indexes...)
+        with_filter_hint(v.ds.ncid,v.varid) do
+            _read_data_from_nc!(v, aout, indexes...)
+        end
         return aout
     end
 end
@@ -436,7 +442,9 @@ _read_data_from_nc!(v::Variable, aout) = _read_data_from_nc!(v, aout, 1)
 
 function writeblock!(v::Variable, data, indexes::AbstractRange...)
     datamode(v.ds) do
-        _write_data_to_nc(v, data, indexes...)
+        with_filter_hint(v.ds.ncid,v.varid) do
+            _write_data_to_nc(v, data, indexes...)
+        end
         return data
     end
 end
