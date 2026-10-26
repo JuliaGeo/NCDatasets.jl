@@ -66,13 +66,39 @@ found via `HDF5_PLUGIN_PATH`.
 ## Interaction with HDF5.jl
 
 NCDatasets (through `NetCDF_jll`) and HDF5.jl use the same HDF5 library (`HDF5_jll`) when
-both are installed from the General registry. HDF5 keeps a single, process-wide plugin
-path, which `NCDatasets.load_plugins!` sets via netcdf-c. The following was tested
-with netcdf-c 4.10.1 and HDF5.jl 0.17.4:
+both are installed from the General registry. A filter is therefore available to both
+packages as soon as it is known to this library, which can happen in two ways.
+The following was tested with netcdf-c 4.10.1 and HDF5.jl 0.17.4.
 
-* After `NCDatasets.load_plugins!()`, HDF5.jl can read datasets which use the loaded filters
-  (e.g. zstd) without further setup, for example in files written by NCDatasets.
-  Without it, HDF5.jl fails with `filter missing, filter id: 32015 name: zstd`.
+### Filters registered with the HDF5 library (`H5Z` API)
+
+HDF5.jl normally makes filters available by registering them directly with the HDF5
+library (`H5Zregister`), for example the filter packages `H5Zzstd`, `H5Zblosc`, ... Registered filters are
+used by netcdf-c as well and need neither a plugin directory nor `NCPlugins`:
+
+```julia
+using HDF5, H5Zzstd, NCDatasets
+
+h5open("file.h5", "w") do h
+    h["v", chunk = (100, 100), filters = ZstdFilter(3)] = rand(Int32, 400, 400)
+end
+
+NCDataset("file.h5") do ds   # reads the zstd-compressed data
+    ds["v"][:, :]
+end
+```
+
+(NCDatasets reports no registered plugin directory in this case; the filter is found because HDF5.jl
+registered it.) This is the recommended way if HDF5.jl is already used.
+
+### Filters found on the plugin path
+
+`NCDatasets.load_plugins!` sets the plugin path of the HDF5 library (via netcdf-c), so this also
+makes the filter plugins available to HDF5.jl, for example to read files written by NCDatasets.
+Without it, HDF5.jl fails with `filter missing, filter id: 32015 name: zstd`.
+
+Because the plugin path of HDF5 is process-wide, take care when changing it with both packages:
+
 * netcdf-c replaces the plugin path of HDF5 with its own list. Directories which were added
   with HDF5.jl's plugin functions (`HDF5.API.h5pl_append`, ...) *before* calling
   `load_plugins!` are removed from the plugin path.
@@ -86,9 +112,8 @@ with netcdf-c 4.10.1 and HDF5.jl 0.17.4:
   after the directories of the NCDatasets plugins and warns that the plugin path is not
   the default.
 
-Not tested: filters which are implemented in Julia and registered with the HDF5 library
-(the `H5Z` API) instead of being found on the plugin path. They are registered in the same
-HDF5 library and are therefore expected to be usable by NCDatasets, too.
+Not tested: what happens if the same filter is both registered by an HDF5.jl filter package and
+available as a plugin on the plugin path.
 
 ```@docs
 NCDatasets.load_plugins!
