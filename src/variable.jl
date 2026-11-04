@@ -332,6 +332,25 @@ and the least significant digits (`nsd`) for the variable `v`.
 """
 quantize(v::Variable) = nc_inq_var_quantize(v.ds.ncid, v.varid)
 
+
+"""
+    NCDatasets.zstandard(v::Variable, level)
+
+Enable zstandard compression at the given level for variable `v`.
+Regular compression levels are between 1 and 19 (highest compression).
+"""
+zstandard(v::Variable,level::Integer) = nc_def_var_zstandard(v.ds.ncid,v.varid,level)
+
+
+"""
+    has_filter,level = NCDatasets.zstandard(v::Variable)
+
+Query the zstandard compression level. `has_filter` is `true` if the zstandard
+is used for this variable, otherwise `false`.
+"""
+zstandard(v::Variable) = nc_inq_var_zstandard(v.ds.ncid,v.varid)
+
+
 function fillmode(v::Variable)
     no_fill,fv = nc_inq_var_fill(v.ds.ncid, v.varid)
     return no_fill,fv
