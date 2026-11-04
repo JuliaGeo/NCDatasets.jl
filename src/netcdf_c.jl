@@ -1658,6 +1658,45 @@ end
     check(ccall((:nc_rename_var,libnetcdf),Cint,(Cint,Cint,Cstring),ncid,varid,name))
 end
 
+# Plugin's path
+# https://docs.unidata.ucar.edu/netcdf-c/4.10.0/pluginpaths.html
+
+struct NCPluginList
+    ndirs::Csize_t
+    dirs::Ptr{Ptr{Cchar}}
+end
+
+#int nc_plugin_path_ndirs(size_t* ndirsp);
+@with_lock function nc_plugin_path_ndirs()
+    ndirsp = Ref(Csize_t(0))
+    check(ccall((:nc_plugin_path_ndirs,libnetcdf),Cint,(Ref{Csize_t},),ndirsp))
+    return ndirsp[]
+end
+
+#int nc_plugin_path_get(NCPluginList* dirs);
+@with_lock function nc_plugin_path_get()
+    # If the value of dirs.dirs is NULL (the normal case), then memory is
+    # allocated to hold the vector of directories. Otherwise, use the memory of
+    # dirs.dirs to hold the vector of directories.
+    # https://docs-unidata-ucar-edu.translate.goog/netcdf-c/4.10.0/pluginpaths.html
+    pluginlist = Ref(NCPluginList(0,Ptr{Ptr{Cchar}}(C_NULL)))
+    check(ccall((:nc_plugin_path_get,libnetcdf),Cint,(Ref{NCPluginList},),pluginlist))
+    return [Base.unsafe_string(Base.unsafe_load(pluginlist[].dirs,i)) for i in 1:pluginlist[].ndirs]
+end
+
+@with_lock function nc_plugin_path_set!(dirs)
+    GC.@preserve dirs begin
+        cdirs = Base.unsafe_convert.(Cstring, dirs)
+
+        GC.@preserve cdirs begin
+            pluginlist = NCPluginList(length(cdirs),pointer(cdirs))
+            check(ccall((:nc_plugin_path_set,libnetcdf),Cint,(Ref{NCPluginList},),pluginlist))
+        end
+    end
+    return dirs
+end
+
+
 # @with_lock function nc_copy_var(ncid_in::Integer,varid::Integer,ncid_out::Integer)
 #     check(ccall((:nc_copy_var,libnetcdf),Cint,(Cint,Cint,Cint),ncid_in,varid,ncid_out))
 # end
