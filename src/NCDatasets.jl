@@ -49,12 +49,22 @@ import CommonDataModel: AbstractDataset, AbstractVariable,
     chunking, deflate, checksum,
     maskingvalue
 
-
+import NCH5blosc_jll
+import NCH5bzip2_jll
+import NCH5deflate_jll
+import NCH5fletcher32_jll
+import NCH5shuffle_jll
+import NCH5szip_jll
+import NCH5zstd_jll
+import NCZhdf5filters_jll
+import NCZstdfilters_jll
+import Preferences
 import DiskArrays
 import DiskArrays: readblock!, writeblock!, eachchunk, haschunks
 
 function __init__()
     NetCDF_jll.is_available() && init_certificate_authority()
+    register_plugins!()
 end
 
 const default_timeunits = "days since 1900-00-00 00:00:00"
@@ -76,6 +86,7 @@ include("cfvariable.jl")
 include("defer.jl")
 include("multifile.jl")
 include("ncgen.jl")
+include("plugins.jl")
 include("precompile.jl")
 
 export CatArrays
@@ -89,6 +100,6 @@ export coord
 export bounds
 export @CF_str
 
-VERSION >= v"1.11.0-DEV.469" && eval(Meta.parse("public @select, select, enums, typemap!"))
+VERSION >= v"1.11.0-DEV.469" && eval(Meta.parse("public @select, select, enums, typemap!, quantize, zstandard"))
 
 end # module

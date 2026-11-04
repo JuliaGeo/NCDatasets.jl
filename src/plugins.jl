@@ -1,6 +1,26 @@
 
 struct NCPluginPath <: AbstractVector{String}
 end
+
+
+"""
+    NCDatasets.PLUGIN_PATH
+
+Directories containing HDF5 and NCZarr plugins can be added to the
+NetCDF search path via `NCDatasets.PLUGIN_PATH`:
+
+```julia
+push!(NCDatasets.PLUGIN_PATH,"/some/plugin/dir") # or pushfirst!
+```
+
+Unfortunately, modifing the HDF5 plugins path indepenently of the NetCDF-C library is
+currently unsupported and leads to an assertion failure in the C library
+(https://github.com/Unidata/netcdf-c/issues/3478).
+
+Once a plugin has been *used* to encode/decode any variable, attempting to
+unregistering it via removing it from
+`NCDatasets.PLUGIN_PATH` does not have any effect.
+"""
 const PLUGIN_PATH = NCPluginPath()
 const PLUGIN_PATH_LOCK = ReentrantLock()
 
@@ -25,7 +45,7 @@ for fun in (:append!, :deleteat!, :empty!, :insert!, :keepat!, :pop!, :popat!,
     end
 end
 
-const DEFAULT_FILTERS = [
+const DEFAULT_PLUGINS = [
     NCH5blosc_jll,
     NCH5bzip2_jll,
     NCH5deflate_jll,
@@ -38,18 +58,37 @@ const DEFAULT_FILTERS = [
 ]
 
 function plugins_toload()
-    plugins_preference = Preferences.load_preference(NCDatasets,"plugins",["all"])
-    @show plugins_preference
+    plugins_preference = Preferences.load_preference(NCDatasets,"plugins","all")
 
-    return [f for f in DEFAULT_FILTERS if (replace(string(f),"_jll" => "") in plugins_preference ||
-                    plugins_preference == ["all"])]
+    return [f for f in DEFAULT_PLUGINS if (plugins_preference == "all" || (replace(string(f),"_jll" => "") in plugins_preference))]
 
 end
 
-function register_filters(p = plugins_toload())
-    @show p
+
+"""
+    NCDatasets.register_plugins!()
+
+Register default HDF5 and NCZarr plugin filters distributed with the NetCDF
+library. Currently the default plugins are the
+following packages:
+
+  *  $(join(string.('`',DEFAULT_PLUGINS,'`'),"\n * "))
+
+
+"""
+function register_plugins!(p = plugins_toload())
+    @debug "register_plugins! " p
     dirs = [dirname(getproperty(f,Symbol("lib__" * lowercase(replace(string(f),"_jll" => ""))))) for f in p]
 
-    @info "append dirs to NetCDF plugin path " dirs
+    if length(dirs) == 0
+        # safer to not use nc_plugin_path_get/nc_plugin_path_set at all in this case
+        # https://github.com/Unidata/netcdf-c/issues/3478
+        return nothing
+    end
+
+    @debug "append dirs to NetCDF plugin path " dirs
     append!(PLUGIN_PATH,dirs)
+    return nothing
 end
+
+VERSION >= v"1.11.0-DEV.469" && eval(Meta.parse("public PLUGIN_PATH"))

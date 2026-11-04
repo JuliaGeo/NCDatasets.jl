@@ -324,10 +324,11 @@ for the variable `v`.
 """
 quantize(v::Variable,mode,nsd) = nc_def_var_quantize(v.ds.ncid, v.varid, mode, nsd)
 
+
 """
     mode, nsd = NCDatasets.quantize(v::Variable)
 
-Queries the quantization mode (`:noquantize, :BitGroom, :GranularBitRound, :BitRound`)
+Query the quantization mode (`:noquantize, :BitGroom, :GranularBitRound, :BitRound`)
 and the least significant digits (`nsd`) for the variable `v`.
 """
 quantize(v::Variable) = nc_inq_var_quantize(v.ds.ncid, v.varid)
@@ -495,7 +496,7 @@ function eachchunk(v::Variable)
         return DiskArrays.GridChunks(v, chunksizes)
     end
 end
-haschunks(v::Variable) = (_chunking(v)[1] == :contiguous ? DiskArrays.Unchunked(DiskArrays.SubRanges(DiskArrays.CanStepRange(),1.0)) : 
+haschunks(v::Variable) = (_chunking(v)[1] == :contiguous ? DiskArrays.Unchunked(DiskArrays.SubRanges(DiskArrays.CanStepRange(),1.0)) :
     DiskArrays.Chunked(DiskArrays.SubRanges(DiskArrays.CanStepRange(),1.0)))
 
 eachchunk(v::CFVariable{T,N,<:Variable}) where {T,N} = eachchunk(v.var)
@@ -589,4 +590,3 @@ function _range_indices_dest(of,v,rest...)
     _range_indices_dest((of...,ind),rest...)
 end
 range_indices_dest(ri...) = _range_indices_dest((),ri...)
-

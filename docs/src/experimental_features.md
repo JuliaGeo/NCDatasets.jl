@@ -214,3 +214,76 @@ ds = NCDataset(fname)
 data = ds["data"][:]
 close(ds)
 ```
+
+
+## NetCDF plugins
+
+For the HDF5 and the NCZarr storage format, NetCDF can use filters to encode/decode the stored data. These filters are implemented as plugins.
+
+
+```@docs
+NCDatasets.PLUGIN_PATH
+```
+
+To load only a subset of the default plugins, create the file [`LocalPreferences.toml`](https://docs.julialang.org/en/v1/manual/code-loading/#preferences)
+in your current environement with the following content:
+
+```toml
+[NCDatasets]
+plugins = ["NCH5blosc","NCH5zstd"]
+```
+
+In this example, only the `NCH5blosc_jll` and `NCH5zstd_jll` plugin packages are registered.
+No plugins are registered with `plugins = []` or all plugins are registered with `plugins = "all"` (default).
+
+Alternatively, use the `set_preferences!` function to create this file:
+
+```julia
+using Preferences
+set_preferences!("NCDatasets","plugins" => ["NCH5blosc","NCH5zstd"])
+```
+
+Create a NetCDF file with zstandard compression for example can be done with:
+
+```julia
+using NCDatasets
+
+level = 3
+data = zeros(Int8,1_000_000);
+
+fname = tempname()
+ds = NCDataset(fname,"c");
+defDim(ds,"dim",length(data));
+v = defVar(ds,"var-zstd",Int8,("dim",))
+NCDatasets.zstandard(v.var,level)
+v[:] .= data
+close(ds)
+```
+
+The `H5Zzstd.jl` filter from `HDF5.jl` can also be used:
+
+```julia
+using Preferences
+set_preferences!("NCDatasets","plugins" => []) # restart julia if NCDatasets is already loaded
+
+using H5Zzstd
+using NCDatasets
+
+# should be empty
+println(readdir.(filter(isdir,NCDatasets.PLUGIN_PATH)))
+
+level = 3
+data = zeros(Int8,1_000_000);
+
+fname = tempname()
+ds = NCDataset(fname,"c");
+defDim(ds,"dim",length(data));
+v = defVar(ds,"var-zstd",Int8,("dim",))
+NCDatasets.zstandard(v.var,level)
+v[:] .= data
+close(ds)
+```
+
+Currently HDF5 plugins like `H5Zzstd.jl` always take the precedence over plugins provided
+via NetCDF even if `set_preferences!` is not used, but users should not rely on this
+behaviour of the underlying C libraries.
