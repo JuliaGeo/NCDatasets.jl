@@ -24,6 +24,8 @@ unregistering it via removing it from
 const PLUGIN_PATH = NCPluginPath()
 const PLUGIN_PATH_LOCK = ReentrantLock()
 
+const PLUGIN_PATH_INTIALIZED = Ref(false)
+
 import Base: append!, push!, deleteat!, delete!, size, getindex, collect, IndexStyle
 Base.size(::NCPluginPath) = (Int(nc_plugin_path_ndirs()),)
 Base.getindex(::NCPluginPath,i) = nc_plugin_path_get()[i]
@@ -88,6 +90,8 @@ function register_plugins!(p = plugins_toload())
 
     @debug "append dirs to NetCDF plugin path " dirs
     append!(PLUGIN_PATH,dirs)
+
+    @show "reg ",length(PLUGIN_PATH), getpid()
     return nothing
 end
 

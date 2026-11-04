@@ -64,7 +64,15 @@ import DiskArrays: readblock!, writeblock!, eachchunk, haschunks
 
 function __init__()
     NetCDF_jll.is_available() && init_certificate_authority()
-    register_plugins!()
+
+    # due to the MPI extension, __init__() can be called twice for the same
+    # processes during precompilation.
+    # On Windows, the precompilation of NCDatasetsMPIExt fails with
+    # Assertion failed: l5.ndirs == nclistlength(gs->pluginpaths), file dplugins.c, line 234
+    if !PLUGIN_PATH_INTIALIZED[]
+        register_plugins!()
+        PLUGIN_PATH_INTIALIZED[] = true
+    end
 end
 
 const default_timeunits = "days since 1900-00-00 00:00:00"
