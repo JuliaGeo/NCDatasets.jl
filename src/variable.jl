@@ -231,7 +231,7 @@ export name
 chunking(v::Variable,storage,chunksizes) = nc_def_var_chunking(v.ds.ncid,v.varid,storage,reverse(collect(chunksizes)))
 
 """
-    storage,chunksizes = chunking(v::Variable)
+    storage,chunksizes = NCDatasets.chunking(v::Variable)
 
 Return the storage type (`:contiguous` or `:chunked`) and the chunk sizes
 of the varable `v`.
@@ -292,7 +292,7 @@ function _chunking(v)
 end
 
 """
-    isshuffled,isdeflated,deflate_level = deflate(v::Variable)
+    isshuffled,isdeflated,deflate_level = NCDatasets.deflate(v::Variable)
 
 Return compression information of the variable `v`. If shuffle
 is `true`, then shuffling (byte interlacing) is activated. If
@@ -307,7 +307,7 @@ export deflate
 checksum(v::Variable,checksummethod) = nc_def_var_fletcher32(v.ds.ncid,v.varid,checksummethod)
 
 """
-    checksummethod = checksum(v::Variable)
+    checksummethod = NCDatasets.checksum(v::Variable)
 
 Return the checksum method of the variable `v` which can be either
 be `:fletcher32` or `:nochecksum`.
