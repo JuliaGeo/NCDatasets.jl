@@ -6,8 +6,6 @@
 using NCDatasets
 using Test
 
-NCDatasets.register_plugins!()
-
 zstd_id = 32015
 level = 3
 data = zeros(Int8,1_000_000);
