@@ -69,11 +69,12 @@ function __init__()
     # processes during precompilation.
     # On Windows, the precompilation of NCDatasetsMPIExt fails with
     # Assertion failed: l5.ndirs == nclistlength(gs->pluginpaths), file dplugins.c, line 234
-
-    @show PLUGIN_PATH_INTIALIZED[]
-    if !PLUGIN_PATH_INTIALIZED[]
-        register_plugins!()
-        PLUGIN_PATH_INTIALIZED[] = true
+    lock(PLUGIN_PATH_LOCK) do
+        @show PLUGIN_PATH_INTIALIZED[]
+        if !PLUGIN_PATH_INTIALIZED[]
+            register_plugins!()
+            PLUGIN_PATH_INTIALIZED[] = true
+        end
     end
 end
 
