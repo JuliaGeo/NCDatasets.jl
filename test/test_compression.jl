@@ -1,5 +1,6 @@
 using NCDatasets
 using NCDatasets: quantize
+using Test
 
 sz = (40,10)
 filename = tempname()
@@ -13,7 +14,7 @@ defDim(ds,"lat",sz[2])
 T = Float64
 for T in [UInt8,Int8,UInt16,Int16,UInt32,Int32,UInt64,Int64,Float32,Float64]
     #for T in [Float32]
-    local data
+    local data, v
     data = fill(T(123),sz)
 
     v = defVar(ds,"var-$T",T,("lon","lat");
