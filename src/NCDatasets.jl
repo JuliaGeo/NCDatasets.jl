@@ -63,17 +63,20 @@ import DiskArrays
 import DiskArrays: readblock!, writeblock!, eachchunk, haschunks
 
 function __init__()
+    println("init")
     NetCDF_jll.is_available() && init_certificate_authority()
 
-    # due to the MPI extension, __init__() can be called twice for the same
-    # processes during precompilation.
-    # On Windows, the precompilation of NCDatasetsMPIExt fails with
-    # Assertion failed: l5.ndirs == nclistlength(gs->pluginpaths), file dplugins.c, line 234
-    lock(PLUGIN_PATH_LOCK) do
-        @show PLUGIN_PATH_INTIALIZED[]
-        if !PLUGIN_PATH_INTIALIZED[]
-            register_plugins!()
-            PLUGIN_PATH_INTIALIZED[] = true
+    @static if !Sys.isapple() && !Sys.iswindows()
+        # due to the MPI extension, __init__() can be called twice for the same
+        # processes during precompilation.
+        # On Windows, the precompilation of NCDatasetsMPIExt fails with
+        # Assertion failed: l5.ndirs == nclistlength(gs->pluginpaths), file dplugins.c, line 234
+        lock(PLUGIN_PATH_LOCK) do
+            @show PLUGIN_PATH_INTIALIZED[]
+            if !PLUGIN_PATH_INTIALIZED[]
+                register_plugins!()
+                PLUGIN_PATH_INTIALIZED[] = true
+            end
         end
     end
 end

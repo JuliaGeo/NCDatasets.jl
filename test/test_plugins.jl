@@ -6,6 +6,7 @@
 using NCDatasets
 using Test
 
+@static if !Sys.isapple() && !Sys.iswindows()
 zstd_id = 32015
 level = 3
 data = zeros(Int8,1_000_000);
@@ -25,3 +26,4 @@ close(ds)
 
 
 @test stat(fname).size < length(data)
+end
