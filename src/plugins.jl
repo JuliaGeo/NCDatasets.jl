@@ -24,8 +24,6 @@ unregistering it via removing it from
 const PLUGIN_PATH = NCPluginPath()
 const PLUGIN_PATH_LOCK = ReentrantLock()
 
-const PLUGIN_PATH_INTIALIZED = Ref(false)
-
 import Base: append!, push!, deleteat!, delete!, size, getindex, collect, IndexStyle
 Base.size(::NCPluginPath) = (Int(nc_plugin_path_ndirs()),)
 Base.getindex(::NCPluginPath,i) = nc_plugin_path_get()[i]
@@ -79,7 +77,6 @@ following packages:
 
 """
 function register_plugins!(p = plugins_toload())
-    @debug "register_plugins! " p
     dirs = [dirname(getproperty(f,Symbol("lib__" * lowercase(replace(string(f),"_jll" => ""))))) for f in p]
 
     if length(dirs) == 0
@@ -88,24 +85,19 @@ function register_plugins!(p = plugins_toload())
         return nothing
     end
 
-    dirs = setdiff(dirs,PLUGIN_PATH)
+    lock(PLUGIN_PATH_LOCK) do
+        dirs = setdiff(dirs,PLUGIN_PATH)
 
-    if length(dirs) == 0
-        return nothing
-    end
+        if length(dirs) == 0
+            return nothing
+        end
 
-    @show "before",collect(PLUGIN_PATH)
-
-#    @static if !Sys.isapple() && !Sys.iswindows()
         @debug "append dirs to NetCDF plugin path " dirs
         append!(PLUGIN_PATH,dirs)
 
-        @show "reg ",length(PLUGIN_PATH), getpid(), PLUGIN_PATH_INTIALIZED[]
+        @debug "reg ",length(PLUGIN_PATH), getpid()
+    end
 
-        # if  length(PLUGIN_PATH) > 11
-        #     error("foo")
-        # end
-#    end
     return nothing
 end
 
