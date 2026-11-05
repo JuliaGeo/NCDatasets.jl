@@ -26,5 +26,5 @@ v[:] .= data
 close(ds)
 
 
-#@test stat(fname).size < length(data)
-end
+@test stat(fname).size < length(data)
+#end
