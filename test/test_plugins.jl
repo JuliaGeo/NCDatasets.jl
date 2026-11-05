@@ -1,7 +1,7 @@
-
-#using Pkg
-#Pkg.activate("ncd",shared=true)
-
+#=
+using Pkg
+Pkg.activate("ncd",shared=true)
+=#
 
 using NCDatasets
 using Test

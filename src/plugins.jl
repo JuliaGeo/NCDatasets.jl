@@ -88,15 +88,18 @@ function register_plugins!(p = plugins_toload())
         return nothing
     end
 
-    @debug "append dirs to NetCDF plugin path " dirs
-    append!(PLUGIN_PATH,dirs)
+    @show "before",collect(PLUGIN_PATH)
 
-    @show "reg ",length(PLUGIN_PATH), getpid(), PLUGIN_PATH_INTIALIZED[]
+    @static if !Sys.isapple() && !Sys.iswindows()
+        @debug "append dirs to NetCDF plugin path " dirs
+        append!(PLUGIN_PATH,dirs)
 
-    if  length(PLUGIN_PATH) > 11
-        error("foo")
+        @show "reg ",length(PLUGIN_PATH), getpid(), PLUGIN_PATH_INTIALIZED[]
+
+        if  length(PLUGIN_PATH) > 11
+            error("foo")
+        end
     end
-
     return nothing
 end
 
