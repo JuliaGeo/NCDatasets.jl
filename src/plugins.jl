@@ -96,9 +96,9 @@ function register_plugins!(p = plugins_toload())
 
         @show "reg ",length(PLUGIN_PATH), getpid(), PLUGIN_PATH_INTIALIZED[]
 
-        if  length(PLUGIN_PATH) > 11
-            error("foo")
-        end
+        # if  length(PLUGIN_PATH) > 11
+        #     error("foo")
+        # end
 #    end
     return nothing
 end
