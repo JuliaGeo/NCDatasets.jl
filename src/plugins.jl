@@ -88,6 +88,12 @@ function register_plugins!(p = plugins_toload())
         return nothing
     end
 
+    dirs = setdiff(dirs,PLUGIN_PATH)
+
+    if length(dirs) == 0
+        return nothing
+    end
+
     @show "before",collect(PLUGIN_PATH)
 
 #    @static if !Sys.isapple() && !Sys.iswindows()
