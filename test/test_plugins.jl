@@ -6,9 +6,10 @@ Pkg.activate("ncd",shared=true)
 using NCDatasets
 using Test
 
-NCDatasets.register_plugins!()
-NCDatasets.register_plugins!()
-#@static if !Sys.isapple() && !Sys.iswindows()
+@static if Sys.isapple() || Sys.iswindows()
+    NCDatasets.register_plugins!()
+end
+
 zstd_id = 32015
 level = 3
 data = zeros(Int8,1_000_000);
@@ -26,6 +27,5 @@ NCDatasets.zstandard(v.var,level)
 v[:] .= data
 close(ds)
 
-
 @test stat(fname).size < length(data)
-#end
+
