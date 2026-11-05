@@ -7,6 +7,7 @@ using NCDatasets
 using Test
 
 NCDatasets.register_plugins!()
+NCDatasets.register_plugins!()
 #@static if !Sys.isapple() && !Sys.iswindows()
 zstd_id = 32015
 level = 3
